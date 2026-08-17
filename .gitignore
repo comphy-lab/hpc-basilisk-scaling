@@ -1,0 +1,46 @@
+# OS specific files
+**/.DS_Store
+**/Thumbs.db
+
+# Local agent pointer
+CLAUDE.md
+
+# Basilisk installation and local mode flags
+basilisk/
+**/.comphy-basilisk
+**/.docker_mode
+**/.project_config
+
+# qcc-generated portable C99 (regenerate with scripts/generate-sources.sh)
+generated/
+_*.c
+
+# Compiled objects and binaries
+*.o
+*.a
+*.so
+*.out
+mpi-circle
+mpi-laplacian
+
+# Slurm / run output
+*.err
+slurm-*.out
+slurm-*.err
+results/*/
+!results/.gitkeep
+figures/*.pdf
+figures/*.png
+figures/*.svg
+!figures/.gitkeep
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/.venv
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo

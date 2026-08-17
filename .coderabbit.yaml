@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-GB"
+early_access: false
+
+reviews:
+  profile: "chill"
+  high_level_summary: true
+  path_filters:
+    - "!docs/**"
+    - "!.github/docs/**"
+    - "!basilisk/**"
+    - "!generated/**"
+    - "!results/**"
+    - "!**/*.tsv"
+    - "!**/*.csv"
+    - "!**/*.dat"
+    - "!**/*.png"
+    - "!**/*.pdf"
+  path_instructions:
+    - path: "simulationCases/**"
+      instructions: |
+        These files are unmodified stock Basilisk tests from basilisk.fr.
+        Do not suggest local physics, style, or include-path "fixes".
+        Flag only accidental local edits that would make them stop matching
+        upstream src/test/mpi-circle.c and src/test/mpi-laplacian.c.
+    - path: "scripts/**"
+      instructions: |
+        HPC staging and compile helpers. Never hardcode a machine-local qcc
+        path; resolve with $BASILISK or `which qcc`. Review quoting, set -euo
+        pipefail, and fail-closed argument checks.
+    - path: "slurm/**"
+      instructions: |
+        MareNostrum5 GPP batch scripts. Check account/QoS, exclusive node
+        use, no login-node compute, and that srun rank counts match
+        SLURM_NTASKS.
+    - path: "postProcess/**"
+      instructions: |
+        Figure-generation scripts. Review parsing of stock Basilisk timer
+        lines and reproducibility of PDF output.
+    - path: "AGENTS.md"
+      instructions: |
+        Canonical repo operating manual. Check for stale state, broken
+        references, and contradictions with the actual repo layout.
+  tools:
+    cppcheck:
+      enabled: false
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: true
+    markdownlint:
+      enabled: true
+    actionlint:
+      enabled: true
