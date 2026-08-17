@@ -15,6 +15,7 @@ submit() {
     --job-name="smoke-${test}-${ntasks}" \
     --ntasks="${ntasks}" \
     --nodes="${nodes}" \
+    --dependency=singleton \
     --export=ALL,TEST="${test}",LEVEL="${level}" \
     "${extra[@]}" \
     "${SBATCH}"

@@ -13,11 +13,13 @@ NODES_LIST="${NODES_LIST:-1 2 4 8 16}"
 submit() {
   local test="$1" nodes="$2" level="$3"
   local ntasks=$((nodes * 112))
+  # gp_debug allows one job per user; singleton keeps the chain in order.
   sbatch --parsable \
-    --job-name="scale-${test}-${ntasks}" \
+    --job-name="bsk-scale" \
     --qos="${QOS}" \
     --nodes="${nodes}" \
     --ntasks="${ntasks}" \
+    --dependency=singleton \
     --export=ALL,TEST="${test}",LEVEL="${level}" \
     "${SBATCH}"
 }
