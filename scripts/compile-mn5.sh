@@ -13,11 +13,12 @@ fi
 mkdir -p "${SCRATCH_DST}/bin"
 cd "${SCRATCH_DST}/bin"
 
+# Intel mpicc needs an explicit -lmpi after the object on this module stack.
 # -diag-disable=10441 silences the Intel Classic deprecation remark.
 "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
-  "${SCRATCH_DST}/generated/_mpi-circle.c" -o mpi-circle -lm
+  "${SCRATCH_DST}/generated/_mpi-circle.c" -o mpi-circle -lm -lmpi
 "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
-  "${SCRATCH_DST}/generated/_mpi-laplacian.c" -o mpi-laplacian -lm
+  "${SCRATCH_DST}/generated/_mpi-laplacian.c" -o mpi-laplacian -lm -lmpi
 
 echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian"
