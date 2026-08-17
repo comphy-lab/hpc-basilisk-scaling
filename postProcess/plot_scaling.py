@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 import argparse
-import glob
+import csv
 import os
+import re
 from pathlib import Path
 
 import matplotlib
@@ -22,17 +23,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 KERNELS = ("refine", "cos", "laplacian", "sum", "restriction", "poisson")
+OUT_RE = re.compile(r"^out-(\d+)-(\d+)$")
 
 
-def parse_table(path: Path) -> list[dict[str, float | str]]:
-    rows: list[dict[str, float | str]] = []
+def parse_table(path: Path) -> list[dict[str, float | str | int]]:
+    match = OUT_RE.match(path.name)
+    if match is None:
+        return []
+    level = int(match.group(1))
+    npe_from_name = int(match.group(2))
+    test = path.parent.name
+    rows: list[dict[str, float | str | int]] = []
     for raw in path.read_text(errors="replace").splitlines():
         parts = raw.split()
         if len(parts) < 11:
             continue
         try:
             npe = int(parts[0])
-            cpu = float(parts[1])
             real = float(parts[2])
             speed = float(parts[3])
         except ValueError:
@@ -41,38 +48,45 @@ def parse_table(path: Path) -> list[dict[str, float | str]]:
         if name not in KERNELS:
             continue
         try:
-            comm_min = float(parts[5])
             comm_avg = float(parts[6])
-            comm_max = float(parts[7])
-            mem = float(parts[9])
         except ValueError:
+            continue
+        if npe != npe_from_name:
             continue
         rows.append(
             {
+                "test": test,
+                "level": level,
                 "npe": npe,
-                "cpu": cpu,
                 "real": real,
                 "speed": speed,
                 "name": name,
-                "comm_min": comm_min,
                 "comm_avg": comm_avg,
-                "comm_max": comm_max,
-                "mem": mem,
                 "source": str(path),
             }
         )
     return rows
 
 
-def load_results(root: Path) -> list[dict[str, float | str]]:
-    rows: list[dict[str, float | str]] = []
+def load_results(root: Path) -> list[dict[str, float | str | int]]:
+    rows: list[dict[str, float | str | int]] = []
     for path in sorted(root.rglob("out-*")):
         rows.extend(parse_table(path))
     return rows
 
 
-def select(rows: list[dict[str, float | str]], kernel: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    picked = [row for row in rows if row["name"] == kernel]
+def select(
+    rows: list[dict[str, float | str | int]],
+    *,
+    test: str,
+    level: int,
+    kernel: str,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    picked = [
+        row
+        for row in rows
+        if row["test"] == test and int(row["level"]) == level and row["name"] == kernel
+    ]
     picked.sort(key=lambda row: int(row["npe"]))
     npe = np.array([int(row["npe"]) for row in picked], dtype=float)
     real = np.array([float(row["real"]) for row in picked], dtype=float)
@@ -92,25 +106,90 @@ def style(ax: plt.Axes) -> None:
     ax.set_box_aspect(1)
 
 
-def plot_kernel(rows: list[dict[str, float | str]], kernel: str, out: Path, title: str) -> None:
-    npe, real, comm = select(rows, kernel)
-    if npe.size == 0:
-        raise SystemExit(f"no rows for kernel {kernel}")
-    fig, ax = plt.subplots(figsize=(12, 12))
-    ax.plot(npe, real, "o-", lw=3, ms=14, color="C0", label="wall time")
-    ax.plot(npe, comm, "s--", lw=3, ms=12, color="C3", label="MPI time")
+def draw_kernel(
+    ax: plt.Axes,
+    npe: np.ndarray,
+    real: np.ndarray,
+    comm: np.ndarray,
+    title: str,
+) -> None:
+    ax.plot(
+        npe,
+        real,
+        linestyle="-",
+        linewidth=3,
+        marker="o",
+        markersize=14,
+        markerfacecolor="#1A64B3",
+        markeredgecolor="k",
+        color="#1A64B3",
+        label="wall time",
+        zorder=3,
+    )
+    ax.plot(
+        npe,
+        comm,
+        linestyle="--",
+        linewidth=3,
+        marker="s",
+        markersize=11,
+        markerfacecolor="#C44E52",
+        markeredgecolor="k",
+        color="#C44E52",
+        label="MPI time",
+        zorder=2,
+    )
     if npe.size >= 2 and real[0] > 0:
-        ideal = real[0] * npe[0] / npe
-        ax.plot(npe, ideal, "k:", lw=2, label="ideal strong scaling")
-    ax.set_xlabel(r"MPI ranks", fontsize=40, labelpad=15)
-    ax.set_ylabel(r"Time / iteration (s)", fontsize=40, labelpad=15)
-    ax.set_title(title, fontsize=28, pad=16)
-    ax.legend(fontsize=24, frameon=False)
+        ax.plot(
+            npe,
+            real[0] * npe[0] / npe,
+            linestyle=":",
+            linewidth=2.5,
+            color="0.35",
+            label="ideal strong scaling",
+            zorder=1,
+        )
+    ax.set_xlabel(r"MPI ranks", fontsize=36, labelpad=12)
+    ax.set_ylabel(r"Time / iteration (s)", fontsize=36, labelpad=12)
+    ax.set_title(title, fontsize=24, pad=12)
+    ax.legend(fontsize=20, frameon=False)
     style(ax)
+
+
+def plot_pair(
+    rows: list[dict[str, float | str | int]],
+    *,
+    test: str,
+    level: int,
+    out: Path,
+    heading: str,
+) -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(24, 10))
+    fig.set_facecolor("white")
+    for ax, kernel, label in (
+        (axes[0], "poisson", "Poisson"),
+        (axes[1], "laplacian", "Laplacian"),
+    ):
+        npe, real, comm = select(rows, test=test, level=level, kernel=kernel)
+        if npe.size == 0:
+            raise SystemExit(f"no rows for {test} level {level} {kernel}")
+        draw_kernel(ax, npe, real, comm, rf"{label}, {heading}")
     fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, bbox_inches="tight", dpi=300)
+    fig.savefig(out, bbox_inches="tight", dpi=300, facecolor="white")
     plt.close(fig)
+
+
+def write_csv(rows: list[dict[str, float | str | int]], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = ["test", "level", "name", "npe", "real", "comm_avg", "speed"]
+    with path.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        for row in sorted(
+            rows, key=lambda item: (str(item["test"]), int(item["level"]), str(item["name"]), int(item["npe"]))
+        ):
+            writer.writerow(row)
 
 
 def main() -> None:
@@ -121,10 +200,20 @@ def main() -> None:
     rows = load_results(args.results)
     if not rows:
         raise SystemExit(f"no timer rows under {args.results}")
-    plot_kernel(rows, "poisson", args.outdir / "poisson-scaling.pdf", "Poisson (stock Basilisk)")
-    plot_kernel(rows, "laplacian", args.outdir / "laplacian-scaling.pdf", "Laplacian (stock Basilisk)")
-    plot_kernel(
-        rows, "restriction", args.outdir / "restriction-scaling.pdf", "Restriction (stock Basilisk)"
+    write_csv(rows, args.outdir / "mn5-kernel-timings.csv")
+    plot_pair(
+        rows,
+        test="mpi-laplacian",
+        level=8,
+        out=args.outdir / "mn5-laplacian-L8.pdf",
+        heading=r"stock mpi-laplacian, octree $L=8$",
+    )
+    plot_pair(
+        rows,
+        test="mpi-circle",
+        level=12,
+        out=args.outdir / "mn5-circle-L12.pdf",
+        heading=r"stock mpi-circle, adaptive $L=12$",
     )
     print(f"plotted {len(rows)} timer rows from {args.results} -> {args.outdir}")
 

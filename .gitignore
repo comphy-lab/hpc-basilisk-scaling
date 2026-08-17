@@ -29,10 +29,11 @@ slurm-*.out
 slurm-*.err
 results/*/
 !results/.gitkeep
-figures/*.pdf
 figures/*.png
 figures/*.svg
-!figures/.gitkeep
+# Campaign PDFs and timing tables are tracked.
+!figures/*.pdf
+!figures/*.csv
 
 # Python
 **/__pycache__/

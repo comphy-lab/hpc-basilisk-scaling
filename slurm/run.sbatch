@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=bsk-kernel
 #SBATCH --account=your_account
-#SBATCH --qos=gp_debug
+#SBATCH --qos=gp_ehpc
 #SBATCH --ntasks=2
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:20:00

@@ -50,9 +50,10 @@ ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/scripts/com
 ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/slurm/smoke.sh'
 ```
 
-Account `your_account`, default smoke QoS `gp_debug`. Builds and output live
-under `/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling`. Compact
-scripts stay under `/gpfs/projects/your_account/mn5-basilisk-scaling`.
+Account `your_account`. Use `gp_debug` only for a one-job compile/smoke.
+Scale-up defaults to `gp_ehpc` (3-day wall, many jobs allowed). Builds
+and output live under `/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling`.
+Compact scripts stay under `/gpfs/projects/your_account/mn5-basilisk-scaling`.
 
 ## Guidelines
 
