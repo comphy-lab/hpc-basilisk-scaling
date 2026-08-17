@@ -22,8 +22,8 @@ cp "${ROOT}/simulationCases/mpi-circle.c" \
 mkdir -p "${ROOT}/generated"
 (
   cd "${WORKDIR}"
-  "${QCC}" -source mpi-circle.c
-  "${QCC}" -grid=octree -source mpi-laplacian.c
+  "${QCC}" -source -D_MPI=1 mpi-circle.c
+  "${QCC}" -grid=octree -source -D_MPI=1 mpi-laplacian.c
 )
 
 install -m 0644 "${WORKDIR}/_mpi-circle.c" "${ROOT}/generated/_mpi-circle.c"

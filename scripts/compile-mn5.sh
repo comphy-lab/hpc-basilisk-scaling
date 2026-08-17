@@ -13,9 +13,10 @@ fi
 mkdir -p "${SCRATCH_DST}/bin"
 cd "${SCRATCH_DST}/bin"
 
-"${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
+# -diag-disable=10441 silences the Intel Classic deprecation remark.
+"${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
   "${SCRATCH_DST}/generated/_mpi-circle.c" -o mpi-circle -lm
-"${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
+"${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
   "${SCRATCH_DST}/generated/_mpi-laplacian.c" -o mpi-laplacian -lm
 
 echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
