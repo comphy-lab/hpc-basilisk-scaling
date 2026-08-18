@@ -70,8 +70,11 @@ python3 postProcess/plot_scaling.py --results results/latest --outdir figures
 ```
 
 Current campaign figures are `figures/mn5-laplacian-L9.pdf` and
-`figures/mn5-circle-L14.pdf`. The thinner `gp_debug` \(L=8\) / \(L=12\)
-set is kept beside them.
+`figures/mn5-circle-L14.pdf`. Each panel overlays the published Basilisk
+tables from Curie (`mpi-circle`) or Occigen (`mpi-laplacian`), stored in
+`reference/`. The thinner `gp_debug` \(L=8\) / \(L=12\) set is kept beside
+them. Occigen has no \(L=8\) table, so that debug figure uses Occigen
+\(L=9\).
 
 ## Licence
 

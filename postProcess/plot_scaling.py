@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plot stock Basilisk kernel timings from MN5 out-LEVEL-NRANKS tables."""
+"""Plot MN5 stock Basilisk timings with official Curie/Occigen overlays."""
 
 from __future__ import annotations
 
@@ -24,15 +24,27 @@ import numpy as np
 
 KERNELS = ("refine", "cos", "laplacian", "sum", "restriction", "poisson")
 OUT_RE = re.compile(r"^out-(\d+)-(\d+)$")
+REPO = Path(__file__).resolve().parents[1]
+OFFICIAL_ROOTS = {
+    "mpi-circle": REPO / "reference" / "curie",
+    "mpi-laplacian": REPO / "reference" / "occigen-3D",
+}
+OFFICIAL_LABEL = {
+    "mpi-circle": "Curie",
+    "mpi-laplacian": "Occigen",
+}
+# Occigen 3D tables start at L=9; overlay that on the MN5 L=8 debug series.
+OFFICIAL_LEVEL = {
+    ("mpi-laplacian", 8): 9,
+}
 
 
-def parse_table(path: Path) -> list[dict[str, float | str | int]]:
+def parse_table(path: Path, test: str) -> list[dict[str, float | str | int]]:
     match = OUT_RE.match(path.name)
     if match is None:
         return []
     level = int(match.group(1))
     npe_from_name = int(match.group(2))
-    test = path.parent.name
     rows: list[dict[str, float | str | int]] = []
     for raw in path.read_text(errors="replace").splitlines():
         parts = raw.split()
@@ -68,10 +80,14 @@ def parse_table(path: Path) -> list[dict[str, float | str | int]]:
     return rows
 
 
-def load_results(root: Path) -> list[dict[str, float | str | int]]:
+def load_results(root: Path, test: str | None = None) -> list[dict[str, float | str | int]]:
     rows: list[dict[str, float | str | int]] = []
     for path in sorted(root.rglob("out-*")):
-        rows.extend(parse_table(path))
+        inferred = test
+        if inferred is None:
+            parent = path.parent.name
+            inferred = parent if parent in OFFICIAL_ROOTS else parent
+        rows.extend(parse_table(path, inferred))
     return rows
 
 
@@ -97,7 +113,7 @@ def select(
 def style(ax: plt.Axes) -> None:
     ax.set_xscale("log", base=2)
     ax.set_yscale("log")
-    ax.tick_params(which="both", direction="out", width=3, labelsize=30, pad=10)
+    ax.tick_params(which="both", direction="out", width=3, labelsize=28, pad=10)
     ax.tick_params(which="major", length=12)
     ax.tick_params(which="minor", length=6)
     for spine in ax.spines.values():
@@ -112,6 +128,7 @@ def draw_kernel(
     real: np.ndarray,
     comm: np.ndarray,
     title: str,
+    official: tuple[str, int, np.ndarray, np.ndarray, np.ndarray] | None,
 ) -> None:
     ax.plot(
         npe,
@@ -119,41 +136,89 @@ def draw_kernel(
         linestyle="-",
         linewidth=3,
         marker="o",
-        markersize=14,
+        markersize=13,
         markerfacecolor="#1A64B3",
         markeredgecolor="k",
         color="#1A64B3",
-        label="wall time",
-        zorder=3,
+        label="MN5 wall",
+        zorder=4,
     )
     ax.plot(
         npe,
         comm,
         linestyle="--",
-        linewidth=3,
+        linewidth=2.5,
         marker="s",
-        markersize=11,
+        markersize=9,
         markerfacecolor="#C44E52",
         markeredgecolor="k",
         color="#C44E52",
-        label="MPI time",
-        zorder=2,
+        label="MN5 MPI",
+        zorder=3,
     )
+    if official is not None:
+        olabel, olevel, onpe, oreal, ocomm = official
+        if onpe.size:
+            otag = rf"{olabel} $L={olevel}$"
+            ax.plot(
+                onpe,
+                oreal,
+                linestyle="-",
+                linewidth=2.2,
+                marker="D",
+                markersize=8,
+                markerfacecolor="none",
+                markeredgecolor="#FC8D59",
+                markeredgewidth=2,
+                color="#FC8D59",
+                label=rf"{otag} wall",
+                zorder=2,
+            )
+            ax.plot(
+                onpe,
+                ocomm,
+                linestyle="--",
+                linewidth=2,
+                marker="^",
+                markersize=7,
+                markerfacecolor="none",
+                markeredgecolor="#8C564B",
+                markeredgewidth=1.6,
+                color="#8C564B",
+                label=rf"{otag} MPI",
+                zorder=2,
+            )
     if npe.size >= 2 and real[0] > 0:
         ax.plot(
             npe,
             real[0] * npe[0] / npe,
             linestyle=":",
-            linewidth=2.5,
+            linewidth=2.4,
             color="0.35",
-            label="ideal strong scaling",
+            label="ideal (MN5)",
             zorder=1,
         )
-    ax.set_xlabel(r"MPI ranks", fontsize=36, labelpad=12)
-    ax.set_ylabel(r"Time / iteration (s)", fontsize=36, labelpad=12)
-    ax.set_title(title, fontsize=24, pad=12)
-    ax.legend(fontsize=20, frameon=False)
+    ax.set_xlabel(r"MPI ranks", fontsize=34, labelpad=12)
+    ax.set_ylabel(r"Time / iteration (s)", fontsize=34, labelpad=12)
+    ax.set_title(title, fontsize=22, pad=12)
+    ax.legend(fontsize=15, frameon=False, loc="best")
     style(ax)
+
+
+def official_series(
+    test: str,
+    mn5_level: int,
+    kernel: str,
+) -> tuple[str, int, np.ndarray, np.ndarray, np.ndarray] | None:
+    root = OFFICIAL_ROOTS.get(test)
+    if root is None or not root.is_dir():
+        return None
+    level = OFFICIAL_LEVEL.get((test, mn5_level), mn5_level)
+    rows = load_results(root, test=test)
+    npe, real, comm = select(rows, test=test, level=level, kernel=kernel)
+    if npe.size == 0:
+        return None
+    return OFFICIAL_LABEL[test], level, npe, real, comm
 
 
 def plot_pair(
@@ -173,7 +238,14 @@ def plot_pair(
         npe, real, comm = select(rows, test=test, level=level, kernel=kernel)
         if npe.size == 0:
             raise SystemExit(f"no rows for {test} level {level} {kernel}")
-        draw_kernel(ax, npe, real, comm, rf"{label}, {heading}")
+        draw_kernel(
+            ax,
+            npe,
+            real,
+            comm,
+            rf"{label}, {heading}",
+            official_series(test, level, kernel),
+        )
     fig.tight_layout()
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, bbox_inches="tight", dpi=300, facecolor="white")
@@ -187,7 +259,13 @@ def write_csv(rows: list[dict[str, float | str | int]], path: Path) -> None:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         for row in sorted(
-            rows, key=lambda item: (str(item["test"]), int(item["level"]), str(item["name"]), int(item["npe"]))
+            rows,
+            key=lambda item: (
+                str(item["test"]),
+                int(item["level"]),
+                str(item["name"]),
+                int(item["npe"]),
+            ),
         ):
             writer.writerow(row)
 

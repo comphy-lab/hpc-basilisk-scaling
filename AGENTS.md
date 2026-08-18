@@ -64,6 +64,7 @@ Compact scripts stay under `/gpfs/projects/your_account/mn5-basilisk-scaling`.
 - Component READMEs are public-candidate. Live timings, job IDs and
   debugging stay in the EuroHPC tracker and project `scratch/` until Vatsal
   approves promotion.
-- Use `publication-plots` for every figure. Current campaign plots are
+- Use `publication-plots` for every figure. Overlay official Curie/Occigen
+  tables from `reference/`. Current campaign plots are
   `figures/mn5-laplacian-L9.pdf` and `figures/mn5-circle-L14.pdf`.
 - `CLAUDE.md` is local and gitignored; it only points at this file.
