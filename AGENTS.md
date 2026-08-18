@@ -55,12 +55,28 @@ Scale-up defaults to `gp_ehpc` (3-day wall, many jobs allowed). Builds
 and output live under `/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling`.
 Compact scripts stay under `/gpfs/projects/your_account/mn5-basilisk-scaling`.
 
+On Snellius, never compute on a login node. Stage, compile and submit
+through `snellius`:
+
+```
+bash scripts/stage-snellius.sh
+ssh snellius 'bash -lc "bash /projects/0/your_project/hpc-basilisk-scaling/scripts/compile-snellius.sh"'
+ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/smoke.sh'
+ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/scale-extent.sh'
+```
+
+Account `your_account`, partition `genoa` (192 cores, 336 GB). Builds and
+output live under `/scratch-shared/your_user/hpc-basilisk-scaling`. Compact
+scripts stay under `/projects/0/your_project/hpc-basilisk-scaling`.
+Collect with `scripts/collect-snellius.sh` and plot with
+`--results results/latest --snellius results/snellius/latest`.
+
 ## Guidelines
 
 - Never hardcode a machine-local `qcc` path; resolve with `$BASILISK` or
   `which qcc`.
 - Do not commit `basilisk/`, `.comphy-basilisk`, `.docker_mode`, generated
-  C99, binaries, or raw MN5 output.
+  C99, binaries, or raw HPC output.
 - Component READMEs are public-candidate. Live timings, job IDs and
   debugging stay in the EuroHPC tracker and project `scratch/` until Vatsal
   approves promotion.

@@ -1,10 +1,10 @@
-# MN5 Basilisk kernel scaling
+# HPC Basilisk kernel scaling
 
 Stock [Basilisk C](http://basilisk.fr) MPI tests on MareNostrum5 GPP
-(Barcelona Supercomputing Center). The repository records the steps used
-to show that the official adaptive-circle and Laplacian/Poisson kernels
-compile and scale on the EuroHPC Benchmark Access award
-`EHPC-BEN-2026B08-034`.
+(Barcelona Supercomputing Center) and Snellius (SURF). The repository
+records the steps used to show that the official adaptive-circle and
+Laplacian/Poisson kernels compile and scale on the EuroHPC Benchmark
+Access award `EHPC-BEN-2026B08-034`, and the same kernels on Snellius.
 
 Developed at the
 [Computational Multiphase Physics (CoMPhy) Lab](https://comphy-lab.org/),
@@ -28,17 +28,18 @@ The files in `simulationCases/` are unmodified copies of those tests.
 ```
 .
 ├── simulationCases/ - unmodified Basilisk tests from basilisk.fr/src/test
-├── scripts/ - local qcc source generation and MN5 staging/compile helpers
-├── slurm/ - MareNostrum5 GPP smoke and scaling batch scripts
+├── scripts/ - local qcc source generation and HPC staging/compile helpers
+├── slurm/ - MareNostrum5 GPP and Snellius smoke/scaling batch scripts
 ├── postProcess/ - timer-table parser and scaling plots
 ├── figures/ - generated PDFs
-└── results/ - collected MN5 timer tables
+└── results/ - collected timer tables
 ```
 
 ## Requirements
 
 - Local: Basilisk `qcc` (used only to emit portable C99)
 - MareNostrum5 GPP: Intel MPI (`mpicc`), Slurm account `your_account`
+- Snellius: OpenMPI 5 / GCC 13 (`foss` 2024 stack), Slurm account `your_account`, partition `genoa`
 
 ## Quick start
 
@@ -63,10 +64,18 @@ Scale-up defaults to `gp_ehpc` (circle \(L=14\), laplacian \(L=9\), 1–32 nodes
 ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/slurm/scale.sh'
 ```
 
+The same official-extent rank list on Snellius genoa:
+
+```bash
+bash scripts/stage-snellius.sh
+ssh snellius 'bash -lc "bash /projects/0/your_project/hpc-basilisk-scaling/scripts/compile-snellius.sh"'
+ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/scale-extent.sh'
+```
+
 Plot collected `out-*-*` tables:
 
-```
-python3 postProcess/plot_scaling.py --results results/latest --outdir figures
+```bash
+python3 postProcess/plot_scaling.py --results results/latest --snellius results/snellius/latest --outdir figures
 ```
 
 Current campaign figures are `figures/laplacian-L9.pdf`,
@@ -74,7 +83,7 @@ Current campaign figures are `figures/laplacian-L9.pdf`,
 series is compared with Occigen. The 2D full-quadtree series is compared
 with Curie: those published "circle" tables are \(N=2^{2L}\) cells, not
 the adaptive `mpi-circle` mesh. Occigen has no \(L=8\) table, so
-`laplacian-L8.pdf` is MareNostrum 5 only.
+`laplacian-L8.pdf` is machine data only.
 
 ## Licence
 

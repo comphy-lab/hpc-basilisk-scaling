@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plot MN5 stock Basilisk timings with official Curie/Occigen overlays."""
+"""Plot stock Basilisk timings with official Curie/Occigen overlays."""
 
 from __future__ import annotations
 
@@ -34,6 +34,22 @@ OFFICIAL_LABEL = {
     "mpi-circle": "Curie",
     "mpi-laplacian": "Occigen",
     "mpi-laplacian-2d": "Curie",
+}
+MACHINE_STYLE = {
+    "MareNostrum 5": {
+        "wall": "#1A64B3",
+        "comm": "#C44E52",
+        "wall_marker": "o",
+        "comm_marker": "s",
+        "z": 4,
+    },
+    "Snellius": {
+        "wall": "#4DAF4A",
+        "comm": "#984EA3",
+        "wall_marker": "P",
+        "comm_marker": "X",
+        "z": 3.5,
+    },
 }
 
 
@@ -122,38 +138,38 @@ def style(ax: plt.Axes) -> None:
 
 def draw_kernel(
     ax: plt.Axes,
-    npe: np.ndarray,
-    real: np.ndarray,
-    comm: np.ndarray,
+    series: list[tuple[str, np.ndarray, np.ndarray, np.ndarray]],
     title: str,
     official: tuple[str, int, np.ndarray, np.ndarray, np.ndarray] | None,
 ) -> None:
-    ax.plot(
-        npe,
-        real,
-        linestyle="-",
-        linewidth=3,
-        marker="o",
-        markersize=13,
-        markerfacecolor="#1A64B3",
-        markeredgecolor="k",
-        color="#1A64B3",
-        label="MareNostrum 5 wall",
-        zorder=4,
-    )
-    ax.plot(
-        npe,
-        comm,
-        linestyle="--",
-        linewidth=2.5,
-        marker="s",
-        markersize=9,
-        markerfacecolor="#C44E52",
-        markeredgecolor="k",
-        color="#C44E52",
-        label="MareNostrum 5 MPI",
-        zorder=3,
-    )
+    for label, npe, real, comm in series:
+        machine_style = MACHINE_STYLE[label]
+        ax.plot(
+            npe,
+            real,
+            linestyle="-",
+            linewidth=3,
+            marker=machine_style["wall_marker"],
+            markersize=13,
+            markerfacecolor=machine_style["wall"],
+            markeredgecolor="k",
+            color=machine_style["wall"],
+            label=rf"{label} wall",
+            zorder=machine_style["z"],
+        )
+        ax.plot(
+            npe,
+            comm,
+            linestyle="--",
+            linewidth=2.5,
+            marker=machine_style["comm_marker"],
+            markersize=9,
+            markerfacecolor=machine_style["comm"],
+            markeredgecolor="k",
+            color=machine_style["comm"],
+            label=rf"{label} MPI",
+            zorder=machine_style["z"] - 0.5,
+        )
     if official is not None:
         olabel, _olevel, onpe, oreal, ocomm = official
         if onpe.size:
@@ -185,16 +201,18 @@ def draw_kernel(
                 label=rf"{olabel} MPI",
                 zorder=2,
             )
-    if npe.size >= 2 and real[0] > 0:
-        ax.plot(
-            npe,
-            real[0] * npe[0] / npe,
-            linestyle=":",
-            linewidth=2.4,
-            color="0.35",
-            label="ideal (MareNostrum 5)",
-            zorder=1,
-        )
+    if series:
+        npe, real, _comm = series[0][1], series[0][2], series[0][3]
+        if npe.size >= 2 and real[0] > 0:
+            ax.plot(
+                npe,
+                real[0] * npe[0] / npe,
+                linestyle=":",
+                linewidth=2.4,
+                color="0.35",
+                label=rf"ideal ({series[0][0]})",
+                zorder=1,
+            )
     ax.set_xlabel(r"MPI ranks", fontsize=34, labelpad=12)
     ax.set_ylabel(r"Time / iteration (s)", fontsize=34, labelpad=12)
     ax.set_title(title, fontsize=22, pad=12)
@@ -219,7 +237,7 @@ def official_series(
 
 
 def plot_pair(
-    rows: list[dict[str, float | str | int]],
+    machines: list[tuple[str, list[dict[str, float | str | int]]]],
     *,
     test: str,
     level: int,
@@ -232,14 +250,16 @@ def plot_pair(
         (axes[0], "poisson", "Poisson"),
         (axes[1], "laplacian", "Laplacian"),
     ):
-        npe, real, comm = select(rows, test=test, level=level, kernel=kernel)
-        if npe.size == 0:
+        series: list[tuple[str, np.ndarray, np.ndarray, np.ndarray]] = []
+        for machine, rows in machines:
+            npe, real, comm = select(rows, test=test, level=level, kernel=kernel)
+            if npe.size:
+                series.append((machine, npe, real, comm))
+        if not series:
             raise SystemExit(f"no rows for {test} level {level} {kernel}")
         draw_kernel(
             ax,
-            npe,
-            real,
-            comm,
+            series,
             rf"{label}, {heading}",
             official_series(test, level, kernel),
         )
@@ -251,13 +271,14 @@ def plot_pair(
 
 def write_csv(rows: list[dict[str, float | str | int]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = ["test", "level", "name", "npe", "real", "comm_avg", "speed"]
+    fieldnames = ["machine", "test", "level", "name", "npe", "real", "comm_avg", "speed"]
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         for row in sorted(
             rows,
             key=lambda item: (
+                str(item.get("machine", "")),
                 str(item["test"]),
                 int(item["level"]),
                 str(item["name"]),
@@ -269,13 +290,33 @@ def write_csv(rows: list[dict[str, float | str | int]], path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--results", type=Path, required=True)
+    parser.add_argument("--results", type=Path, required=True, help="MareNostrum 5 timer tree")
+    parser.add_argument("--snellius", type=Path, default=None, help="optional Snellius timer tree")
     parser.add_argument("--outdir", type=Path, required=True)
     args = parser.parse_args()
-    rows = load_results(args.results)
-    if not rows:
+    mn5 = load_results(args.results)
+    if not mn5:
         raise SystemExit(f"no timer rows under {args.results}")
-    write_csv(rows, args.outdir / "mn5-kernel-timings.csv")
+    def tagged(machine: str, rows: list[dict[str, float | str | int]]) -> list[dict[str, float | str | int]]:
+        tagged_rows: list[dict[str, float | str | int]] = []
+        for row in rows:
+            item = dict(row)
+            item["machine"] = machine
+            tagged_rows.append(item)
+        return tagged_rows
+
+    machines: list[tuple[str, list[dict[str, float | str | int]]]] = [
+        ("MareNostrum 5", mn5)
+    ]
+    all_rows = tagged("MareNostrum 5", mn5)
+    if args.snellius is not None:
+        snellius = load_results(args.snellius)
+        if not snellius:
+            raise SystemExit(f"no timer rows under {args.snellius}")
+        machines.append(("Snellius", snellius))
+        all_rows.extend(tagged("Snellius", snellius))
+    write_csv(all_rows, args.outdir / "kernel-timings.csv")
+    write_csv(all_rows, args.outdir / "mn5-kernel-timings.csv")
     series = (
         ("mpi-laplacian", 9, "laplacian-L9.pdf", r"stock mpi-laplacian, octree $L=9$"),
         ("mpi-laplacian-2d", 14, "circle-L14.pdf", r"2D full quadtree $L=14$ (Curie comparison)"),
@@ -283,11 +324,19 @@ def main() -> None:
         ("mpi-laplacian", 8, "laplacian-L8.pdf", r"stock mpi-laplacian, octree $L=8$"),
     )
     for test, level, filename, heading in series:
-        npe, _, _ = select(rows, test=test, level=level, kernel="poisson")
-        if npe.size == 0:
+        if not any(
+            select(rows, test=test, level=level, kernel="poisson")[0].size
+            for _label, rows in machines
+        ):
             continue
-        plot_pair(rows, test=test, level=level, out=args.outdir / filename, heading=heading)
-    print(f"plotted {len(rows)} timer rows from {args.results} -> {args.outdir}")
+        plot_pair(
+            machines,
+            test=test,
+            level=level,
+            out=args.outdir / filename,
+            heading=heading,
+        )
+    print(f"plotted {len(all_rows)} timer rows -> {args.outdir}")
 
 
 if __name__ == "__main__":

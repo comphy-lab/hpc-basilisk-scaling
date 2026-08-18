@@ -28,6 +28,8 @@ mpi-laplacian
 slurm-*.out
 slurm-*.err
 results/*/
+results/latest
+results/snellius/latest
 !results/.gitkeep
 figures/*.png
 figures/*.svg
