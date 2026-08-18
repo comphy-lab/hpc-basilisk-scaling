@@ -26,7 +26,7 @@ fi
 mkdir -p "${OUTDIR}"
 cd "${OUTDIR}"
 
-NTASKS="${SLURM_NTASKS}"
+NTASKS="${RANKS:-${SLURM_NTASKS}}"
 TAG="${LEVEL}-${NTASKS}"
 echo "host=$(hostname) test=${TEST} level=${LEVEL} ntasks=${NTASKS} job=${SLURM_JOB_ID}"
 

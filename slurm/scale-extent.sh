@@ -11,17 +11,25 @@ RANKS_LIST="${RANKS_LIST:-1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384
 
 submit() {
   local test="$1" level="$2" ntasks="$3"
-  local nodes=$(( (ntasks + 111) / 112 ))
-  if [[ "${nodes}" -lt 1 ]]; then
+  local cores_per_node=112
+  local nodes=$(( (ntasks + cores_per_node - 1) / cores_per_node ))
+  local slurm_ntasks="${ntasks}"
+  # BSC forbids --mem. GPP RAM is 2 GB/core, so a 4-rank job would
+  # get ~8 GB and OOM a full L=14/L=9 grid. Below one node, allocate
+  # the whole node and pass the real rank count as RANKS; run.sbatch
+  # launches srun -n "${RANKS}".
+  if [[ "${ntasks}" -lt "${cores_per_node}" ]]; then
     nodes=1
+    slurm_ntasks="${cores_per_node}"
   fi
   sbatch --parsable \
     --job-name="bsk-${test}-${level}-${ntasks}" \
     --qos="${QOS}" \
     --nodes="${nodes}" \
-    --ntasks="${ntasks}" \
+    --ntasks="${slurm_ntasks}" \
+    --exclusive \
     --time=00:45:00 \
-    --export=ALL,TEST="${test}",LEVEL="${level}" \
+    --export=ALL,TEST="${test}",LEVEL="${level}",RANKS="${ntasks}" \
     "${SBATCH}"
 }
 
