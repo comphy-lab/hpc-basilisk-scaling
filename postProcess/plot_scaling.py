@@ -201,20 +201,17 @@ def main() -> None:
     if not rows:
         raise SystemExit(f"no timer rows under {args.results}")
     write_csv(rows, args.outdir / "mn5-kernel-timings.csv")
-    plot_pair(
-        rows,
-        test="mpi-laplacian",
-        level=8,
-        out=args.outdir / "mn5-laplacian-L8.pdf",
-        heading=r"stock mpi-laplacian, octree $L=8$",
+    series = (
+        ("mpi-laplacian", 9, "mn5-laplacian-L9.pdf", r"stock mpi-laplacian, octree $L=9$"),
+        ("mpi-circle", 14, "mn5-circle-L14.pdf", r"stock mpi-circle, adaptive $L=14$"),
+        ("mpi-laplacian", 8, "mn5-laplacian-L8.pdf", r"stock mpi-laplacian, octree $L=8$"),
+        ("mpi-circle", 12, "mn5-circle-L12.pdf", r"stock mpi-circle, adaptive $L=12$"),
     )
-    plot_pair(
-        rows,
-        test="mpi-circle",
-        level=12,
-        out=args.outdir / "mn5-circle-L12.pdf",
-        heading=r"stock mpi-circle, adaptive $L=12$",
-    )
+    for test, level, filename, heading in series:
+        npe, _, _ = select(rows, test=test, level=level, kernel="poisson")
+        if npe.size == 0:
+            continue
+        plot_pair(rows, test=test, level=level, out=args.outdir / filename, heading=heading)
     print(f"plotted {len(rows)} timer rows from {args.results} -> {args.outdir}")
 
 

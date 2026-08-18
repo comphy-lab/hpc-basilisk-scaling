@@ -57,7 +57,7 @@ ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/scripts/com
 ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/slurm/smoke.sh'
 ```
 
-Scale-up (node-aligned, still `gp_debug` unless you pass `--qos gp_ehpc`):
+Scale-up defaults to `gp_ehpc` (circle \(L=14\), laplacian \(L=9\), 1–32 nodes):
 
 ```
 ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/slurm/scale.sh'
@@ -68,6 +68,10 @@ Plot collected `out-*-*` tables:
 ```
 python3 postProcess/plot_scaling.py --results results/latest --outdir figures
 ```
+
+Current campaign figures are `figures/mn5-laplacian-L9.pdf` and
+`figures/mn5-circle-L14.pdf`. The thinner `gp_debug` \(L=8\) / \(L=12\)
+set is kept beside them.
 
 ## Licence
 
