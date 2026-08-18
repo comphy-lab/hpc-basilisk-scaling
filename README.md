@@ -83,7 +83,7 @@ Current campaign figures are `figures/laplacian-L9.pdf`,
 series is compared with Occigen. The 2D full-quadtree series is compared
 with Curie: those published "circle" tables are \(N=2^{2L}\) cells, not
 the adaptive `mpi-circle` mesh. Occigen has no \(L=8\) table, so
-`laplacian-L8.pdf` is machine data only.
+`laplacian-L8.pdf` is MareNostrum 5 and Snellius only.
 
 ## Licence
 
