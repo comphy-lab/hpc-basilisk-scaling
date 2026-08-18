@@ -1,4 +1,4 @@
-# mn5-basilisk-scaling
+# hpc-basilisk-scaling
 
 Stock Basilisk MPI kernel benchmarks on MareNostrum5 GPP. The first
 EuroHPC Regular Access evidence is that unmodified `mpi-circle.c` and
