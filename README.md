@@ -69,12 +69,12 @@ Plot collected `out-*-*` tables:
 python3 postProcess/plot_scaling.py --results results/latest --outdir figures
 ```
 
-Current campaign figures are `figures/laplacian-L9.pdf` and
-`figures/circle-L14.pdf`. The 3D octree series is compared with Occigen.
-The 2D full-quadtree series is compared with Curie: those published
-"circle" tables are \(N=2^{L}\) grids, not the adaptive `mpi-circle`
-mesh. Occigen has no \(L=8\) table, so `laplacian-L8.pdf` is MareNostrum 5
-only.
+Current campaign figures are `figures/laplacian-L9.pdf`,
+`figures/circle-L14.pdf` and `figures/circle-L12.pdf`. The 3D octree
+series is compared with Occigen. The 2D full-quadtree series is compared
+with Curie: those published "circle" tables are \(N=2^{2L}\) cells, not
+the adaptive `mpi-circle` mesh. Occigen has no \(L=8\) table, so
+`laplacian-L8.pdf` is MareNostrum 5 only.
 
 ## Licence
 

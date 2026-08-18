@@ -66,6 +66,7 @@ Compact scripts stay under `/gpfs/projects/your_account/mn5-basilisk-scaling`.
   approves promotion.
 - Use `publication-plots` for every figure. Overlay official Curie/Occigen
   tables from `reference/` only when the mesh matches. Current campaign
-  plots are `figures/laplacian-L9.pdf` and `figures/circle-L14.pdf`.
-  Published Curie "circle" tables are full 2D grids (\(2^{2L}\) cells).
+  plots are `figures/laplacian-L9.pdf`, `figures/circle-L14.pdf` and
+  `figures/circle-L12.pdf`. Published Curie "circle" tables are full 2D
+  grids (\(2^{2L}\) cells).
 - `CLAUDE.md` is local and gitignored; it only points at this file.
