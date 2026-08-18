@@ -7,7 +7,7 @@ PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
 SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
 TRANSFER="${TRANSFER:-mn5-transfer}"
 
-if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" ]]; then
+if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" || ! -f "${ROOT}/generated/_mpi-laplacian-2d.c" ]]; then
   echo "stage-mn5: run scripts/generate-sources.sh first" >&2
   exit 1
 fi
@@ -25,6 +25,7 @@ rsync -a --delete \
 rsync -a \
   "${ROOT}/generated/_mpi-circle.c" \
   "${ROOT}/generated/_mpi-laplacian.c" \
+  "${ROOT}/generated/_mpi-laplacian-2d.c" \
   "${TRANSFER}:${SCRATCH_DST}/generated/"
 
 echo "staged scripts -> ${TRANSFER}:${PROJECT_DST}"

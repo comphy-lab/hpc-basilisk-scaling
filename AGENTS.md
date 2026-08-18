@@ -65,6 +65,7 @@ Compact scripts stay under `/gpfs/projects/your_account/mn5-basilisk-scaling`.
   debugging stay in the EuroHPC tracker and project `scratch/` until Vatsal
   approves promotion.
 - Use `publication-plots` for every figure. Overlay official Curie/Occigen
-  tables from `reference/`. Current campaign plots are
-  `figures/mn5-laplacian-L9.pdf` and `figures/mn5-circle-L14.pdf`.
+  tables from `reference/` only when the mesh matches. Current campaign
+  plots are `figures/laplacian-L9.pdf` and `figures/circle-L14.pdf`.
+  Published Curie "circle" tables are full 2D grids (\(2^{2L}\) cells).
 - `CLAUDE.md` is local and gitignored; it only points at this file.

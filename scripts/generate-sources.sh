@@ -24,11 +24,17 @@ mkdir -p "${ROOT}/generated"
   cd "${WORKDIR}"
   "${QCC}" -source -D_MPI=1 mpi-circle.c
   "${QCC}" -grid=octree -source -D_MPI=1 mpi-laplacian.c
+  mv _mpi-laplacian.c _mpi-laplacian-3d.c
+  "${QCC}" -source -D_MPI=1 mpi-laplacian.c
+  mv _mpi-laplacian.c _mpi-laplacian-2d.c
+  mv _mpi-laplacian-3d.c _mpi-laplacian.c
 )
 
 install -m 0644 "${WORKDIR}/_mpi-circle.c" "${ROOT}/generated/_mpi-circle.c"
 install -m 0644 "${WORKDIR}/_mpi-laplacian.c" "${ROOT}/generated/_mpi-laplacian.c"
+install -m 0644 "${WORKDIR}/_mpi-laplacian-2d.c" "${ROOT}/generated/_mpi-laplacian-2d.c"
 echo "wrote ${ROOT}/generated/_mpi-circle.c"
 echo "wrote ${ROOT}/generated/_mpi-laplacian.c"
+echo "wrote ${ROOT}/generated/_mpi-laplacian-2d.c"
 echo "qcc=${QCC}"
 echo "BASILISK=${BASILISK}"

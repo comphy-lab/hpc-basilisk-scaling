@@ -19,7 +19,11 @@ cd "${SCRATCH_DST}/bin"
   "${SCRATCH_DST}/generated/_mpi-circle.c" -o mpi-circle -lm -lmpi
 "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
   "${SCRATCH_DST}/generated/_mpi-laplacian.c" -o mpi-laplacian -lm -lmpi
+"${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
+  "${SCRATCH_DST}/generated/_mpi-laplacian-2d.c" -o mpi-laplacian-2d -lm -lmpi
 
 echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian"
-ls -l "${SCRATCH_DST}/bin/mpi-circle" "${SCRATCH_DST}/bin/mpi-laplacian"
+echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian-2d"
+ls -l "${SCRATCH_DST}/bin/mpi-circle" "${SCRATCH_DST}/bin/mpi-laplacian" \
+  "${SCRATCH_DST}/bin/mpi-laplacian-2d"

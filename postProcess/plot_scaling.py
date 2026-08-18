@@ -28,14 +28,12 @@ REPO = Path(__file__).resolve().parents[1]
 OFFICIAL_ROOTS = {
     "mpi-circle": REPO / "reference" / "curie",
     "mpi-laplacian": REPO / "reference" / "occigen-3D",
+    "mpi-laplacian-2d": REPO / "reference" / "curie",
 }
 OFFICIAL_LABEL = {
     "mpi-circle": "Curie",
     "mpi-laplacian": "Occigen",
-}
-# Occigen 3D tables start at L=9; overlay that on the MN5 L=8 debug series.
-OFFICIAL_LEVEL = {
-    ("mpi-laplacian", 8): 9,
+    "mpi-laplacian-2d": "Curie",
 }
 
 
@@ -140,7 +138,7 @@ def draw_kernel(
         markerfacecolor="#1A64B3",
         markeredgecolor="k",
         color="#1A64B3",
-        label="MN5 wall",
+        label="MareNostrum 5 wall",
         zorder=4,
     )
     ax.plot(
@@ -153,13 +151,12 @@ def draw_kernel(
         markerfacecolor="#C44E52",
         markeredgecolor="k",
         color="#C44E52",
-        label="MN5 MPI",
+        label="MareNostrum 5 MPI",
         zorder=3,
     )
     if official is not None:
-        olabel, olevel, onpe, oreal, ocomm = official
+        olabel, _olevel, onpe, oreal, ocomm = official
         if onpe.size:
-            otag = rf"{olabel} $L={olevel}$"
             ax.plot(
                 onpe,
                 oreal,
@@ -171,7 +168,7 @@ def draw_kernel(
                 markeredgecolor="#FC8D59",
                 markeredgewidth=2,
                 color="#FC8D59",
-                label=rf"{otag} wall",
+                label=rf"{olabel} wall",
                 zorder=2,
             )
             ax.plot(
@@ -185,7 +182,7 @@ def draw_kernel(
                 markeredgecolor="#8C564B",
                 markeredgewidth=1.6,
                 color="#8C564B",
-                label=rf"{otag} MPI",
+                label=rf"{olabel} MPI",
                 zorder=2,
             )
     if npe.size >= 2 and real[0] > 0:
@@ -195,7 +192,7 @@ def draw_kernel(
             linestyle=":",
             linewidth=2.4,
             color="0.35",
-            label="ideal (MN5)",
+            label="ideal (MareNostrum 5)",
             zorder=1,
         )
     ax.set_xlabel(r"MPI ranks", fontsize=34, labelpad=12)
@@ -213,7 +210,7 @@ def official_series(
     root = OFFICIAL_ROOTS.get(test)
     if root is None or not root.is_dir():
         return None
-    level = OFFICIAL_LEVEL.get((test, mn5_level), mn5_level)
+    level = mn5_level
     rows = load_results(root, test=test)
     npe, real, comm = select(rows, test=test, level=level, kernel=kernel)
     if npe.size == 0:
@@ -280,10 +277,10 @@ def main() -> None:
         raise SystemExit(f"no timer rows under {args.results}")
     write_csv(rows, args.outdir / "mn5-kernel-timings.csv")
     series = (
-        ("mpi-laplacian", 9, "mn5-laplacian-L9.pdf", r"stock mpi-laplacian, octree $L=9$"),
-        ("mpi-circle", 14, "mn5-circle-L14.pdf", r"stock mpi-circle, adaptive $L=14$"),
-        ("mpi-laplacian", 8, "mn5-laplacian-L8.pdf", r"stock mpi-laplacian, octree $L=8$"),
-        ("mpi-circle", 12, "mn5-circle-L12.pdf", r"stock mpi-circle, adaptive $L=12$"),
+        ("mpi-laplacian", 9, "laplacian-L9.pdf", r"stock mpi-laplacian, octree $L=9$"),
+        ("mpi-laplacian-2d", 14, "circle-L14.pdf", r"2D full quadtree $L=14$ (Curie comparison)"),
+        ("mpi-laplacian-2d", 12, "circle-L12.pdf", r"2D full quadtree $L=12$ (Curie comparison)"),
+        ("mpi-laplacian", 8, "laplacian-L8.pdf", r"stock mpi-laplacian, octree $L=8$"),
     )
     for test, level, filename, heading in series:
         npe, _, _ = select(rows, test=test, level=level, kernel="poisson")
