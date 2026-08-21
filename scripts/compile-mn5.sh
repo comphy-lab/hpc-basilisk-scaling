@@ -21,7 +21,10 @@ cd "${SCRATCH_DST}/bin"
   "${SCRATCH_DST}/generated/_mpi-laplacian.c" -o mpi-laplacian -lm -lmpi
 "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
   "${SCRATCH_DST}/generated/_mpi-laplacian-2d.c" -o mpi-laplacian-2d -lm -lmpi
-"${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
+# Intel icc -O2 traps a SIGFPE in the axi+CLSVOF+integral first step.
+# Intel MPI + GCC frontend matches the Snellius numerics and still
+# launches with srun --mpi=pmi2.
+I_MPI_CC=gcc "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
   "${SCRATCH_DST}/generated/_marangoni-scale.c" -o marangoni-scale -lm -lmpi
 
 echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
