@@ -63,8 +63,12 @@ def load_tree(root: Path) -> list[dict[str, float | int | str]]:
     rows: list[dict[str, float | int | str]] = []
     for path in sorted(root.rglob("out-*")):
         row = parse_file(path)
-        if row is not None:
-            rows.append(row)
+        if row is None:
+            continue
+        # Keep completed scaling windows only: LEVEL 10/12 at t/t0 = 0.5.
+        if int(row["level"]) < 10 or float(row["t"]) < 0.45:
+            continue
+        rows.append(row)
     return rows
 
 
