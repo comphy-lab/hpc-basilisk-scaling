@@ -32,6 +32,10 @@ MACHINE_STYLE = {
     "MareNostrum 5": {"color": "#1A64B3", "marker": "o", "z": 4},
     "Snellius": {"color": "#4DAF4A", "marker": "P", "z": 3.5},
 }
+MESH_STYLE = {
+    "uniform": {"linestyle": "-", "label": "uniform"},
+    "adaptive": {"linestyle": "--", "label": "adaptive"},
+}
 
 
 def parse_file(path: Path) -> dict[str, float | int] | None:
@@ -73,8 +77,19 @@ def load_tree(root: Path) -> list[dict[str, float | int | str]]:
     return rows
 
 
-def select(rows: list[dict[str, float | int | str]], level: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def mesh_of(row: dict[str, float | int | str]) -> str:
+    grid = str(row.get("grid") or "").strip()
+    return grid if grid in MESH_STYLE else "adaptive"
+
+
+def select(
+    rows: list[dict[str, float | int | str]],
+    level: int,
+    mesh: str | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     picked = [row for row in rows if int(row["level"]) == level]
+    if mesh is not None:
+        picked = [row for row in picked if mesh_of(row) == mesh]
     picked.sort(key=lambda row: int(row["npe"]))
     npe = np.array([int(row["npe"]) for row in picked], dtype=float)
     real = np.array([float(row["real"]) for row in picked], dtype=float)
@@ -107,36 +122,46 @@ def plot_level(
         (axes[1], "speed", r"Speed (cells/s)"),
     ):
         drawn = False
+        meshes = []
+        for _, rows in machines:
+            for row in rows:
+                if int(row["level"]) == level:
+                    name = mesh_of(row)
+                    if name not in meshes:
+                        meshes.append(name)
         for label, rows in machines:
-            npe, real, speed = select(rows, level)
-            if npe.size == 0:
-                continue
-            y = real if key == "real" else speed
-            machine_style = MACHINE_STYLE[label]
-            ax.plot(
-                npe,
-                y,
-                linestyle="-",
-                linewidth=3,
-                marker=machine_style["marker"],
-                markersize=13,
-                markerfacecolor=machine_style["color"],
-                markeredgecolor="k",
-                color=machine_style["color"],
-                label=label,
-                zorder=machine_style["z"],
-            )
-            if key == "real" and npe.size >= 2 and real[0] > 0:
+            for mesh in meshes:
+                npe, real, speed = select(rows, level, mesh)
+                if npe.size == 0:
+                    continue
+                y = real if key == "real" else speed
+                machine_style = MACHINE_STYLE[label]
+                mesh_style = MESH_STYLE[mesh]
+                series = label if len(meshes) == 1 else rf"{label}, {mesh_style['label']}"
                 ax.plot(
                     npe,
-                    real[0] * npe[0] / npe,
-                    linestyle=":",
-                    linewidth=2.4,
-                    color="0.35",
-                    label=rf"ideal ({label})" if not drawn else None,
-                    zorder=1,
+                    y,
+                    linestyle=mesh_style["linestyle"],
+                    linewidth=3,
+                    marker=machine_style["marker"],
+                    markersize=13,
+                    markerfacecolor=machine_style["color"] if mesh == "uniform" else "white",
+                    markeredgecolor=machine_style["color"],
+                    color=machine_style["color"],
+                    label=series,
+                    zorder=machine_style["z"] + (0.2 if mesh == "uniform" else 0),
                 )
-                drawn = True
+                if key == "real" and mesh == meshes[0] and npe.size >= 2 and real[0] > 0:
+                    ax.plot(
+                        npe,
+                        real[0] * npe[0] / npe,
+                        linestyle=":",
+                        linewidth=2.4,
+                        color="0.35",
+                        label=rf"ideal ({series})" if not drawn else None,
+                        zorder=1,
+                    )
+                    drawn = True
         ax.set_xlabel(r"MPI ranks", fontsize=34, labelpad=12)
         ax.set_ylabel(ylabel, fontsize=34, labelpad=12)
         grids = {
@@ -150,6 +175,8 @@ def plot_level(
             mesh = "uniform mesh, "
         elif grids == {"adaptive"}:
             mesh = "adaptive mesh, "
+        elif grids == {"adaptive", "uniform"}:
+            mesh = "adaptive vs uniform, "
         else:
             mesh = ""
         ax.set_title(
@@ -173,7 +200,12 @@ def write_csv(rows: list[dict[str, float | int | str]], path: Path) -> None:
         writer.writeheader()
         for row in sorted(
             rows,
-            key=lambda item: (str(item.get("machine", "")), int(item["level"]), int(item["npe"])),
+            key=lambda item: (
+                str(item.get("machine", "")),
+                str(item.get("grid", "")),
+                int(item["level"]),
+                int(item["npe"]),
+            ),
         ):
             writer.writerow({key: row.get(key, "") for key in fieldnames})
 
@@ -182,6 +214,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results", type=Path, required=True, help="MareNostrum 5 run tree")
     parser.add_argument("--snellius", type=Path, default=None)
+    parser.add_argument("--adaptive-results", type=Path, default=None)
+    parser.add_argument("--adaptive-snellius", type=Path, default=None)
     parser.add_argument("--outdir", type=Path, required=True)
     parser.add_argument("--prefix", type=str, default="marangoni")
     args = parser.parse_args()
@@ -203,6 +237,24 @@ def main() -> None:
             item = dict(row)
             item["machine"] = "Snellius"
             all_rows.append(item)
+
+    def add_adaptive(root: Path, machine: str) -> None:
+        extra = load_tree(root)
+        for row in extra:
+            item = dict(row)
+            item["machine"] = machine
+            if not str(item.get("grid") or ""):
+                item["grid"] = "adaptive"
+            all_rows.append(item)
+            for label, rows in machines:
+                if label == machine:
+                    rows.append(item)
+                    break
+
+    if args.adaptive_results is not None:
+        add_adaptive(args.adaptive_results, "MareNostrum 5")
+    if args.adaptive_snellius is not None:
+        add_adaptive(args.adaptive_snellius, "Snellius")
     write_csv(all_rows, args.outdir / f"{args.prefix}-timings.csv")
     levels = sorted({int(row["level"]) for row in all_rows})
     for level in levels:
