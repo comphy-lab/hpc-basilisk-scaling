@@ -13,6 +13,9 @@ pitch plus a one-radius margin still fits. That is the many-drop
 physical scale-up: more interfaces, more adaptive cells, same drop
 resolution.
 
+Compile with `-DUNIFORM=1` to keep the initial quadtree uniform at
+LEVEL (no `adapt_wavelet`). Same TREE/MPI backend, \(N^2\) cells.
+
 Usage:
 
 ~~~
@@ -103,8 +106,14 @@ int main (int argc, char * argv[])
   if (pid() == 0)
     fprintf (stderr,
 	     "marangoni-multidrop ndrops=%d grid=%dx%d L0=%g LEVEL=%d "
-	     "pts/R=%g npe=%d TMAX/t0=%g\n",
-	     NDROPS, NX, NY, L0, LEVEL, N*R/L0, npe(), TMAX_T0);
+	     "pts/R=%g npe=%d TMAX/t0=%g grid=%s\n",
+	     NDROPS, NX, NY, L0, LEVEL, N*R/L0, npe(), TMAX_T0,
+#ifdef UNIFORM
+	     "uniform"
+#else
+	     "adaptive"
+#endif
+	     );
 
   run();
 }
@@ -157,12 +166,18 @@ event stop (t = TMAX_T0*t0)
 {
   if (pid() == 0)
     fprintf (fout,
-	     "#TIMING npe=%d ndrops=%d level=%d cells=%ld steps=%d t=%g real=%g speed=%g u=%g\n",
+	     "#TIMING npe=%d ndrops=%d level=%d cells=%ld steps=%d t=%g real=%g speed=%g u=%g grid=%s\n",
 	     npe(), NDROPS, LEVEL, grid->tn, i, t/t0, perf.t, perf.speed,
-	     u_drop/U_drop);
+	     u_drop/U_drop,
+#ifdef UNIFORM
+	     "uniform"
+#else
+	     "adaptive"
+#endif
+	     );
 }
 
-#if TREE
+#if TREE && !defined(UNIFORM)
 event adapt (i++) {
   adapt_wavelet ({f,u}, {1e-2, 1e-5, 1e-5}, LEVEL);
 }

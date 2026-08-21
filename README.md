@@ -23,8 +23,10 @@ tests already isolate that kernel and the operators it is built from
 
 The files in `simulationCases/` are unmodified copies of those tests, plus
 the stock `marangoni.c` Marangoni-migration case (Al Saud et al., 2018)
-and a cluster I/O variant `marangoni-scale.c` that keeps the same
-equations on a single finer mesh.
+and cluster I/O variants `marangoni-scale.c` / `marangoni-multidrop.c`
+that keep the same equations. Those two cases can be compiled with
+`-DUNIFORM=1` to hold a uniform quadtree at the requested LEVEL instead
+of wavelet adaptation.
 
 ## Structure
 

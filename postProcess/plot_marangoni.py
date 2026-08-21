@@ -25,7 +25,7 @@ import numpy as np
 TIMING_RE = re.compile(
     r"#TIMING npe=(?P<npe>\d+) level=(?P<level>\d+) cells=(?P<cells>\d+) "
     r"steps=(?P<steps>\d+) t=(?P<t>\S+) real=(?P<real>\S+) "
-    r"speed=(?P<speed>\S+) u=(?P<u>\S+)"
+    r"speed=(?P<speed>\S+) u=(?P<u>\S+)(?: grid=(?P<grid>\S+))?"
 )
 OUT_RE = re.compile(r"^out-(\d+)-(\d+)$")
 MACHINE_STYLE = {
@@ -55,6 +55,7 @@ def parse_file(path: Path) -> dict[str, float | int] | None:
         "real": float(match.group("real")),
         "speed": float(match.group("speed")),
         "u": float(match.group("u")),
+        "grid": match.group("grid") or "",
         "source": str(path),
     }
 
@@ -138,8 +139,21 @@ def plot_level(
                 drawn = True
         ax.set_xlabel(r"MPI ranks", fontsize=34, labelpad=12)
         ax.set_ylabel(ylabel, fontsize=34, labelpad=12)
+        grids = {
+            str(row.get("grid") or "")
+            for _, rows in machines
+            for row in rows
+            if int(row["level"]) == level
+        }
+        grids.discard("")
+        if grids == {"uniform"}:
+            mesh = "uniform mesh, "
+        elif grids == {"adaptive"}:
+            mesh = "adaptive mesh, "
+        else:
+            mesh = ""
         ax.set_title(
-            rf"Marangoni migration, $L={level}$ (${pts}$ pts$/R$)",
+            rf"Marangoni migration, {mesh}$L={level}$ (${pts}$ pts$/R$)",
             fontsize=22,
             pad=12,
         )
@@ -153,7 +167,7 @@ def plot_level(
 
 def write_csv(rows: list[dict[str, float | int | str]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = ["machine", "level", "npe", "cells", "steps", "t", "real", "speed", "u"]
+    fieldnames = ["machine", "level", "npe", "cells", "steps", "t", "real", "speed", "u", "grid"]
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
@@ -169,6 +183,7 @@ def main() -> None:
     parser.add_argument("--results", type=Path, required=True, help="MareNostrum 5 run tree")
     parser.add_argument("--snellius", type=Path, default=None)
     parser.add_argument("--outdir", type=Path, required=True)
+    parser.add_argument("--prefix", type=str, default="marangoni")
     args = parser.parse_args()
     mn5 = load_tree(args.results)
     if not mn5:
@@ -188,10 +203,10 @@ def main() -> None:
             item = dict(row)
             item["machine"] = "Snellius"
             all_rows.append(item)
-    write_csv(all_rows, args.outdir / "marangoni-timings.csv")
+    write_csv(all_rows, args.outdir / f"{args.prefix}-timings.csv")
     levels = sorted({int(row["level"]) for row in all_rows})
     for level in levels:
-        plot_level(machines, level, args.outdir / f"marangoni-L{level}.pdf")
+        plot_level(machines, level, args.outdir / f"{args.prefix}-L{level}.pdf")
     print(f"plotted {len(all_rows)} timing rows -> {args.outdir}")
 
 

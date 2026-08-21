@@ -26,6 +26,7 @@ TIMING_RE = re.compile(
     r"#TIMING npe=(?P<npe>\d+) ndrops=(?P<ndrops>\d+) level=(?P<level>\d+) "
     r"cells=(?P<cells>\d+) steps=(?P<steps>\d+) t=(?P<t>\S+) "
     r"real=(?P<real>\S+) speed=(?P<speed>\S+) u=(?P<u>\S+)"
+    r"(?: grid=(?P<grid>\S+))?"
 )
 DROP_COLORS = {
     2: "#1A64B3",
@@ -50,6 +51,7 @@ def parse_file(path: Path) -> dict[str, float | int] | None:
         row[key] = int(row[key])
     for key in ("t", "real", "speed", "u"):
         row[key] = float(row[key])
+    row["grid"] = match.group("grid") or ""
     if row["t"] < 0.45:
         return None
     row["source"] = str(path)
@@ -126,7 +128,19 @@ def plot_all(rows: list[dict[str, float | int | str]], out: Path) -> None:
                     first_ideal = False
         ax.set_xlabel(r"MPI ranks", fontsize=34, labelpad=12)
         ax.set_ylabel(ylabel, fontsize=34, labelpad=12)
-        ax.set_title(r"Planar multi-drop Marangoni, 64 pts$/R$", fontsize=22, pad=12)
+        grids = {str(row.get("grid") or "") for row in rows}
+        grids.discard("")
+        if grids == {"uniform"}:
+            mesh = "uniform mesh, "
+        elif grids == {"adaptive"}:
+            mesh = "adaptive mesh, "
+        else:
+            mesh = ""
+        ax.set_title(
+            rf"Planar multi-drop Marangoni, {mesh}64 pts$/R$",
+            fontsize=22,
+            pad=12,
+        )
         ax.legend(fontsize=13, frameon=False, loc="best", ncol=1)
         style(ax)
     fig.tight_layout()
@@ -136,7 +150,7 @@ def plot_all(rows: list[dict[str, float | int | str]], out: Path) -> None:
 
 
 def write_csv(rows: list[dict[str, float | int | str]], path: Path) -> None:
-    fieldnames = ["machine", "ndrops", "level", "npe", "cells", "steps", "t", "real", "speed", "u"]
+    fieldnames = ["machine", "ndrops", "level", "npe", "cells", "steps", "t", "real", "speed", "u", "grid"]
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
@@ -157,6 +171,7 @@ def main() -> None:
     parser.add_argument("--results", type=Path, required=True)
     parser.add_argument("--snellius", type=Path, default=None)
     parser.add_argument("--outdir", type=Path, required=True)
+    parser.add_argument("--prefix", type=str, default="marangoni-multidrop")
     args = parser.parse_args()
     all_rows: list[dict[str, float | int | str]] = []
     mn5 = load_tree(args.results)
@@ -172,8 +187,8 @@ def main() -> None:
             all_rows.append(item)
     if not all_rows:
         raise SystemExit("no multi-drop #TIMING rows")
-    write_csv(all_rows, args.outdir / "marangoni-multidrop-timings.csv")
-    plot_all(all_rows, args.outdir / "marangoni-multidrop.pdf")
+    write_csv(all_rows, args.outdir / f"{args.prefix}-timings.csv")
+    plot_all(all_rows, args.outdir / f"{args.prefix}.pdf")
     print(f"plotted {len(all_rows)} timing rows -> {args.outdir}")
 
 

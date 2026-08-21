@@ -37,7 +37,7 @@ if [[ -n "${RANKS:-}" && "${RANKS}" != "${NTASKS}" ]]; then
   echo "RANKS=${RANKS} does not match SLURM_NTASKS=${NTASKS}" >&2
   exit 1
 fi
-if [[ "${TEST}" == "marangoni-multidrop" ]]; then
+if [[ "${TEST}" == marangoni-multidrop* ]]; then
   TAG="${NDROPS}-${NTASKS}"
 else
   TAG="${LEVEL}-${NTASKS}"
@@ -48,10 +48,10 @@ export OMP_NUM_THREADS=1
 if [[ "${TEST}" == "mpi-circle" ]]; then
   srun -n "${NTASKS}" "${BIN}" "${LEVEL}" "${MINLEVEL}" \
     > "out-${TAG}" 2> "log-${TAG}"
-elif [[ "${TEST}" == "marangoni-scale" ]]; then
+elif [[ "${TEST}" == marangoni-scale* ]]; then
   srun -n "${NTASKS}" "${BIN}" "${LEVEL}" "${TMAX}" \
     > "out-${TAG}" 2> "log-${TAG}"
-elif [[ "${TEST}" == "marangoni-multidrop" ]]; then
+elif [[ "${TEST}" == marangoni-multidrop* ]]; then
   srun -n "${NTASKS}" "${BIN}" "${NDROPS}" "${TMAX}" \
     > "out-${TAG}" 2> "log-${TAG}"
 else

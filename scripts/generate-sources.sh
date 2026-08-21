@@ -32,6 +32,14 @@ mkdir -p "${ROOT}/generated"
   mv _mpi-laplacian-3d.c _mpi-laplacian.c
   "${QCC}" -source -D_MPI=1 marangoni-scale.c
   "${QCC}" -source -D_MPI=1 marangoni-multidrop.c
+  mv _marangoni-scale.c _marangoni-scale-adaptive.c
+  mv _marangoni-multidrop.c _marangoni-multidrop-adaptive.c
+  "${QCC}" -source -D_MPI=1 -DUNIFORM=1 marangoni-scale.c
+  mv _marangoni-scale.c _marangoni-scale-uniform.c
+  "${QCC}" -source -D_MPI=1 -DUNIFORM=1 marangoni-multidrop.c
+  mv _marangoni-multidrop.c _marangoni-multidrop-uniform.c
+  mv _marangoni-scale-adaptive.c _marangoni-scale.c
+  mv _marangoni-multidrop-adaptive.c _marangoni-multidrop.c
 )
 
 install -m 0644 "${WORKDIR}/_mpi-circle.c" "${ROOT}/generated/_mpi-circle.c"
@@ -39,10 +47,16 @@ install -m 0644 "${WORKDIR}/_mpi-laplacian.c" "${ROOT}/generated/_mpi-laplacian.
 install -m 0644 "${WORKDIR}/_mpi-laplacian-2d.c" "${ROOT}/generated/_mpi-laplacian-2d.c"
 install -m 0644 "${WORKDIR}/_marangoni-scale.c" "${ROOT}/generated/_marangoni-scale.c"
 install -m 0644 "${WORKDIR}/_marangoni-multidrop.c" "${ROOT}/generated/_marangoni-multidrop.c"
+install -m 0644 "${WORKDIR}/_marangoni-scale-uniform.c" \
+  "${ROOT}/generated/_marangoni-scale-uniform.c"
+install -m 0644 "${WORKDIR}/_marangoni-multidrop-uniform.c" \
+  "${ROOT}/generated/_marangoni-multidrop-uniform.c"
 echo "wrote ${ROOT}/generated/_mpi-circle.c"
 echo "wrote ${ROOT}/generated/_mpi-laplacian.c"
 echo "wrote ${ROOT}/generated/_mpi-laplacian-2d.c"
 echo "wrote ${ROOT}/generated/_marangoni-scale.c"
 echo "wrote ${ROOT}/generated/_marangoni-multidrop.c"
+echo "wrote ${ROOT}/generated/_marangoni-scale-uniform.c"
+echo "wrote ${ROOT}/generated/_marangoni-multidrop-uniform.c"
 echo "qcc=${QCC}"
 echo "BASILISK=${BASILISK}"

@@ -29,6 +29,10 @@ The official verification window is 3. Default 0.5 is long enough to
 adapt the mesh and sample the Marangoni start-up without spending the
 full terminal-velocity integration on every rank count.
 
+Compile with `-DUNIFORM=1` to keep the initial quadtree uniform at
+LEVEL (no `adapt_wavelet`). That is the same TREE/MPI backend with
+\(N^2\) cells instead of the interface-only adaptive count.
+
 Rank 0 writes the time series to stdout and a one-line `#TIMING`
 summary at the end. `run()` still prints Basilisk's `timer_print`
 line.
@@ -79,8 +83,14 @@ int main (int argc, char * argv[])
 
   if (pid() == 0)
     fprintf (stderr,
-	     "marangoni-scale LEVEL=%d pts/R=%d npe=%d TMAX/t0=%g N=%d\n",
-	     LEVEL, N/16, npe(), TMAX_T0, N);
+	     "marangoni-scale LEVEL=%d pts/R=%d npe=%d TMAX/t0=%g N=%d grid=%s\n",
+	     LEVEL, N/16, npe(), TMAX_T0, N,
+#ifdef UNIFORM
+	     "uniform"
+#else
+	     "adaptive"
+#endif
+	     );
 
   run();
 }
@@ -130,12 +140,18 @@ event stop (t = TMAX_T0*t0)
 {
   if (pid() == 0)
     fprintf (fout,
-	     "#TIMING npe=%d level=%d cells=%ld steps=%d t=%g real=%g speed=%g u=%g\n",
+	     "#TIMING npe=%d level=%d cells=%ld steps=%d t=%g real=%g speed=%g u=%g grid=%s\n",
 	     npe(), LEVEL, grid->tn, i, t/t0, perf.t, perf.speed,
-	     u_drop/U_drop);
+	     u_drop/U_drop,
+#ifdef UNIFORM
+	     "uniform"
+#else
+	     "adaptive"
+#endif
+	     );
 }
 
-#if TREE
+#if TREE && !defined(UNIFORM)
 event adapt (i++) {
   adapt_wavelet ({f,u}, {1e-2, 1e-5, 1e-5}, LEVEL);
 }

@@ -7,7 +7,7 @@ PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
 SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
 TRANSFER="${TRANSFER:-mn5-transfer}"
 
-if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" || ! -f "${ROOT}/generated/_mpi-laplacian-2d.c" || ! -f "${ROOT}/generated/_marangoni-scale.c" || ! -f "${ROOT}/generated/_marangoni-multidrop.c" ]]; then
+if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" || ! -f "${ROOT}/generated/_mpi-laplacian-2d.c" || ! -f "${ROOT}/generated/_marangoni-scale.c" || ! -f "${ROOT}/generated/_marangoni-multidrop.c" || ! -f "${ROOT}/generated/_marangoni-scale-uniform.c" || ! -f "${ROOT}/generated/_marangoni-multidrop-uniform.c" ]]; then
   echo "stage-mn5: run scripts/generate-sources.sh first" >&2
   exit 1
 fi
@@ -28,6 +28,8 @@ rsync -a \
   "${ROOT}/generated/_mpi-laplacian-2d.c" \
   "${ROOT}/generated/_marangoni-scale.c" \
   "${ROOT}/generated/_marangoni-multidrop.c" \
+  "${ROOT}/generated/_marangoni-scale-uniform.c" \
+  "${ROOT}/generated/_marangoni-multidrop-uniform.c" \
   "${TRANSFER}:${SCRATCH_DST}/generated/"
 
 echo "staged scripts -> ${TRANSFER}:${PROJECT_DST}"
