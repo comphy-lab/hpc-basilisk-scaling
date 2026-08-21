@@ -8,7 +8,7 @@ module purge
 module load 2024
 module load OpenMPI/5.0.3-GCC-13.3.0
 
-if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale.c" ]]; then
+if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-multidrop.c" ]]; then
   echo "compile-snellius: missing generated sources under ${SCRATCH_DST}" >&2
   exit 1
 fi
@@ -24,10 +24,14 @@ mpicc -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
   "${SCRATCH_DST}/generated/_mpi-laplacian-2d.c" -o mpi-laplacian-2d -lm
 mpicc -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
   "${SCRATCH_DST}/generated/_marangoni-scale.c" -o marangoni-scale -lm
+mpicc -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
+  "${SCRATCH_DST}/generated/_marangoni-multidrop.c" -o marangoni-multidrop -lm
 
 echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian-2d"
 echo "compiled ${SCRATCH_DST}/bin/marangoni-scale"
+echo "compiled ${SCRATCH_DST}/bin/marangoni-multidrop"
 ls -l "${SCRATCH_DST}/bin/mpi-circle" "${SCRATCH_DST}/bin/mpi-laplacian" \
-  "${SCRATCH_DST}/bin/mpi-laplacian-2d" "${SCRATCH_DST}/bin/marangoni-scale"
+  "${SCRATCH_DST}/bin/mpi-laplacian-2d" "${SCRATCH_DST}/bin/marangoni-scale" \
+  "${SCRATCH_DST}/bin/marangoni-multidrop"

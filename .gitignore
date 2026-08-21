@@ -23,6 +23,7 @@ _*.c
 mpi-circle
 mpi-laplacian
 marangoni-scale
+marangoni-multidrop
 
 # Slurm / run output
 *.err

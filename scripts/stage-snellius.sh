@@ -7,7 +7,7 @@ PROJECT_DST="${PROJECT_DST:-/projects/0/your_project/hpc-basilisk-scaling}"
 SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
 HOST="${HOST:-snellius}"
 
-if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" || ! -f "${ROOT}/generated/_mpi-laplacian-2d.c" || ! -f "${ROOT}/generated/_marangoni-scale.c" ]]; then
+if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" || ! -f "${ROOT}/generated/_mpi-laplacian-2d.c" || ! -f "${ROOT}/generated/_marangoni-scale.c" || ! -f "${ROOT}/generated/_marangoni-multidrop.c" ]]; then
   echo "stage-snellius: run scripts/generate-sources.sh first" >&2
   exit 1
 fi
@@ -27,6 +27,7 @@ rsync -a \
   "${ROOT}/generated/_mpi-laplacian.c" \
   "${ROOT}/generated/_mpi-laplacian-2d.c" \
   "${ROOT}/generated/_marangoni-scale.c" \
+  "${ROOT}/generated/_marangoni-multidrop.c" \
   "${HOST}:${SCRATCH_DST}/generated/"
 
 echo "staged scripts -> ${HOST}:${PROJECT_DST}"

@@ -19,6 +19,7 @@ TEST="${TEST:-mpi-circle}"
 LEVEL="${LEVEL:-8}"
 MINLEVEL="${MINLEVEL:-5}"
 TMAX="${TMAX:-0.5}"
+NDROPS="${NDROPS:-2}"
 SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
 BIN="${SCRATCH_DST}/bin/${TEST}"
 OUTDIR="${SCRATCH_DST}/runs/${TEST}"
@@ -36,8 +37,12 @@ if [[ -n "${RANKS:-}" && "${RANKS}" != "${NTASKS}" ]]; then
   echo "RANKS=${RANKS} does not match SLURM_NTASKS=${NTASKS}" >&2
   exit 1
 fi
-TAG="${LEVEL}-${NTASKS}"
-echo "host=$(hostname) test=${TEST} level=${LEVEL} ntasks=${NTASKS} job=${SLURM_JOB_ID}"
+if [[ "${TEST}" == "marangoni-multidrop" ]]; then
+  TAG="${NDROPS}-${NTASKS}"
+else
+  TAG="${LEVEL}-${NTASKS}"
+fi
+echo "host=$(hostname) test=${TEST} level=${LEVEL} ndrops=${NDROPS} ntasks=${NTASKS} job=${SLURM_JOB_ID}"
 
 export OMP_NUM_THREADS=1
 if [[ "${TEST}" == "mpi-circle" ]]; then
@@ -45,6 +50,9 @@ if [[ "${TEST}" == "mpi-circle" ]]; then
     > "out-${TAG}" 2> "log-${TAG}"
 elif [[ "${TEST}" == "marangoni-scale" ]]; then
   srun -n "${NTASKS}" "${BIN}" "${LEVEL}" "${TMAX}" \
+    > "out-${TAG}" 2> "log-${TAG}"
+elif [[ "${TEST}" == "marangoni-multidrop" ]]; then
+  srun -n "${NTASKS}" "${BIN}" "${NDROPS}" "${TMAX}" \
     > "out-${TAG}" 2> "log-${TAG}"
 else
   srun -n "${NTASKS}" "${BIN}" "${LEVEL}" \

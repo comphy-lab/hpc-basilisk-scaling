@@ -5,7 +5,7 @@ set -euo pipefail
 SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
 CC="${CC:-mpicc}"
 
-if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale.c" ]]; then
+if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-multidrop.c" ]]; then
   echo "compile-mn5: missing generated sources under ${SCRATCH_DST}" >&2
   exit 1
 fi
@@ -26,10 +26,14 @@ cd "${SCRATCH_DST}/bin"
 # launches with srun --mpi=pmi2.
 I_MPI_CC=gcc "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
   "${SCRATCH_DST}/generated/_marangoni-scale.c" -o marangoni-scale -lm -lmpi
+I_MPI_CC=gcc "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
+  "${SCRATCH_DST}/generated/_marangoni-multidrop.c" -o marangoni-multidrop -lm -lmpi
 
 echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian-2d"
 echo "compiled ${SCRATCH_DST}/bin/marangoni-scale"
+echo "compiled ${SCRATCH_DST}/bin/marangoni-multidrop"
 ls -l "${SCRATCH_DST}/bin/mpi-circle" "${SCRATCH_DST}/bin/mpi-laplacian" \
-  "${SCRATCH_DST}/bin/mpi-laplacian-2d" "${SCRATCH_DST}/bin/marangoni-scale"
+  "${SCRATCH_DST}/bin/mpi-laplacian-2d" "${SCRATCH_DST}/bin/marangoni-scale" \
+  "${SCRATCH_DST}/bin/marangoni-multidrop"
