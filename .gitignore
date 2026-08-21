@@ -22,6 +22,7 @@ _*.c
 *.out
 mpi-circle
 mpi-laplacian
+marangoni-scale
 
 # Slurm / run output
 *.err

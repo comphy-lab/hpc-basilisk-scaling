@@ -5,7 +5,7 @@ set -euo pipefail
 SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
 CC="${CC:-mpicc}"
 
-if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" ]]; then
+if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale.c" ]]; then
   echo "compile-mn5: missing generated sources under ${SCRATCH_DST}" >&2
   exit 1
 fi
@@ -21,9 +21,12 @@ cd "${SCRATCH_DST}/bin"
   "${SCRATCH_DST}/generated/_mpi-laplacian.c" -o mpi-laplacian -lm -lmpi
 "${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
   "${SCRATCH_DST}/generated/_mpi-laplacian-2d.c" -o mpi-laplacian-2d -lm -lmpi
+"${CC}" -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 -diag-disable=10441 \
+  "${SCRATCH_DST}/generated/_marangoni-scale.c" -o marangoni-scale -lm -lmpi
 
 echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian"
 echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian-2d"
+echo "compiled ${SCRATCH_DST}/bin/marangoni-scale"
 ls -l "${SCRATCH_DST}/bin/mpi-circle" "${SCRATCH_DST}/bin/mpi-laplacian" \
-  "${SCRATCH_DST}/bin/mpi-laplacian-2d"
+  "${SCRATCH_DST}/bin/mpi-laplacian-2d" "${SCRATCH_DST}/bin/marangoni-scale"

@@ -23,8 +23,13 @@ Poisson is the bottleneck later physics sits on.
 - `simulationCases/mpi-laplacian.c` is the Laplacian / restriction / Poisson
   kernel test. Generate the 3D octree C99 with `qcc -grid=octree`.
 - `simulationCases/check_restriction.h` is required by `mpi-circle.c`.
-- Do not edit these files. If a change is required, record why and keep a
-  stock copy identifiable.
+- `simulationCases/marangoni.c` is the unmodified basilisk.fr
+  `src/test/marangoni.c` (Al Saud et al. 2018). Do not edit it.
+- `simulationCases/marangoni-scale.c` is the same physics with cluster I/O:
+  no bview, a single LEVEL from argv, a short \(t/t_0\) window, rank-0
+  logging. Default LEVEL 10 is 64 points per radius.
+- Do not edit the unmodified stock copies. If a change is required, record
+  why and keep a stock copy identifiable.
 
 Pinned local Basilisk used to generate portable C99:
 

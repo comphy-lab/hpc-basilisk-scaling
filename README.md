@@ -21,7 +21,10 @@ tests already isolate that kernel and the operators it is built from
 - [`mpi-laplacian.c`](http://basilisk.fr/src/test/mpi-laplacian.c) — 3D
   octree kernels, published on Occigen
 
-The files in `simulationCases/` are unmodified copies of those tests.
+The files in `simulationCases/` are unmodified copies of those tests, plus
+the stock `marangoni.c` Marangoni-migration case (Al Saud et al., 2018)
+and a cluster I/O variant `marangoni-scale.c` that keeps the same
+equations on a single finer mesh.
 
 ## Structure
 

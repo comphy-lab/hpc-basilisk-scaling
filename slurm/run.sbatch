@@ -14,6 +14,7 @@ set -euo pipefail
 TEST="${TEST:-mpi-circle}"
 LEVEL="${LEVEL:-8}"
 MINLEVEL="${MINLEVEL:-5}"
+TMAX="${TMAX:-0.5}"
 SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
 BIN="${SCRATCH_DST}/bin/${TEST}"
 OUTDIR="${SCRATCH_DST}/runs/${TEST}"
@@ -33,6 +34,9 @@ echo "host=$(hostname) test=${TEST} level=${LEVEL} ntasks=${NTASKS} job=${SLURM_
 export OMP_NUM_THREADS=1
 if [[ "${TEST}" == "mpi-circle" ]]; then
   srun --mpi=pmi2 -n "${NTASKS}" "${BIN}" "${LEVEL}" "${MINLEVEL}" \
+    > "out-${TAG}" 2> "log-${TAG}"
+elif [[ "${TEST}" == "marangoni-scale" ]]; then
+  srun --mpi=pmi2 -n "${NTASKS}" "${BIN}" "${LEVEL}" "${TMAX}" \
     > "out-${TAG}" 2> "log-${TAG}"
 else
   srun --mpi=pmi2 -n "${NTASKS}" "${BIN}" "${LEVEL}" \

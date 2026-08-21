@@ -18,6 +18,7 @@ module load OpenMPI/5.0.3-GCC-13.3.0
 TEST="${TEST:-mpi-circle}"
 LEVEL="${LEVEL:-8}"
 MINLEVEL="${MINLEVEL:-5}"
+TMAX="${TMAX:-0.5}"
 SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
 BIN="${SCRATCH_DST}/bin/${TEST}"
 OUTDIR="${SCRATCH_DST}/runs/${TEST}"
@@ -41,6 +42,9 @@ echo "host=$(hostname) test=${TEST} level=${LEVEL} ntasks=${NTASKS} job=${SLURM_
 export OMP_NUM_THREADS=1
 if [[ "${TEST}" == "mpi-circle" ]]; then
   srun -n "${NTASKS}" "${BIN}" "${LEVEL}" "${MINLEVEL}" \
+    > "out-${TAG}" 2> "log-${TAG}"
+elif [[ "${TEST}" == "marangoni-scale" ]]; then
+  srun -n "${NTASKS}" "${BIN}" "${LEVEL}" "${TMAX}" \
     > "out-${TAG}" 2> "log-${TAG}"
 else
   srun -n "${NTASKS}" "${BIN}" "${LEVEL}" \
