@@ -160,20 +160,18 @@ def main() -> None:
     args = parser.parse_args()
     all_rows: list[dict[str, float | int | str]] = []
     mn5 = load_tree(args.results)
-    if not mn5:
-        raise SystemExit(f"no multi-drop #TIMING rows under {args.results}")
     for row in mn5:
         item = dict(row)
         item["machine"] = "MareNostrum 5"
         all_rows.append(item)
     if args.snellius is not None:
         snellius = load_tree(args.snellius)
-        if not snellius:
-            raise SystemExit(f"no multi-drop #TIMING rows under {args.snellius}")
         for row in snellius:
             item = dict(row)
             item["machine"] = "Snellius"
             all_rows.append(item)
+    if not all_rows:
+        raise SystemExit("no multi-drop #TIMING rows")
     write_csv(all_rows, args.outdir / "marangoni-multidrop-timings.csv")
     plot_all(all_rows, args.outdir / "marangoni-multidrop.pdf")
     print(f"plotted {len(all_rows)} timing rows -> {args.outdir}")
