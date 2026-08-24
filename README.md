@@ -81,6 +81,7 @@ Plot collected `out-*-*` tables:
 
 ```bash
 python3 postProcess/plot_scaling.py --results results/latest --snellius results/snellius/latest --outdir figures
+python3 postProcess/plot_walltime.py --results results/latest --snellius results/snellius/latest --outdir figures
 ```
 
 Current kernel figures are `figures/laplacian-L9.pdf`,
@@ -92,7 +93,23 @@ the adaptive `mpi-circle` mesh. Occigen has no \(L=8\) table, so
 
 Uniform-quadtree Marangoni (stock Al Saud drop, axisymmetric) wall time
 per iteration versus MPI rank, 64--512 points per radius, is
-`figures/marangoni-uniform-per-iter.pdf`.
+`figures/marangoni-uniform-per-iter.pdf` (ranks 2--1024 on the figure).
+Source is `simulationCases/marangoni-scale.c` compiled with `-DUNIFORM=1`.
+Reproduce the sweep with:
+
+```bash
+# L10 (64 pts/R), t/t0=0.5
+ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/slurm/scale-marangoni-uniform.sh'
+ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/scale-marangoni-uniform.sh'
+# L11-L13 (128-512 pts/R) at t/t0=0.5
+ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/slurm/scale-marangoni-uniform-resolution.sh'
+ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/scale-marangoni-uniform-resolution.sh'
+# Remaining L12/L13 ranks at t/t0=0.05 (output tags *-t05)
+ssh mn5-login 'bash /gpfs/projects/your_account/mn5-basilisk-scaling/slurm/scale-marangoni-uniform-resolution-short.sh'
+ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/scale-marangoni-uniform-resolution-short.sh'
+```
+
+Collect with `scripts/collect-results.sh` and `scripts/collect-snellius.sh`.
 
 ## Licence
 

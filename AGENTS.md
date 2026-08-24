@@ -75,6 +75,7 @@ output live under `/scratch-shared/your_user/hpc-basilisk-scaling`. Compact
 scripts stay under `/projects/0/your_project/hpc-basilisk-scaling`.
 Collect with `scripts/collect-snellius.sh` and plot with
 `--results results/latest --snellius results/snellius/latest`.
+Uniform Marangoni wall-time/iteration is `postProcess/plot_walltime.py`.
 
 ## Guidelines
 

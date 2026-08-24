@@ -34,6 +34,7 @@ if [[ "${TEST}" == marangoni-multidrop* ]]; then
 else
   TAG="${LEVEL}-${NTASKS}"
 fi
+TAG="${TAG_OVERRIDE:-${TAG}}"
 echo "host=$(hostname) test=${TEST} level=${LEVEL} ndrops=${NDROPS} ntasks=${NTASKS} job=${SLURM_JOB_ID}"
 
 export OMP_NUM_THREADS=1
