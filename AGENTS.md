@@ -87,7 +87,7 @@ Collect with `scripts/collect-snellius.sh` and plot with
   approves promotion.
 - Use `publication-plots` for every figure. Overlay official Curie/Occigen
   tables from `reference/` only when the mesh matches. Current campaign
-  plots are `figures/laplacian-L9.pdf`, `figures/circle-L14.pdf` and
-  `figures/circle-L12.pdf`. Published Curie "circle" tables are full 2D
-  grids (\(2^{2L}\) cells).
+  plots are `figures/laplacian-L9.pdf`, `figures/circle-L14.pdf`,
+  `figures/circle-L12.pdf` and `figures/marangoni-uniform-per-iter.pdf`.
+  Published Curie "circle" tables are full 2D grids (\(2^{2L}\) cells).
 - `CLAUDE.md` is local and gitignored; it only points at this file.
