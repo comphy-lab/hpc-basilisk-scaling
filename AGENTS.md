@@ -89,6 +89,8 @@ Uniform Marangoni wall-time/iteration is `postProcess/plot_walltime.py`.
 - Use `publication-plots` for every figure. Overlay official Curie/Occigen
   tables from `reference/` only when the mesh matches. Current campaign
   plots are `figures/laplacian-L9.pdf`, `figures/circle-L14.pdf`,
-  `figures/circle-L12.pdf` and `figures/marangoni-uniform-per-iter.pdf`.
+  `figures/circle-L12.pdf`, `figures/marangoni-uniform-per-iter.pdf`,
+  `figures/planar-ndrop-per-iter.pdf` and
+  `figures/marangoni-uniform-ndrop-per-iter.pdf`.
   Published Curie "circle" tables are full 2D grids (\(2^{2L}\) cells).
 - `CLAUDE.md` is local and gitignored; it only points at this file.

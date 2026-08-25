@@ -111,6 +111,14 @@ ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/
 
 Collect with `scripts/collect-results.sh` and `scripts/collect-snellius.sh`.
 
+Planar uniform multi-drop Marangoni at 64 pts/R, 1--32 drops, wall time
+per iteration versus MPI rank, is `figures/planar-ndrop-per-iter.pdf`.
+The two-panel figure that places the axisymmetric pts/R series beside
+that drop-count series is `figures/marangoni-uniform-ndrop-per-iter.pdf`.
+Source is `simulationCases/marangoni-multidrop.c` compiled with
+`-DUNIFORM=1`. Plot from collected tables with
+`postProcess/plot_ndrop.py` and `postProcess/plot_grant_two_panel.py`.
+
 ## Licence
 
 The stock tests are part of Basilisk and remain under the Basilisk GPLv3
