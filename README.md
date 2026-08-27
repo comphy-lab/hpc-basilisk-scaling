@@ -111,6 +111,13 @@ ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/
 
 Collect with `scripts/collect-results.sh` and `scripts/collect-snellius.sh`.
 
+Adaptive Al Saud validation through the official window \(t/t_0=3\),
+\(8\)--\(256\) points per radius, is
+`figures/marangoni-validate-vt-fields.pdf` (drop speed versus time,
+relative error versus pts/\(R\) with the basilisk.fr table, and the
+drop-frame field at \(64\) pts/\(R\)). Plot with
+`postProcess/plot_validate_two_panel.py`.
+
 Planar uniform multi-drop Marangoni at 64 pts/R, 1--32 drops, wall time
 per iteration versus MPI rank, is `figures/planar-ndrop-per-iter.pdf`.
 The two-panel figure that places the axisymmetric pts/R series beside

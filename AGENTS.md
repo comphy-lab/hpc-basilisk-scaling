@@ -27,7 +27,10 @@ Poisson is the bottleneck later physics sits on.
   `src/test/marangoni.c` (Al Saud et al. 2018). Do not edit it.
 - `simulationCases/marangoni-scale.c` is the same physics with cluster I/O:
   no bview, a single LEVEL from argv, a short \(t/t_0\) window, rank-0
-  logging. Default LEVEL 10 is 64 points per radius.
+  logging. Default LEVEL 10 is 64 points per radius. Optional argv
+  `DUMP_EVERY` (in \(t/t_0\); negative means no dumps) and `RESTART`.
+  Periodic dumps write `snapshot-TSTAR`; a terminal dump writes `restart`.
+  `#TIMING` includes RSS in kB when the run ends.
 - Do not edit the unmodified stock copies. If a change is required, record
   why and keep a stock copy identifiable.
 
@@ -90,7 +93,8 @@ Uniform Marangoni wall-time/iteration is `postProcess/plot_walltime.py`.
   tables from `reference/` only when the mesh matches. Current campaign
   plots are `figures/laplacian-L9.pdf`, `figures/circle-L14.pdf`,
   `figures/circle-L12.pdf`, `figures/marangoni-uniform-per-iter.pdf`,
-  `figures/planar-ndrop-per-iter.pdf` and
-  `figures/marangoni-uniform-ndrop-per-iter.pdf`.
+  `figures/planar-ndrop-per-iter.pdf`,
+  `figures/marangoni-uniform-ndrop-per-iter.pdf` and
+  `figures/marangoni-validate-vt-fields.pdf`.
   Published Curie "circle" tables are full 2D grids (\(2^{2L}\) cells).
 - `CLAUDE.md` is local and gitignored; it only points at this file.
