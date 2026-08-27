@@ -19,6 +19,7 @@ cp "${ROOT}/simulationCases/mpi-circle.c" \
    "${ROOT}/simulationCases/check_restriction.h" \
    "${ROOT}/simulationCases/marangoni-scale.c" \
    "${ROOT}/simulationCases/marangoni-multidrop.c" \
+   "${ROOT}/simulationCases/marangoni-interact.c" \
    "${WORKDIR}/"
 
 mkdir -p "${ROOT}/generated"
@@ -38,6 +39,7 @@ mkdir -p "${ROOT}/generated"
   mv _marangoni-scale.c _marangoni-scale-uniform.c
   "${QCC}" -source -D_MPI=1 -DUNIFORM=1 marangoni-multidrop.c
   mv _marangoni-multidrop.c _marangoni-multidrop-uniform.c
+  "${QCC}" -source -D_MPI=1 marangoni-interact.c
   mv _marangoni-scale-adaptive.c _marangoni-scale.c
   mv _marangoni-multidrop-adaptive.c _marangoni-multidrop.c
 )
@@ -51,6 +53,8 @@ install -m 0644 "${WORKDIR}/_marangoni-scale-uniform.c" \
   "${ROOT}/generated/_marangoni-scale-uniform.c"
 install -m 0644 "${WORKDIR}/_marangoni-multidrop-uniform.c" \
   "${ROOT}/generated/_marangoni-multidrop-uniform.c"
+install -m 0644 "${WORKDIR}/_marangoni-interact.c" \
+  "${ROOT}/generated/_marangoni-interact.c"
 echo "wrote ${ROOT}/generated/_mpi-circle.c"
 echo "wrote ${ROOT}/generated/_mpi-laplacian.c"
 echo "wrote ${ROOT}/generated/_mpi-laplacian-2d.c"
@@ -58,5 +62,6 @@ echo "wrote ${ROOT}/generated/_marangoni-scale.c"
 echo "wrote ${ROOT}/generated/_marangoni-multidrop.c"
 echo "wrote ${ROOT}/generated/_marangoni-scale-uniform.c"
 echo "wrote ${ROOT}/generated/_marangoni-multidrop-uniform.c"
+echo "wrote ${ROOT}/generated/_marangoni-interact.c"
 echo "qcc=${QCC}"
 echo "BASILISK=${BASILISK}"

@@ -29,7 +29,7 @@ mkdir -p "${OUTDIR}"
 cd "${OUTDIR}"
 
 NTASKS="${RANKS:-${SLURM_NTASKS}}"
-if [[ "${TEST}" == marangoni-multidrop* ]]; then
+if [[ "${TEST}" == marangoni-multidrop* || "${TEST}" == marangoni-interact* ]]; then
   TAG="${NDROPS}-${NTASKS}"
 else
   TAG="${LEVEL}-${NTASKS}"
@@ -43,6 +43,10 @@ if [[ "${TEST}" == "mpi-circle" ]]; then
     > "out-${TAG}" 2> "log-${TAG}"
 elif [[ "${TEST}" == marangoni-scale* ]]; then
   srun --mpi=pmi2 -n "${NTASKS}" "${BIN}" "${LEVEL}" "${TMAX}" \
+    > "out-${TAG}" 2> "log-${TAG}"
+elif [[ "${TEST}" == marangoni-interact* ]]; then
+  srun --mpi=pmi2 -n "${NTASKS}" "${BIN}" "${NDROPS}" "${TMAX}" \
+    "${DUMP_EVERY:-0.1}" \
     > "out-${TAG}" 2> "log-${TAG}"
 elif [[ "${TEST}" == marangoni-multidrop* ]]; then
   srun --mpi=pmi2 -n "${NTASKS}" "${BIN}" "${NDROPS}" "${TMAX}" \
