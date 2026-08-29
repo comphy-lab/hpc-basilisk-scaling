@@ -12,4 +12,8 @@ Source: local Basilisk darcs tree matching
 https://basilisk.fr/src/test/mpi-circle.c and
 https://basilisk.fr/src/test/mpi-laplacian.c.
 
-These files are reference data, not MN5 results.
+`marangoni.ref` is the basilisk.fr Al Saud terminal-velocity table
+(pts/\(R\), computed \(u/U_{\mathrm{drop}}\), theory). It is reference
+data, not a live run.
+
+The Curie and Occigen files are also reference data, not MN5 results.

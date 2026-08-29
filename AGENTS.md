@@ -30,7 +30,10 @@ Poisson is the bottleneck later physics sits on.
   logging. Default LEVEL 10 is 64 points per radius. Optional argv
   `DUMP_EVERY` (in \(t/t_0\); negative means no dumps) and `RESTART`.
   Periodic dumps write `snapshot-TSTAR`; a terminal dump writes `restart`.
-  `#TIMING` includes RSS in kB when the run ends.
+  `#TIMING` includes RSS in kB when the run ends. Snapshot files stay on
+  scratch, never GitHub. Extract one dump with `postProcess/get_facets.c`
+  and `postProcess/get_fields.c`; the validation figure is
+  `postProcess/plot_validate_two_panel.py` plus `reference/marangoni.ref`.
 - Do not edit the unmodified stock copies. If a change is required, record
   why and keep a stock copy identifiable.
 

@@ -115,8 +115,19 @@ Adaptive Al Saud validation through the official window \(t/t_0=3\),
 \(8\)--\(256\) points per radius, is
 `figures/marangoni-validate-vt-fields.pdf` (drop speed versus time,
 relative error versus pts/\(R\) with the basilisk.fr table, and the
-drop-frame field at \(64\) pts/\(R\)). Plot with
-`postProcess/plot_validate_two_panel.py`.
+drop-frame field at \(64\) pts/\(R\)). `marangoni-scale.c` accepts
+optional `DUMP_EVERY` and `RESTART` (Basilisk `dump`/`restore` of the
+mesh; the snapshot files stay on scratch). The packed Snellius job is
+the working validation plus I/O route:
+
+```bash
+ssh snellius 'bash /projects/0/your_project/hpc-basilisk-scaling/slurm/snellius/scale-marangoni-io-validate.sh'
+```
+
+A matching MareNostrum5 launcher is `slurm/scale-marangoni-io-validate.sh`.
+Plot from the adaptive `out` tables, `reference/marangoni.ref`, and
+LEVEL-10 snapshots with `postProcess/plot_validate_two_panel.py`
+(`get_facets.c` / `get_fields.c` restore one snapshot to ASCII).
 
 Planar uniform multi-drop Marangoni at 64 pts/R, 1--32 drops, wall time
 per iteration versus MPI rank, is `figures/planar-ndrop-per-iter.pdf`.
