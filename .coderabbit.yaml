@@ -17,12 +17,38 @@ reviews:
     - "!**/*.png"
     - "!**/*.pdf"
   path_instructions:
-    - path: "simulationCases/**"
+    - path: "simulationCases/mpi-circle.c"
       instructions: |
-        These files are unmodified stock Basilisk tests from basilisk.fr.
-        Do not suggest local physics, style, or include-path "fixes".
-        Flag only accidental local edits that would make them stop matching
-        upstream src/test/mpi-circle.c and src/test/mpi-laplacian.c.
+        Unmodified stock Basilisk test from basilisk.fr. Do not suggest
+        local physics or style fixes. Flag only accidental local edits.
+    - path: "simulationCases/mpi-laplacian.c"
+      instructions: |
+        Unmodified stock Basilisk test from basilisk.fr. Do not suggest
+        local physics or style fixes. Flag only accidental local edits.
+    - path: "simulationCases/marangoni.c"
+      instructions: |
+        Unmodified basilisk.fr src/test/marangoni.c. Do not edit it.
+    - path: "simulationCases/marangoni-scale.c"
+      instructions: |
+        Axisymmetric Al Saud cluster I/O variant. Check dump/restore,
+        LEVEL argv, rank-0 logging, and UNIFORM vs adaptive. Not stock.
+    - path: "simulationCases/marangoni-multidrop.c"
+      instructions: |
+        Planar n-drop Marangoni cluster I/O variant. Check dump/restore,
+        drop lattice, rank-0 logging, and UNIFORM vs adaptive. Not stock.
+    - path: "simulationCases/marangoni-interact.c"
+      instructions: |
+        Planar eight-drop radial-sigma showcase. Check dump/restore,
+        LEVEL/TMAX argv, and MPI-safe output. Not stock basilisk.fr.
+    - path: "simulationCases/activity-*.c"
+      instructions: |
+        HPC-oriented active-drop solver derived from
+        comphy-lab/active-drops-with-memory. Check parameter parsing,
+        custom-layout bounds, dump/restore, and MPI-safe output.
+    - path: "src-local/**"
+      instructions: |
+        Custom Basilisk headers. Check include-order compatibility and
+        that tracer attributes match activity-drop.c.
     - path: "scripts/**"
       instructions: |
         HPC staging and compile helpers. Never hardcode a machine-local qcc
@@ -35,8 +61,10 @@ reviews:
         SLURM_NTASKS.
     - path: "postProcess/**"
       instructions: |
-        Figure-generation scripts. Review parsing of stock Basilisk timer
-        lines and reproducibility of PDF output.
+        Scaling plots and snapshot movies. Timer parsers must stay
+        compatible with Basilisk #TIMING lines. Frame movies must sort
+        by numeric snapshot time, compile get_* helpers once, and use
+        mathtext (not usetex) when rendering in parallel.
     - path: "AGENTS.md"
       instructions: |
         Canonical repo operating manual. Check for stale state, broken

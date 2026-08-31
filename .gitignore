@@ -24,6 +24,10 @@ mpi-circle
 mpi-laplacian
 marangoni-scale
 marangoni-multidrop
+marangoni-interact
+activity-drop
+get_fields_planar
+get_facets_planar
 
 # Slurm / run output
 *.err

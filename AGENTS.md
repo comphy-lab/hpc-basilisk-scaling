@@ -1,20 +1,28 @@
 # hpc-basilisk-scaling
 
-Stock Basilisk MPI kernel benchmarks on MareNostrum5 GPP. The first
-EuroHPC Regular Access evidence is that unmodified `mpi-circle.c` and
-`mpi-laplacian.c` from basilisk.fr compile, run, and scale on MN5.
-Poisson is the bottleneck later physics sits on.
+HPC benchmark and showcase tree for Basilisk MPI kernels plus two-phase
+cases. The first EuroHPC Regular Access evidence is that unmodified
+`mpi-circle.c` and `mpi-laplacian.c` from basilisk.fr compile, run, and
+scale on MareNostrum5 GPP. Poisson is the bottleneck later physics sits
+on. Marangoni and chemically fuelled active-drop cases share that stack
+and supply field movies.
+
+The public README is the collaborator-facing map. This file is the
+operating manual: keep live job IDs, timings and debugging out of
+`README.md` until there is a tracker receipt
+`promotion approved — <finding> -> README.md`.
 
 ## Structure
 
 ```
 .
-├── simulationCases/ - unmodified Basilisk tests from basilisk.fr/src/test
-├── scripts/ - local qcc source generation and MN5 staging/compile helpers
-├── slurm/ - MareNostrum5 GPP smoke and scaling batch scripts
-├── postProcess/ - timer-table parser and publication-style scaling plots
-├── figures/ - generated PDFs (gitignored)
-└── results/ - collected MN5 timer tables (gitignored raw trees)
+├── simulationCases/ - kernel tests and two-phase showcase solvers
+├── src-local/ - activity.h for activity-drop.c
+├── scripts/ - qcc -source generation and HPC staging/compile helpers
+├── slurm/ - MareNostrum5 GPP and Snellius smoke/scaling batch scripts
+├── postProcess/ - timer plots; axi get_fields/get_facets; planar movie pipeline
+├── figures/ - generated PDFs
+└── results/ - collected timer tables (gitignored raw trees)
 ```
 
 ## Stock sources
@@ -34,6 +42,16 @@ Poisson is the bottleneck later physics sits on.
   scratch, never GitHub. Extract one dump with `postProcess/get_facets.c`
   and `postProcess/get_fields.c`; the validation figure is
   `postProcess/plot_validate_two_panel.py` plus `reference/marangoni.ref`.
+- `simulationCases/marangoni-interact.c` is planar eight-drop radial
+  $\sigma$ (not stock). Default LEVEL 10, $T_{\max}/t_0=12$.
+- `simulationCases/activity-drop.c` is the chemically fuelled drop
+  solver (from `comphy-lab/active-drops-with-memory` `dropMove.c` at
+  `45ce373`) with cluster dumps and a custom-layout parser.
+  `activity-single.cfg` is one drop; `activity-seven.cfg` is seven
+  custom centres in a $56R$ box. Header `src-local/activity.h`.
+  Planar movies use `postProcess/get_fields_planar.c`,
+  `get_facets_planar.c` and `plot_field_frames.py` (`--field c` or
+  `speed`). Do not point that movie pipeline at the axi `get_fields.c`.
 - Do not edit the unmodified stock copies. If a change is required, record
   why and keep a stock copy identifiable.
 
@@ -87,11 +105,19 @@ Uniform Marangoni wall-time/iteration is `postProcess/plot_walltime.py`.
 
 - Never hardcode a machine-local `qcc` path; resolve with `$BASILISK` or
   `which qcc`.
+- `qcc` rewrites included `.h` files next to the translation unit. Compile
+  `activity-drop.c` only via `scripts/compile-activity-drop.sh` or in a
+  throwaway directory that contains a *copy* of `src-local/activity.h`.
+  Never `qcc simulationCases/activity-drop.c` from the repo root.
 - Do not commit `basilisk/`, `.comphy-basilisk`, `.docker_mode`, generated
   C99, binaries, or raw HPC output.
 - Component READMEs are public-candidate. Live timings, job IDs and
   debugging stay in the EuroHPC tracker and project `scratch/` until Vatsal
   approves promotion.
+- `plot_field_frames.py` must sort frames by parsed float snapshot time
+  and stitch with sequential `%06d` image2 input (`-bf 0 -g 1`). Do not
+  glob unpadded `t_*.png` names and do not use ffmpeg concat on this
+  toolchain.
 - Use `publication-plots` for every figure. Overlay official Curie/Occigen
   tables from `reference/` only when the mesh matches. Current campaign
   plots are `figures/laplacian-L9.pdf`, `figures/circle-L14.pdf`,

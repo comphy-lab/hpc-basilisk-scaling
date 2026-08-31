@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Emit portable C99 from the stock Basilisk tests. Requires qcc locally.
+# Emit portable C99 from the kernel tests and showcase solvers. Requires qcc.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,6 +21,9 @@ cp "${ROOT}/simulationCases/mpi-circle.c" \
    "${ROOT}/simulationCases/marangoni-multidrop.c" \
    "${ROOT}/simulationCases/marangoni-interact.c" \
    "${WORKDIR}/"
+mkdir -p "${WORKDIR}/src-local"
+cp "${ROOT}/simulationCases/activity-drop.c" "${WORKDIR}/"
+cp "${ROOT}/src-local/activity.h" "${WORKDIR}/src-local/"
 
 mkdir -p "${ROOT}/generated"
 (
@@ -40,6 +43,7 @@ mkdir -p "${ROOT}/generated"
   "${QCC}" -source -D_MPI=1 -DUNIFORM=1 marangoni-multidrop.c
   mv _marangoni-multidrop.c _marangoni-multidrop-uniform.c
   "${QCC}" -source -D_MPI=1 marangoni-interact.c
+  "${QCC}" -source -D_MPI=1 activity-drop.c
   mv _marangoni-scale-adaptive.c _marangoni-scale.c
   mv _marangoni-multidrop-adaptive.c _marangoni-multidrop.c
 )
@@ -55,6 +59,8 @@ install -m 0644 "${WORKDIR}/_marangoni-multidrop-uniform.c" \
   "${ROOT}/generated/_marangoni-multidrop-uniform.c"
 install -m 0644 "${WORKDIR}/_marangoni-interact.c" \
   "${ROOT}/generated/_marangoni-interact.c"
+install -m 0644 "${WORKDIR}/_activity-drop.c" \
+  "${ROOT}/generated/_activity-drop.c"
 echo "wrote ${ROOT}/generated/_mpi-circle.c"
 echo "wrote ${ROOT}/generated/_mpi-laplacian.c"
 echo "wrote ${ROOT}/generated/_mpi-laplacian-2d.c"
@@ -63,5 +69,6 @@ echo "wrote ${ROOT}/generated/_marangoni-multidrop.c"
 echo "wrote ${ROOT}/generated/_marangoni-scale-uniform.c"
 echo "wrote ${ROOT}/generated/_marangoni-multidrop-uniform.c"
 echo "wrote ${ROOT}/generated/_marangoni-interact.c"
+echo "wrote ${ROOT}/generated/_activity-drop.c"
 echo "qcc=${QCC}"
 echo "BASILISK=${BASILISK}"
