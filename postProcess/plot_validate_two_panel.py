@@ -26,7 +26,6 @@ from matplotlib.colors import LinearSegmentedColormap, LogNorm, TwoSlopeNorm
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
 from matplotlib.ticker import LogLocator, NullFormatter
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 PTS_CMAP = LinearSegmentedColormap.from_list(
     "viridis_readable",
@@ -203,11 +202,11 @@ def draw_drop(ax, fields, segments, speed_norm, vb_use):
     v_win = v_rel_full[np.ix_(ixs, iys)].T
     ax.streamplot(
         xs, ys, u_win, v_win,
-        color="0.35", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
+        color="0.55", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
     )
     ax.streamplot(
         xs, -ys[::-1], u_win[::-1, :], -v_win[::-1, :],
-        color="0.35", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
+        color="0.55", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
     )
     if segs + segs_m:
         ax.add_collection(LineCollection(
@@ -382,12 +381,7 @@ def main() -> None:
             plt.setp(ax.get_yticklabels(), visible=False)
     axes_f[0].text(-0.22, 1.08, r"$(c)$", transform=axes_f[0].transAxes,
                    fontsize=PANEL_FONT, va="bottom")
-    cax = inset_axes(
-        axes_f[1], width="6.5%", height="100%", loc="center left",
-        bbox_to_anchor=(1.08, -1.14, 1, 2.14),
-        bbox_transform=axes_f[1].transAxes,
-        borderpad=0,
-    )
+    cax = fig.add_axes([0.92, 0.08, 0.016, 0.86])
     cbar = fig.colorbar(im, cax=cax)
     cbar.set_label(
         r"$u_x'/U_{\mathrm{drop}}$",
