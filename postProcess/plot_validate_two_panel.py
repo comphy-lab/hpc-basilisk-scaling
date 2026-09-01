@@ -170,18 +170,27 @@ def draw_drop(ax, fields, segments, speed_norm, vb_use):
     x_shift = x - xb
     segs = [seg - np.array([xb, 0.0]) for seg in segments]
     segs_m = [np.column_stack((seg[:, 0], -seg[:, 1])) for seg in segs]
-
-    im = ax.pcolormesh(
-        x_shift, y, u_rel_full, shading="nearest", cmap="RdBu_r",
-        norm=speed_norm, rasterized=True, zorder=1,
-    )
-    ax.pcolormesh(
-        x_shift, -y, u_rel_full, shading="nearest", cmap="RdBu_r",
-        norm=speed_norm, rasterized=True, zorder=1,
-    )
-
     x1d = x_shift[:, 0]
     y1d = y[0, :]
+    field = u_rel_full.T
+    dx = float(np.median(np.diff(x1d)))
+    dy = float(np.median(np.diff(y1d)))
+    xlo, xhi = x1d[0] - dx / 2.0, x1d[-1] + dx / 2.0
+    ylo, yhi = max(0.0, y1d[0] - dy / 2.0), y1d[-1] + dy / 2.0
+
+    im = ax.imshow(
+        field,
+        extent=(xlo, xhi, ylo, yhi),
+        origin="lower", interpolation="nearest", cmap="RdBu_r",
+        norm=speed_norm, aspect="auto", zorder=1,
+    )
+    ax.imshow(
+        field[::-1, :],
+        extent=(xlo, xhi, -yhi, -ylo),
+        origin="lower", interpolation="nearest", cmap="RdBu_r",
+        norm=speed_norm, aspect="auto", zorder=1,
+    )
+
     ix = np.where((x1d >= -VIEW) & (x1d <= VIEW))[0]
     iy = np.where(y1d <= VIEW)[0]
     skipx = max(1, len(ix) // 18)
@@ -194,11 +203,11 @@ def draw_drop(ax, fields, segments, speed_norm, vb_use):
     v_win = v_rel_full[np.ix_(ixs, iys)].T
     ax.streamplot(
         xs, ys, u_win, v_win,
-        color="k", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
+        color="0.35", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
     )
     ax.streamplot(
         xs, -ys[::-1], u_win[::-1, :], -v_win[::-1, :],
-        color="k", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
+        color="0.35", density=0.55, linewidth=0.65, arrowsize=0.65, zorder=2,
     )
     if segs + segs_m:
         ax.add_collection(LineCollection(
