@@ -1,19 +1,21 @@
-# Official Basilisk scaling tables
+# Published Basilisk scaling tables
 
 Unmodified `out-LEVEL-NRANKS` files from the Basilisk test tree, as
 published on basilisk.fr:
 
-- `curie/` — `src/test/mpi-circle/curie/` (CEA Curie). Cell counts are
-  exactly \(2^{2L}\): these are full 2D grids, not the adaptive
-  `mpi-circle.c` mesh.
-- `occigen-3D/` — `src/test/mpi-laplacian/occigen/3D/` (CINES Occigen, 3D octree)
+- `curie/` is `src/test/mpi-circle/curie/` (CEA Curie). The cell counts are
+  exactly $2^{2L}$, so these are full 2D grids rather than the adaptive
+  `mpi-circle.c` mesh. Overlay them only against a uniform run at the same
+  level.
+- `occigen-3D/` is `src/test/mpi-laplacian/occigen/3D/` (CINES Occigen, 3D
+  octree).
 
-Source: local Basilisk darcs tree matching
+Both sets come from a local Basilisk darcs tree matching
 https://basilisk.fr/src/test/mpi-circle.c and
 https://basilisk.fr/src/test/mpi-laplacian.c.
 
-`marangoni.ref` is the basilisk.fr Al Saud terminal-velocity table
-(pts/\(R\), computed \(u/U_{\mathrm{drop}}\), theory). It is reference
-data, not a live run.
+`marangoni.ref` is the basilisk.fr Al Saud terminal-velocity table: points
+per $R$, computed $u/U_{\mathrm{drop}}$ and theory. It is the reference the
+validation figure compares against, not a live run.
 
-The Curie and Occigen files are also reference data, not MN5 results.
+Nothing in this directory was produced by the campaigns in this repository.
