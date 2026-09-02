@@ -3,7 +3,9 @@
 # LEVEL 10 only (1024^2 cells). L12 uniform is not this sweep.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/projects/0/your_project/hpc-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/site-env.sh"
+site_env snellius
 SBATCH="${PROJECT_DST}/slurm/snellius/run.sbatch"
 PARTITION="${PARTITION:-genoa}"
 CORES_PER_NODE="${CORES_PER_NODE:-192}"
@@ -36,6 +38,7 @@ submit() {
     fi
   fi
   sbatch --parsable \
+    "${SITE_SBATCH_ARGS[@]}" \
     --job-name="snl-unif-${level}-${ntasks}" \
     --partition="${PARTITION}" \
     --nodes="${nodes}" \

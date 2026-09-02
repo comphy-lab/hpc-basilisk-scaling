@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Copy compact scripts to Snellius project space and generated C99 to scratch.
+# Reads site/snellius.env.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_DST="${PROJECT_DST:-/projects/0/your_project/hpc-basilisk-scaling}"
-SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
-HOST="${HOST:-snellius}"
+# shellcheck source=scripts/site-env.sh
+source "${ROOT}/scripts/site-env.sh"
+site_env snellius
+HOST="${HOST:?set HOST (login SSH alias) in site/snellius.env}"
 
 if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" || ! -f "${ROOT}/generated/_mpi-laplacian-2d.c" || ! -f "${ROOT}/generated/_marangoni-scale.c" || ! -f "${ROOT}/generated/_marangoni-multidrop.c" || ! -f "${ROOT}/generated/_marangoni-scale-uniform.c" || ! -f "${ROOT}/generated/_marangoni-multidrop-uniform.c" || ! -f "${ROOT}/generated/_marangoni-interact.c" || ! -f "${ROOT}/generated/_activity-drop.c" ]]; then
   echo "stage-snellius: run scripts/generate-sources.sh first" >&2

@@ -4,7 +4,9 @@
 # (2^{2L} cells). 3D octree matches Occigen.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run.sbatch"
 QOS="${QOS:-gp_ehpc}"
 RANKS_LIST="${RANKS_LIST:-1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384}"
@@ -23,6 +25,7 @@ submit() {
     slurm_ntasks="${cores_per_node}"
   fi
   sbatch --parsable \
+    "${SITE_SBATCH_ARGS[@]}" \
     --job-name="bsk-${test}-${level}-${ntasks}" \
     --qos="${QOS}" \
     --nodes="${nodes}" \

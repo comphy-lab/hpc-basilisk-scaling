@@ -2,12 +2,15 @@
 # Two-rank smoke on one exclusive genoa node. Do not run on a login node.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/projects/0/your_project/hpc-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/site-env.sh"
+site_env snellius
 SBATCH="${PROJECT_DST}/slurm/snellius/run.sbatch"
 
 submit() {
   local test="$1" level="$2"
   sbatch --parsable \
+    "${SITE_SBATCH_ARGS[@]}" \
     --job-name="snl-smoke-${test}" \
     --partition=genoa \
     --nodes=1 \

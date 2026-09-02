@@ -10,7 +10,7 @@ if [[ -z "${QCC}" ]]; then
 fi
 export BASILISK="${BASILISK:-$(cd "$(dirname "${QCC}")" && pwd)}"
 
-WORKDIR="$(mktemp -d "${TMPDIR:-/tmp}/mn5-basilisk-src.XXXXXX")"
+WORKDIR="$(mktemp -d "${TMPDIR:-/tmp}/basilisk-src.XXXXXX")"
 cleanup() { rm -rf "${WORKDIR}"; }
 trap cleanup EXIT
 

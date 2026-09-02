@@ -5,7 +5,9 @@
 # launches RANKS MPI ranks, not SLURM_NTASKS.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run.sbatch"
 QOS="${QOS:-gp_ehpc}"
 RANKS_LIST="${RANKS_LIST:-4 16 64}"
@@ -37,6 +39,7 @@ submit() {
     slurm_ntasks="${ntasks}"
   fi
   sbatch --parsable \
+    "${SITE_SBATCH_ARGS[@]}" \
     --job-name="bsk-unif-mdrop-${ndrops}-${ntasks}" \
     --qos="${QOS}" \
     --nodes="${nodes}" \

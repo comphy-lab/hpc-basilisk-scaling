@@ -5,6 +5,9 @@
 # Local agent pointer
 CLAUDE.md
 
+# Per-cluster account and path settings (see site/*.env.example)
+site/*.env
+
 # Basilisk installation and local mode flags
 basilisk/
 **/.comphy-basilisk

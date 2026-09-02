@@ -4,7 +4,9 @@
 # node still charges 112 cores.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run.sbatch"
 QOS="${QOS:-gp_ehpc}"
 NDROPS="${NDROPS:-8}"
@@ -14,6 +16,7 @@ RANKS="${RANKS:-16}"
 WALL="${WALL:-12:00:00}"
 
 sbatch --parsable \
+  "${SITE_SBATCH_ARGS[@]}" \
   --job-name="bsk-interact-${NDROPS}d" \
   --qos="${QOS}" \
   --nodes=1 \

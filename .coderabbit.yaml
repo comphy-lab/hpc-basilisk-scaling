@@ -49,6 +49,10 @@ reviews:
       instructions: |
         Custom Basilisk headers. Check include-order compatibility and
         that tracer attributes match activity-drop.c.
+    - path: "site/**"
+      instructions: |
+        Only *.env.example files are tracked. Flag any real account,
+        username or absolute path.
     - path: "scripts/**"
       instructions: |
         HPC staging and compile helpers. Never hardcode a machine-local qcc
@@ -56,9 +60,12 @@ reviews:
         pipefail, and fail-closed argument checks.
     - path: "slurm/**"
       instructions: |
-        MareNostrum5 GPP batch scripts. Check account/QoS, exclusive node
-        use, no login-node compute, and that srun rank counts match
-        SLURM_NTASKS.
+        MareNostrum5 GPP and Snellius batch wrappers. Account and log paths
+        come from scripts/site-env.sh and site/*.env, never from the
+        scripts. Check exclusive node use, no login-node compute, and
+        that srun rank counts follow each wrapper's contract: Snellius
+        launches SLURM_NTASKS, MareNostrum5 sub-node jobs pad the node
+        and launch RANKS.
     - path: "postProcess/**"
       instructions: |
         Scaling plots and snapshot movies. Timer parsers must stay

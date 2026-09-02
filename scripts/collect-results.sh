@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Pull MN5 timer tables into a local results tree.
+# Pull MareNostrum5 timer tables into a local results tree. Reads site/mn5.env.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
-TRANSFER="${TRANSFER:-mn5-transfer}"
+# shellcheck source=scripts/site-env.sh
+source "${ROOT}/scripts/site-env.sh"
+site_env mn5
+TRANSFER="${TRANSFER:?set TRANSFER (data-transfer SSH alias) in site/mn5.env}"
 STAMP="${STAMP:-$(date -u +%Y%m%dT%H%MZ)}"
 DEST="${ROOT}/results/${STAMP}"
 

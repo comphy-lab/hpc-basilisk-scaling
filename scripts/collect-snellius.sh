@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Pull Snellius timer tables into a local results tree.
+# Pull Snellius timer tables into a local results tree. Reads site/snellius.env.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
-HOST="${HOST:-snellius}"
+# shellcheck source=scripts/site-env.sh
+source "${ROOT}/scripts/site-env.sh"
+site_env snellius
+HOST="${HOST:?set HOST (login SSH alias) in site/snellius.env}"
 STAMP="${STAMP:-$(date -u +%Y%m%dT%H%MZ)}"
 DEST="${ROOT}/results/snellius/${STAMP}"
 

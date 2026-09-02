@@ -1,12 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=bsk-kernel
-#SBATCH --account=your_account
 #SBATCH --partition=genoa
 #SBATCH --ntasks=192
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:20:00
-#SBATCH --output=/scratch-shared/your_user/hpc-basilisk-scaling/runs/%x-%j.out
-#SBATCH --error=/scratch-shared/your_user/hpc-basilisk-scaling/runs/%x-%j.err
 #SBATCH --exclusive
 
 set -euo pipefail
@@ -20,7 +17,7 @@ LEVEL="${LEVEL:-8}"
 MINLEVEL="${MINLEVEL:-5}"
 TMAX="${TMAX:-0.5}"
 NDROPS="${NDROPS:-2}"
-SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
+SCRATCH_DST="${SCRATCH_DST:?set SCRATCH_DST through site/*.env (scripts/site-env.sh)}"
 BIN="${SCRATCH_DST}/bin/${TEST}"
 OUTDIR="${SCRATCH_DST}/runs/${TEST}"
 

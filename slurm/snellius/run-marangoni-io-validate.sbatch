@@ -1,14 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=snl-io-val
-#SBATCH --account=your_account
 #SBATCH --partition=genoa
 #SBATCH --nodes=1
 #SBATCH --ntasks=192
 #SBATCH --cpus-per-task=1
 #SBATCH --time=12:00:00
 #SBATCH --exclusive
-#SBATCH --output=/scratch-shared/your_user/hpc-basilisk-scaling/runs/marangoni-io-validate-%j.out
-#SBATCH --error=/scratch-shared/your_user/hpc-basilisk-scaling/runs/marangoni-io-validate-%j.err
 
 # One genoa node: 192 cores = sum of (ranks * 4 cpt) over L7--L12, then
 # a 64-rank uniform L10 dump+restart. Rank counts keep roughly
@@ -27,7 +24,7 @@ module purge
 module load 2024
 module load OpenMPI/5.0.3-GCC-13.3.0
 
-SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
+SCRATCH_DST="${SCRATCH_DST:?set SCRATCH_DST through site/*.env (scripts/site-env.sh)}"
 BIN_UNI="${SCRATCH_DST}/bin/marangoni-scale-uniform"
 BIN_AD="${SCRATCH_DST}/bin/marangoni-scale"
 IO_DIR="${SCRATCH_DST}/runs/marangoni-io/L10-n64"

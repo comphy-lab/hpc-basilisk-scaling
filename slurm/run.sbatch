@@ -1,12 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=bsk-kernel
-#SBATCH --account=your_account
 #SBATCH --qos=gp_ehpc
 #SBATCH --ntasks=2
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:20:00
-#SBATCH --output=/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling/runs/%x-%j.out
-#SBATCH --error=/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling/runs/%x-%j.err
 #SBATCH --exclusive
 
 set -euo pipefail
@@ -16,7 +13,7 @@ LEVEL="${LEVEL:-8}"
 MINLEVEL="${MINLEVEL:-5}"
 TMAX="${TMAX:-0.5}"
 NDROPS="${NDROPS:-2}"
-SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
+SCRATCH_DST="${SCRATCH_DST:?set SCRATCH_DST through site/*.env (scripts/site-env.sh)}"
 BIN="${SCRATCH_DST}/bin/${TEST}"
 OUTDIR="${SCRATCH_DST}/runs/${TEST}"
 

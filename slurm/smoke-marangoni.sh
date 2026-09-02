@@ -3,12 +3,15 @@
 # LEVEL 8 (16 points per radius) and a short TMAX, not the scaling grid.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run.sbatch"
 
 submit() {
   local ntasks="$1" nodes="$2" slurm_ntasks="$3"
   sbatch --parsable \
+    "${SITE_SBATCH_ARGS[@]}" \
     --job-name="smoke-marangoni-${ntasks}" \
     --qos=gp_debug \
     --ntasks="${slurm_ntasks}" \

@@ -4,10 +4,13 @@
 # --ntasks=112 pads the exclusive GPP node; RANKS=2 is the MPI size.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run.sbatch"
 
 sbatch --parsable \
+  "${SITE_SBATCH_ARGS[@]}" \
   --job-name="smoke-unif-marangoni" \
   --qos=gp_debug \
   --ntasks=112 \

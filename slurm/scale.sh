@@ -3,7 +3,9 @@
 # Default: gp_ehpc, 1-32 nodes. Pass QOS=gp_debug to use the one-job debug queue.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run.sbatch"
 QOS="${QOS:-gp_ehpc}"
 CIRCLE_LEVEL="${CIRCLE_LEVEL:-14}"
@@ -21,6 +23,7 @@ submit() {
     extra+=(--job-name="bsk-${test}-${ntasks}")
   fi
   sbatch --parsable \
+    "${SITE_SBATCH_ARGS[@]}" \
     --qos="${QOS}" \
     --nodes="${nodes}" \
     --ntasks="${ntasks}" \

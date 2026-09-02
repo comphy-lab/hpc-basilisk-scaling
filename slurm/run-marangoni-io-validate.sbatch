@@ -1,18 +1,15 @@
 #!/bin/bash
 #SBATCH --job-name=bsk-io-val
-#SBATCH --account=your_account
 #SBATCH --qos=gp_ehpc
 #SBATCH --nodes=1
 #SBATCH --ntasks=112
 #SBATCH --cpus-per-task=1
 #SBATCH --time=12:00:00
 #SBATCH --exclusive
-#SBATCH --output=/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling/runs/marangoni-io-validate-%j.out
-#SBATCH --error=/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling/runs/marangoni-io-validate-%j.err
 
 set -euo pipefail
 
-SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
+SCRATCH_DST="${SCRATCH_DST:?set SCRATCH_DST through site/*.env (scripts/site-env.sh)}"
 BIN_UNI="${SCRATCH_DST}/bin/marangoni-scale-uniform"
 BIN_AD="${SCRATCH_DST}/bin/marangoni-scale"
 IO_DIR="${SCRATCH_DST}/runs/marangoni-io/L10-n64"

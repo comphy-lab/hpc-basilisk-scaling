@@ -3,8 +3,10 @@
 # then adaptive Al Saud validation (levels 7-12, t/t0=3, dumps on).
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run-marangoni-io-validate.sbatch"
 QOS="${QOS:-gp_ehpc}"
 
-sbatch --parsable --qos="${QOS}" "${SBATCH}"
+sbatch --parsable "${SITE_SBATCH_ARGS[@]}" --export=ALL --qos="${QOS}" "${SBATCH}"

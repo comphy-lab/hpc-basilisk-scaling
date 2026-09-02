@@ -2,7 +2,9 @@
 # Two-rank then one-node smoke for both stock tests on gp_debug.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/scripts/site-env.sh"
+site_env mn5
 SBATCH="${PROJECT_DST}/slurm/run.sbatch"
 
 submit() {
@@ -12,6 +14,7 @@ submit() {
     extra+=(--nodes="${nodes}")
   fi
   sbatch --parsable \
+    "${SITE_SBATCH_ARGS[@]}" \
     --job-name="smoke-${test}-${ntasks}" \
     --ntasks="${ntasks}" \
     --nodes="${nodes}" \

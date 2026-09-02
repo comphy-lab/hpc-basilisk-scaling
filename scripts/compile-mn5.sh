@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# Compile the generated C99 on a MareNostrum5 GPP login node. Do not run jobs here.
+# Compile the generated C99 on a MareNostrum5 GPP login node. Do not run jobs
+# here. Reads site/mn5.env.
 set -euo pipefail
 
-SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/site-env.sh"
+site_env mn5
 CC="${CC:-mpicc}"
 
 if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-multidrop.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale-uniform.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-multidrop-uniform.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-interact.c" || ! -f "${SCRATCH_DST}/generated/_activity-drop.c" ]]; then

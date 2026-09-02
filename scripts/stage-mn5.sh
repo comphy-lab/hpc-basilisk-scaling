@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Copy compact scripts/sources to MN5 project space and generated C99 to scratch.
+# Copy compact scripts/sources to MareNostrum5 project space and generated
+# C99 to scratch. Reads site/mn5.env.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_DST="${PROJECT_DST:-/gpfs/projects/your_account/mn5-basilisk-scaling}"
-SCRATCH_DST="${SCRATCH_DST:-/gpfs/scratch/your_account/your_user/mn5-basilisk-scaling}"
-TRANSFER="${TRANSFER:-mn5-transfer}"
+# shellcheck source=scripts/site-env.sh
+source "${ROOT}/scripts/site-env.sh"
+site_env mn5
+TRANSFER="${TRANSFER:?set TRANSFER (data-transfer SSH alias) in site/mn5.env}"
 
 if [[ ! -f "${ROOT}/generated/_mpi-circle.c" || ! -f "${ROOT}/generated/_mpi-laplacian.c" || ! -f "${ROOT}/generated/_mpi-laplacian-2d.c" || ! -f "${ROOT}/generated/_marangoni-scale.c" || ! -f "${ROOT}/generated/_marangoni-multidrop.c" || ! -f "${ROOT}/generated/_marangoni-scale-uniform.c" || ! -f "${ROOT}/generated/_marangoni-multidrop-uniform.c" || ! -f "${ROOT}/generated/_marangoni-interact.c" || ! -f "${ROOT}/generated/_activity-drop.c" ]]; then
   echo "stage-mn5: run scripts/generate-sources.sh first" >&2

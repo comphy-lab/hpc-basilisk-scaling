@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Compile the generated C99 on a Snellius login node. Do not run jobs here.
+# Reads site/snellius.env.
 set -euo pipefail
 
-SCRATCH_DST="${SCRATCH_DST:-/scratch-shared/your_user/hpc-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/site-env.sh"
+site_env snellius
 
 module purge
 module load 2024

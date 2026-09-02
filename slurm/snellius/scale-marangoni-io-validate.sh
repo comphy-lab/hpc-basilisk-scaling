@@ -3,7 +3,9 @@
 # then uniform 64 pts/R dump+restart. Same physics as the MN5 job.
 set -euo pipefail
 
-PROJECT_DST="${PROJECT_DST:-/projects/0/your_project/hpc-basilisk-scaling}"
+# shellcheck source=scripts/site-env.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/site-env.sh"
+site_env snellius
 SBATCH="${PROJECT_DST}/slurm/snellius/run-marangoni-io-validate.sbatch"
 
-sbatch --parsable "${SBATCH}"
+sbatch --parsable "${SITE_SBATCH_ARGS[@]}" --export=ALL "${SBATCH}"
