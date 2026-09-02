@@ -41,6 +41,8 @@ TICK_FONT = 28
 LEGEND_FONT = 26
 CBAR_FONT = 28
 PANEL_FONT = 30
+LEGEND_MARKER_SIZE = 16
+SERIES_MARKER_SIZE = 14
 
 
 def _load_csv(path: Path) -> list[dict[str, float | int | str]]:
@@ -99,7 +101,7 @@ def _machine_legend(ax: plt.Axes) -> None:
             [0],
             linestyle="None",
             marker=COMBINED_MARKERS[name]["marker"],
-            markersize=16,
+            markersize=LEGEND_MARKER_SIZE,
             markerfacecolor="white",
             markeredgecolor="k",
             markeredgewidth=1.4,
@@ -186,7 +188,7 @@ def _draw_series(
                 linestyle="-",
                 linewidth=2.8,
                 marker=spec["marker"],
-                markersize=14,
+                markersize=SERIES_MARKER_SIZE,
                 markerfacecolor=color,
                 markeredgecolor="k",
                 markeredgewidth=1.1,
@@ -251,7 +253,19 @@ def main() -> None:
     parser.add_argument("--pts-csv", type=Path, required=True)
     parser.add_argument("--drops-csv", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--word", action="store_true", help="use larger type for Word insertion")
     args = parser.parse_args()
+
+    global LABEL_FONT, TICK_FONT, LEGEND_FONT, CBAR_FONT, PANEL_FONT
+    global LEGEND_MARKER_SIZE, SERIES_MARKER_SIZE
+    if args.word:
+        LABEL_FONT = 44
+        TICK_FONT = 38
+        LEGEND_FONT = 34
+        CBAR_FONT = 36
+        PANEL_FONT = 38
+        LEGEND_MARKER_SIZE = 20
+        SERIES_MARKER_SIZE = 18
     pts_rows = _load_csv(args.pts_csv)
     drop_rows = _load_csv(args.drops_csv)
     if not pts_rows or not drop_rows:

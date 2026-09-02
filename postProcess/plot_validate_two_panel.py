@@ -37,6 +37,10 @@ TICK_FONT = 16
 LEGEND_FONT = 14
 CBAR_FONT = 16
 PANEL_FONT = 20
+VT_LEGEND_FONT = 12
+FIELD_TICK_FONT = 13
+FIELD_LABEL_FONT = 15
+FIELD_TITLE_FONT = 16
 # Young–Wilson–Goldstein U_drop for equal properties: (2/15) Gamma_T R |∇T|/μ.
 U_DROP = (2.0 / 15.0) * 0.066
 U_DROP_SIGNED = -U_DROP
@@ -80,8 +84,11 @@ def load_ref(path: Path) -> np.ndarray:
     return np.column_stack((data[:, 0], data[:, 1] / data[:, 2]))
 
 
-def style_axes(ax, labelsize: int = TICK_FONT) -> None:
-    ax.tick_params(which="both", direction="out", width=2.4, labelsize=labelsize, pad=6)
+def style_axes(ax, labelsize: int | None = None) -> None:
+    resolved_labelsize = TICK_FONT if labelsize is None else labelsize
+    ax.tick_params(
+        which="both", direction="out", width=2.4, labelsize=resolved_labelsize, pad=6
+    )
     ax.tick_params(which="major", length=9)
     ax.tick_params(which="minor", length=4)
     for spine in ax.spines.values():
@@ -217,7 +224,7 @@ def draw_drop(ax, fields, segments, speed_norm, vb_use):
     ax.set_ylim(-VIEW, VIEW)
     ax.set_xticks([-2, 0, 2])
     ax.set_yticks([-2, 0, 2])
-    style_axes(ax, labelsize=13)
+    style_axes(ax, labelsize=FIELD_TICK_FONT)
     return im
 
 
@@ -229,7 +236,21 @@ def main() -> None:
     parser.add_argument("--helpers", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--ny", type=int, default=180)
+    parser.add_argument("--word", action="store_true", help="use larger type for Word insertion")
     args = parser.parse_args()
+
+    global LABEL_FONT, TICK_FONT, LEGEND_FONT, CBAR_FONT, PANEL_FONT
+    global VT_LEGEND_FONT, FIELD_TICK_FONT, FIELD_LABEL_FONT, FIELD_TITLE_FONT
+    if args.word:
+        LABEL_FONT = 30
+        TICK_FONT = 24
+        LEGEND_FONT = 22
+        CBAR_FONT = 24
+        PANEL_FONT = 28
+        VT_LEGEND_FONT = 20
+        FIELD_TICK_FONT = 20
+        FIELD_LABEL_FONT = 21
+        FIELD_TITLE_FONT = 22
 
     levels = sorted(
         int(p.name[1:])
@@ -307,7 +328,8 @@ def main() -> None:
             for p in PTS_LEGEND
         ],
         title=r"$\mathrm{pts}/R$",
-        loc="lower right", frameon=False, fontsize=12, title_fontsize=12,
+        loc="lower right", frameon=False,
+        fontsize=VT_LEGEND_FONT, title_fontsize=VT_LEGEND_FONT,
         handlelength=1.2, labelspacing=0.18, borderpad=0.15, ncol=2,
         columnspacing=0.9, handletextpad=0.4,
     )
@@ -368,14 +390,14 @@ def main() -> None:
     im = None
     for i, (ax, (tstar, fields, segs, vb_use)) in enumerate(zip(axes_f, frames)):
         im = draw_drop(ax, fields, segs, speed_norm, vb_use)
-        ax.set_title(rf"$t/t_0={tstar:g}$", fontsize=16, pad=4)
+        ax.set_title(rf"$t/t_0={tstar:g}$", fontsize=FIELD_TITLE_FONT, pad=4)
         if i >= 2:
-            ax.set_xlabel(r"$(x-x_b)/R$", fontsize=15, labelpad=3)
+            ax.set_xlabel(r"$(x-x_b)/R$", fontsize=FIELD_LABEL_FONT, labelpad=3)
         else:
             ax.tick_params(axis="x", which="both", labelbottom=False)
             plt.setp(ax.get_xticklabels(), visible=False)
         if i % 2 == 0:
-            ax.set_ylabel(r"$y/R$", fontsize=15, labelpad=3)
+            ax.set_ylabel(r"$y/R$", fontsize=FIELD_LABEL_FONT, labelpad=3)
         else:
             ax.tick_params(axis="y", which="both", labelleft=False)
             plt.setp(ax.get_yticklabels(), visible=False)
@@ -388,7 +410,7 @@ def main() -> None:
         fontsize=CBAR_FONT, labelpad=8,
     )
     cbar.set_ticks([-1.0, -0.5, 0.0, 0.5, 1.0])
-    cbar.ax.tick_params(labelsize=13, width=1.6, length=5)
+    cbar.ax.tick_params(labelsize=FIELD_TICK_FONT, width=1.6, length=5)
     for spine in cbar.ax.spines.values():
         spine.set_linewidth(1.6)
 
