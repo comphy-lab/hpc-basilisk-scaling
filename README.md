@@ -13,6 +13,12 @@ Developed at the
 [Computational Multiphase Physics (CoMPhy) Lab](https://comphy-lab.org/),
 Durham University.
 
+The standalone public report
+[Basilisk MPI CPU Benchmarks for Multiphase Flow](Basilisk-MPI-CPU-Benchmarks.pdf)
+summarizes the current evidence and proposes a node-aligned qualification
+matrix for future CPU systems. Its complete source is the single file
+[`Basilisk-MPI-CPU-Benchmarks.tex`](Basilisk-MPI-CPU-Benchmarks.tex).
+
 ## Why these cases
 
 Every time step of an incompressible Basilisk run ends in a multigrid
