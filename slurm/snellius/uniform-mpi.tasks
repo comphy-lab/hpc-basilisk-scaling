@@ -1,0 +1,16 @@
+# test LEVEL NITER RANKS
+taylorculick-uniform 10 10 2
+taylorculick-uniform 10 10 8
+taylorculick-uniform 10 10 32
+taylorculick-uniform 10 10 96
+taylorculick-uniform 10 10 192
+ve3d-impact-uniform 7 10 2
+ve3d-impact-uniform 7 10 8
+ve3d-impact-uniform 7 10 32
+ve3d-impact-uniform 7 10 96
+ve3d-impact-uniform 7 10 192
+drop-impact-uniform 10 10 2
+drop-impact-uniform 10 10 8
+drop-impact-uniform 10 10 32
+drop-impact-uniform 10 10 96
+drop-impact-uniform 10 10 192

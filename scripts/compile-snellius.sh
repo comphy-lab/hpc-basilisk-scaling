@@ -11,14 +11,35 @@ module purge
 module load 2024
 module load OpenMPI/5.0.3-GCC-13.3.0
 
-if [[ ! -f "${SCRATCH_DST}/generated/_mpi-circle.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-multidrop.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-scale-uniform.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-multidrop-uniform.c" || ! -f "${SCRATCH_DST}/generated/_marangoni-interact.c" || ! -f "${SCRATCH_DST}/generated/_activity-drop.c" ]]; then
-  echo "compile-snellius: missing generated sources under ${SCRATCH_DST}" >&2
-  exit 1
-fi
+need=(
+  _mpi-circle.c
+  _marangoni-scale.c
+  _marangoni-multidrop.c
+  _marangoni-scale-uniform.c
+  _marangoni-multidrop-uniform.c
+  _marangoni-interact.c
+  _activity-drop.c
+  _bursting-uniform-init.c
+  _bursting-uniform.c
+  _taylorculick-uniform.c
+  _ve3d-impact-uniform.c
+  _drop-impact-uniform.c
+  _jumping-uniform-init.c
+  _jumping-uniform.c
+)
+for f in "${need[@]}"; do
+  if [[ ! -f "${SCRATCH_DST}/generated/${f}" ]]; then
+    echo "compile-snellius: missing ${SCRATCH_DST}/generated/${f}" >&2
+    exit 1
+  fi
+done
+
+COMPILE_SET="${COMPILE_SET:-all}"
 
 mkdir -p "${SCRATCH_DST}/bin"
 cd "${SCRATCH_DST}/bin"
 
+if [[ "${COMPILE_SET}" == "all" ]]; then
 mpicc -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
   "${SCRATCH_DST}/generated/_mpi-circle.c" -o mpi-circle -lm
 mpicc -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
@@ -38,20 +59,31 @@ mpicc -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
   "${SCRATCH_DST}/generated/_marangoni-interact.c" -o marangoni-interact -lm
 mpicc -Wall -std=c99 -O2 -D_MPI=1 -D_GNU_SOURCE=1 \
   "${SCRATCH_DST}/generated/_activity-drop.c" -o activity-drop -lm
+fi
 
-echo "compiled ${SCRATCH_DST}/bin/mpi-circle"
-echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian"
-echo "compiled ${SCRATCH_DST}/bin/mpi-laplacian-2d"
-echo "compiled ${SCRATCH_DST}/bin/marangoni-scale"
-echo "compiled ${SCRATCH_DST}/bin/marangoni-multidrop"
-echo "compiled ${SCRATCH_DST}/bin/marangoni-scale-uniform"
-echo "compiled ${SCRATCH_DST}/bin/marangoni-multidrop-uniform"
-echo "compiled ${SCRATCH_DST}/bin/marangoni-interact"
-echo "compiled ${SCRATCH_DST}/bin/activity-drop"
-ls -l "${SCRATCH_DST}/bin/mpi-circle" "${SCRATCH_DST}/bin/mpi-laplacian" \
-  "${SCRATCH_DST}/bin/mpi-laplacian-2d" "${SCRATCH_DST}/bin/marangoni-scale" \
-  "${SCRATCH_DST}/bin/marangoni-multidrop" \
-  "${SCRATCH_DST}/bin/marangoni-scale-uniform" \
-  "${SCRATCH_DST}/bin/marangoni-multidrop-uniform" \
-  "${SCRATCH_DST}/bin/marangoni-interact" \
-  "${SCRATCH_DST}/bin/activity-drop"
+# axi/two-phase C99 from macOS qcc enables signaling-NaN FPE when compiled
+# without OpenMP. MN5 already uses these flags for the same class of solvers.
+TWOPHASE_CFLAGS="-Wall -std=c99 -O2 -fno-trapping-math -fno-signaling-nans -D_GNU_SOURCE=1"
+gcc ${TWOPHASE_CFLAGS} -fopenmp \
+  "${SCRATCH_DST}/generated/_bursting-uniform-init.c" -o bursting-uniform-init -lm
+mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
+  "${SCRATCH_DST}/generated/_bursting-uniform.c" -o bursting-uniform -lm
+mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
+  "${SCRATCH_DST}/generated/_taylorculick-uniform.c" -o taylorculick-uniform -lm
+mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
+  "${SCRATCH_DST}/generated/_ve3d-impact-uniform.c" -o ve3d-impact-uniform -lm
+mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
+  "${SCRATCH_DST}/generated/_drop-impact-uniform.c" -o drop-impact-uniform -lm
+gcc ${TWOPHASE_CFLAGS} -fopenmp \
+  "${SCRATCH_DST}/generated/_jumping-uniform-init.c" -o jumping-uniform-init -lm
+mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
+  "${SCRATCH_DST}/generated/_jumping-uniform.c" -o jumping-uniform -lm
+
+echo "compiled binaries under ${SCRATCH_DST}/bin"
+ls -l bursting-uniform-init bursting-uniform taylorculick-uniform \
+  ve3d-impact-uniform drop-impact-uniform jumping-uniform-init jumping-uniform
+if [[ "${COMPILE_SET}" == "all" ]]; then
+  ls -l mpi-circle mpi-laplacian mpi-laplacian-2d marangoni-scale \
+    marangoni-multidrop marangoni-scale-uniform marangoni-multidrop-uniform \
+    marangoni-interact activity-drop
+fi

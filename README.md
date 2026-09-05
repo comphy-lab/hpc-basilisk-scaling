@@ -49,6 +49,11 @@ from one source tree.
 | `marangoni-multidrop.c` | Planar lattice of $n$ drops, adaptive or uniform |
 | `marangoni-interact.c` | Eight drops pulled into a radial $\sigma$ well |
 | `activity-drop.c` | One or seven chemically fuelled drops |
+| `bursting-uniform.c` | Axisymmetric bursting bubble, uniform grid; serial `distance.h` init |
+| `taylorculick-uniform.c` | Axisymmetric elastic Taylor--Culick sheet, uniform grid |
+| `ve3d-impact-uniform.c` | 3D viscoelastic drop impact, uniform octree |
+| `drop-impact-uniform.c` | Axisymmetric Newtonian drop impact, uniform grid |
+| `jumping-uniform.c` | 3D jumping drops, uniform octree; serial STL init |
 
 `marangoni.c` is the unmodified basilisk.fr `src/test/marangoni.c`. The
 `-scale`, `-multidrop`, `-interact` and `activity-drop` files keep its
@@ -144,8 +149,15 @@ the script URL and `--ref` with the same
 │   ├── marangoni-interact.c - eight drops, radial sigma well
 │   ├── activity-drop.c - chemically fuelled drop solver
 │   ├── activity-single.cfg - one-drop activity layout
-│   └── activity-seven.cfg - seven custom-centred drops
-├── src-local/ - headers used by activity-drop.c
+│   ├── activity-seven.cfg - seven custom-centred drops
+│   ├── bursting-uniform.c - bursting bubble, serial init then MPI
+│   ├── taylorculick-uniform.c - elastic Taylor--Culick, uniform
+│   ├── ve3d-impact-uniform.c - 3D viscoelastic impact, uniform
+│   ├── drop-impact-uniform.c - Newtonian drop impact, uniform
+│   ├── jumping-uniform-init.c - jumping-drops serial STL init
+│   ├── jumping-uniform.c - jumping-drops MPI continuation
+│   └── DataFiles/ - bursting interface polyline (Bo = 0.001)
+├── src-local/ - activity.h and vendored viscoelastic headers
 │   └── activity.h - activity tracer transport
 ├── scripts/ - qcc -source generation, site staging and compile helpers
 │   ├── site-env.sh - loads site/<name>.env and checks it
@@ -231,9 +243,11 @@ The Snellius sequence is the same with `stage-snellius.sh`,
 wrapper submits one campaign: `smoke*.sh` for a two-rank check,
 `scale.sh` and `scale-extent.sh` for the kernel rank lists,
 `scale-marangoni*.sh` for the drop cases, and `scale-marangoni-io-validate.sh`
-for a timed dump-and-restart plus the Al Saud resolution study. Rank lists,
-levels and windows are environment variables with sensible defaults; read
-the header of the wrapper before changing them.
+for a timed dump-and-restart plus the Al Saud resolution study, and
+`scale-uniform-apps.sh` for the uniform bursting, Taylor--Culick, 3D VE
+impact, drop-impact and jumping-drops kernels. Rank lists, levels and
+windows are environment variables with sensible defaults; read the header
+of the wrapper before changing them.
 
 Two site facts shape the wrappers. A MareNostrum5 GPP node has 112 cores
 and does not accept `--mem`, so a sub-node job takes one exclusive node and
@@ -254,6 +268,8 @@ Timer tables come from the Basilisk `out-LEVEL-RANKS` files and the
 python3 postProcess/plot_scaling.py --results results/latest --outdir figures
 python3 postProcess/plot_walltime.py --results results/latest --outdir figures
 python3 postProcess/plot_ndrop.py --results results/latest --outdir figures
+python3 postProcess/plot_uniform_apps.py \
+  --snellius results/uniform-apps --outdir figures
 ```
 
 Add `--snellius results/snellius/latest` to overlay the second machine.
@@ -296,8 +312,14 @@ Current figures: kernel scaling in `figures/laplacian-L9.pdf`,
 `figures/circle-L14.pdf` and `figures/circle-L12.pdf`; uniform-quadtree
 Marangoni wall time per iteration in `figures/marangoni-uniform-per-iter.pdf`;
 the planar drop-count series in `figures/planar-ndrop-per-iter.pdf`; both
-together in `figures/marangoni-uniform-ndrop-per-iter.pdf`; and the
-adaptive Al Saud validation in `figures/marangoni-validate-vt-fields.pdf`.
+together in `figures/marangoni-uniform-ndrop-per-iter.pdf`; the
+adaptive Al Saud validation in `figures/marangoni-validate-vt-fields.pdf`;
+and one uniform-grid application panel each in
+`figures/bursting-uniform.pdf`, `figures/taylorculick-uniform.pdf`,
+`figures/ve3d-impact-uniform.pdf`, `figures/drop-impact-uniform.pdf` and
+`figures/jumping-uniform.pdf`. The three axisymmetric panels cover
+$L=9/10/11$ and 2--768 ranks (colour is $N_x$); the two three-dimensional
+panels remain one-node $L=7$ sweeps.
 The timing tables behind them are the CSV files beside the PDFs.
 
 ## Licence

@@ -32,9 +32,13 @@ quadtree and octree meshes. Its pressure projection places a multigrid
 Poisson solve inside every incompressible time step, making communication
 across mesh levels a direct measure of the strong-scaling limit. This report
 sets out a portable CPU benchmark suite built from two stock Basilisk kernels
-and one representative two-phase calculation. Measurements on MareNostrum~5
+and a set of two-phase calculations. Measurements on MareNostrum~5
 and Snellius cover up to 16,384 MPI ranks for fixed-size kernel problems and
-up to 1,024 ranks for the application cases. The kernel data support
+up to 1,024 ranks for the Marangoni application cases. Three axisymmetric
+uniform-grid kernels---bursting bubble, elastic Taylor--Culick retraction and
+Newtonian drop impact---are timed at $L=9$, $10$ and $11$ over 2--768 ranks.
+Two three-dimensional kernels---viscoelastic drop impact and jumping
+drops---remain one-node $L=7$ sweeps. The kernel data support
 small-to-medium system qualification and expose the onset of
 communication-limited scaling. Tests above 100 fully populated 192-core nodes
 remain a proposed campaign rather than a demonstrated result.
@@ -56,8 +60,9 @@ The proposed suite has three layers:
 \begin{enumerate}
   \item stock Poisson and Laplacian kernels for reproducible machine-to-machine
         comparison;
-  \item a verified two-phase migration problem that exercises the same solver
-        stack with interface reconstruction and surface tension; and
+  \item verified two-phase workloads that exercise the same solver
+        stack with interface reconstruction and surface tension, including
+        the Marangoni series and five uniform-grid application kernels; and
   \item a workload series in which spatial resolution or the number of drops
         is increased, testing whether a larger application postpones
         strong-scaling saturation.
@@ -209,6 +214,117 @@ medium scales. A large-scale application case should be promoted only after
 its domain size, interface area and output policy have been fixed so that each
 machine performs the same physical and numerical work.
 
+\section{Uniform-grid application kernels}
+
+The Marangoni series tests one interfacial mechanism while the mesh or the
+drop count is varied. The five kernels below keep that same uniform-tree MPI
+stack and change the physics: a bursting bubble, an elastic Taylor--Culick
+sheet, a three-dimensional viscoelastic impact, an axisymmetric Newtonian
+impact, and three-dimensional jumping drops. The three axisymmetric kernels
+are fixed-size strong-scaling tests at $L=9$, $10$ and $11$ ($512^2$,
+$1024^2$ and $2048^2$ cells) over 2--768 MPI ranks, one to four Snellius
+Genoa nodes. Colour encodes $N_x=2^L$, as in
+Figure~\ref{fig:application-scaling}(a). The two three-dimensional kernels
+remain one-node sweeps at $L=7$ ($128^3$ cells, 2--192 ranks). The timed
+window is the incompressible two-phase solver only. Geometric setup, and the
+serial dump used to seed the two cases whose interface comes from
+\texttt{distance.h}, sit outside that window. The MPI binaries write no
+checkpoints. The $L=11$ axisymmetric series is recorded from eight ranks.
+
+Figure~\ref{fig:bursting-uniform} is the axisymmetric bursting bubble. At
+$L=10$ the wall time per iteration falls from $1.28$~s at two ranks to
+$0.0174$~s at 192 ranks and $0.0108$~s at 768 ranks. The $L=9$ curve
+saturates near $0.008$~s beyond 96 ranks. The $L=11$ curve follows the
+eight-rank ideal line through 384 ranks ($0.0407$~s) and rises to $0.0781$~s
+at 768 ranks.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.72\textwidth]{bursting-uniform.pdf}
+  \caption{Strong scaling of the uniform-grid bursting-bubble kernel on
+  Snellius Genoa. Axisymmetric Navier--Stokes with VOF and surface tension at
+  $L=9$, $10$ and $11$; colour encodes $N_x=2^L$. Each point is one recorded
+  run of ten solver steps after initialisation; the serial interface
+  reconstruction is not included. The $L=11$ series starts at eight ranks.}
+  \label{fig:bursting-uniform}
+\end{figure}
+
+Figure~\ref{fig:taylorculick-uniform} is the axisymmetric elastic
+Taylor--Culick retraction. The log-conformation extra-stress equations ride
+on the same projection step. At $L=10$ the wall time falls from $1.85$~s at
+two ranks to $0.0231$~s at 192 ranks and $0.0127$~s at 768 ranks. The $L=9$
+curve saturates near $0.010$~s. The $L=11$ curve continues to drop, from
+$1.90$~s at eight ranks to $0.0341$~s at 768 ranks.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.72\textwidth]{taylorculick-uniform.pdf}
+  \caption{Strong scaling of the uniform-grid elastic Taylor--Culick kernel on
+  Snellius Genoa. Axisymmetric two-phase viscoelastic flow at $L=9$, $10$ and
+  $11$; colour encodes $N_x=2^L$. Timed window: ten solver steps after
+  geometric initialisation of the sheet. The $L=11$ series starts at eight
+  ranks.}
+  \label{fig:taylorculick-uniform}
+\end{figure}
+
+Figure~\ref{fig:drop-impact-uniform} is the axisymmetric Newtonian drop
+impact on a box of side 8. The drop is placed at $(1.05,0)$ with impact
+velocity toward the wall on the left boundary; Basilisk \texttt{axi.h} keeps
+the symmetry axis on the bottom. At $L=10$ the wall time falls from $2.04$~s
+at two ranks to $0.0267$~s at 192 ranks and $0.0173$~s at 768 ranks. The
+$L=9$ curve saturates near $0.011$~s. The $L=11$ curve follows the eight-rank
+ideal line to $0.0339$~s at 768 ranks.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.72\textwidth]{drop-impact-uniform.pdf}
+  \caption{Strong scaling of the uniform-grid Newtonian drop-impact kernel on
+  Snellius Genoa. Axisymmetric VOF with surface tension at $L=9$, $10$ and
+  $11$; colour encodes $N_x=2^L$. Timed window: ten solver steps after
+  geometric initialisation of the drop. The $L=11$ series starts at eight
+  ranks.}
+  \label{fig:drop-impact-uniform}
+\end{figure}
+
+The two three-dimensional kernels use a uniform octree. Figure
+\ref{fig:ve3d-impact-uniform} is a viscoelastic drop impact at $L=7$
+($128^3$ cells). Wall time per iteration falls from $10.8$~s at two ranks to
+$0.331$~s at 192 ranks, a factor of 32. The curve is monotonic but bends away
+from ideal scaling earlier than the two-dimensional cases, as expected from
+the extra log-conformation work and the octree halo exchange.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.72\textwidth]{ve3d-impact-uniform.pdf}
+  \caption{Strong scaling of the uniform-grid three-dimensional viscoelastic
+  drop-impact kernel on Snellius Genoa. Full octree at $L=7$. Timed window:
+  ten solver steps after geometric initialisation of the drop.}
+  \label{fig:ve3d-impact-uniform}
+\end{figure}
+
+Figure~\ref{fig:jumping-uniform} is the jumping-drop kernel at $L=7$ (again
+$128^3$ cells). An $L=6$ mesh ($64^3$) leaves too few cells per rank on a
+192-core node and saturates; the $L=7$ sweep is monotonic from $5.75$~s at two
+ranks to $0.189$~s at 192 ranks (a factor of 30). That is the same
+three-dimensional pattern as the viscoelastic impact: useful scaling across
+the node, with a lower parallel efficiency than the $1024^2$ axisymmetric
+kernels.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.72\textwidth]{jumping-uniform.pdf}
+  \caption{Strong scaling of the uniform-grid jumping-drop kernel on Snellius
+  Genoa. Full octree at $L=7$. The serial STL reconstruction writes a dump
+  that the MPI ranks restore before the timed window; the ten solver steps
+  themselves write no output.}
+  \label{fig:jumping-uniform}
+\end{figure}
+
+These five figures are one panel each so that a snapshot of the corresponding
+flow can be placed beside the scaling curve later. They are Snellius
+measurements only and, like the other tables in this report, record a single
+observation per rank count.
+
 \section{Reproducibility and reporting}
 
 A procurement-quality result should record the following alongside every
@@ -234,12 +350,12 @@ of the proposed qualification procedure.
 Basilisk provides a compact CPU benchmark with a direct connection to
 production multiphase-flow workloads. The stock Poisson and Laplacian kernels
 separate local computation from MPI communication, while the verified
-two-phase case tests interface reconstruction, surface tension and the full
-projection step. Existing measurements cover the small class and bracket a
-64-node, 192-core-per-node test. The next useful measurements are exact
-node-aligned repeats and scaled three-dimensional problems at 128 and 256
-nodes. This distinction keeps present evidence separate from the capabilities
-that a future system must demonstrate.
+two-phase cases test interface reconstruction, surface tension, extra-stress
+transport and the full projection step. Existing measurements cover the small
+class and bracket a 64-node, 192-core-per-node test. The next useful
+measurements are exact node-aligned repeats and scaled three-dimensional
+problems at 128 and 256 nodes. This distinction keeps present evidence
+separate from the capabilities that a future system must demonstrate.
 
 \begin{thebibliography}{9}
 

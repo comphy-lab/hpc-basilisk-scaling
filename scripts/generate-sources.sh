@@ -20,10 +20,19 @@ cp "${ROOT}/simulationCases/mpi-circle.c" \
    "${ROOT}/simulationCases/marangoni-scale.c" \
    "${ROOT}/simulationCases/marangoni-multidrop.c" \
    "${ROOT}/simulationCases/marangoni-interact.c" \
+   "${ROOT}/simulationCases/bursting-uniform.c" \
+   "${ROOT}/simulationCases/taylorculick-uniform.c" \
+   "${ROOT}/simulationCases/ve3d-impact-uniform.c" \
+   "${ROOT}/simulationCases/drop-impact-uniform.c" \
+   "${ROOT}/simulationCases/jumping-uniform-init.c" \
+   "${ROOT}/simulationCases/jumping-uniform.c" \
    "${WORKDIR}/"
 mkdir -p "${WORKDIR}/src-local"
 cp "${ROOT}/simulationCases/activity-drop.c" "${WORKDIR}/"
-cp "${ROOT}/src-local/activity.h" "${WORKDIR}/src-local/"
+cp "${ROOT}/src-local/"*.h "${WORKDIR}/src-local/"
+# qcc resolves #include "eigen_decomposition.h" from the 3D log-conform header
+# relative to the translation unit as well as src-local/.
+cp "${ROOT}/src-local/eigen_decomposition.h" "${WORKDIR}/"
 
 mkdir -p "${ROOT}/generated"
 (
@@ -46,29 +55,51 @@ mkdir -p "${ROOT}/generated"
   "${QCC}" -source -D_MPI=1 activity-drop.c
   mv _marangoni-scale-adaptive.c _marangoni-scale.c
   mv _marangoni-multidrop-adaptive.c _marangoni-multidrop.c
+
+  "${QCC}" -source -disable-dimensions bursting-uniform.c
+  mv _bursting-uniform.c _bursting-uniform-init.c
+  "${QCC}" -source -D_MPI=1 -disable-dimensions bursting-uniform.c
+  "${QCC}" -source -D_MPI=1 -disable-dimensions taylorculick-uniform.c
+  "${QCC}" -grid=octree -source -D_MPI=1 -disable-dimensions ve3d-impact-uniform.c
+  "${QCC}" -source -D_MPI=1 -disable-dimensions drop-impact-uniform.c
+  "${QCC}" -grid=octree -source -disable-dimensions jumping-uniform-init.c
+  "${QCC}" -grid=octree -source -D_MPI=1 -disable-dimensions jumping-uniform.c
 )
 
-install -m 0644 "${WORKDIR}/_mpi-circle.c" "${ROOT}/generated/_mpi-circle.c"
-install -m 0644 "${WORKDIR}/_mpi-laplacian.c" "${ROOT}/generated/_mpi-laplacian.c"
-install -m 0644 "${WORKDIR}/_mpi-laplacian-2d.c" "${ROOT}/generated/_mpi-laplacian-2d.c"
-install -m 0644 "${WORKDIR}/_marangoni-scale.c" "${ROOT}/generated/_marangoni-scale.c"
-install -m 0644 "${WORKDIR}/_marangoni-multidrop.c" "${ROOT}/generated/_marangoni-multidrop.c"
-install -m 0644 "${WORKDIR}/_marangoni-scale-uniform.c" \
-  "${ROOT}/generated/_marangoni-scale-uniform.c"
-install -m 0644 "${WORKDIR}/_marangoni-multidrop-uniform.c" \
-  "${ROOT}/generated/_marangoni-multidrop-uniform.c"
-install -m 0644 "${WORKDIR}/_marangoni-interact.c" \
-  "${ROOT}/generated/_marangoni-interact.c"
-install -m 0644 "${WORKDIR}/_activity-drop.c" \
-  "${ROOT}/generated/_activity-drop.c"
-echo "wrote ${ROOT}/generated/_mpi-circle.c"
-echo "wrote ${ROOT}/generated/_mpi-laplacian.c"
-echo "wrote ${ROOT}/generated/_mpi-laplacian-2d.c"
-echo "wrote ${ROOT}/generated/_marangoni-scale.c"
-echo "wrote ${ROOT}/generated/_marangoni-multidrop.c"
-echo "wrote ${ROOT}/generated/_marangoni-scale-uniform.c"
-echo "wrote ${ROOT}/generated/_marangoni-multidrop-uniform.c"
-echo "wrote ${ROOT}/generated/_marangoni-interact.c"
-echo "wrote ${ROOT}/generated/_activity-drop.c"
+install_gen() {
+  local name="$1"
+  python3 - "${WORKDIR}/${name}" <<'PY'
+from pathlib import Path
+import sys
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+# qcc -source on macOS bakes __APPLE__ into # if 1 and pulls fp_osx.h.
+# Linux cluster compilers do not have that header; feenableexcept is in fenv.h.
+# Darwin MAP_ANONYMOUS is 0x1000 (Linux MAP_EXECUTABLE); mmap then returns
+# MAP_FAILED and init_grid segfaults. Restore the portable flag name.
+text = text.replace('# include "fp_osx.h"\n', '')
+text = text.replace('MAP_PRIVATE|0x1000', 'MAP_PRIVATE|MAP_ANONYMOUS')
+path.write_text(text, encoding="utf-8")
+PY
+  install -m 0644 "${WORKDIR}/${name}" "${ROOT}/generated/${name}"
+  echo "wrote ${ROOT}/generated/${name}"
+}
+
+install_gen _mpi-circle.c
+install_gen _mpi-laplacian.c
+install_gen _mpi-laplacian-2d.c
+install_gen _marangoni-scale.c
+install_gen _marangoni-multidrop.c
+install_gen _marangoni-scale-uniform.c
+install_gen _marangoni-multidrop-uniform.c
+install_gen _marangoni-interact.c
+install_gen _activity-drop.c
+install_gen _bursting-uniform-init.c
+install_gen _bursting-uniform.c
+install_gen _taylorculick-uniform.c
+install_gen _ve3d-impact-uniform.c
+install_gen _drop-impact-uniform.c
+install_gen _jumping-uniform-init.c
+install_gen _jumping-uniform.c
 echo "qcc=${QCC}"
 echo "BASILISK=${BASILISK}"

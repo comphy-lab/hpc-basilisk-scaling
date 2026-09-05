@@ -13,4 +13,5 @@ repository's verified timing tables and figure assets.
 The report references canonical plots from [`../figures/`](../figures/). The
 plotting scripts remain in [`../postProcess/`](../postProcess/), compact timing
 tables stay beside the generated figures, and raw run output remains excluded
-from Git.
+from Git. The present source covers the stock kernels, the Marangoni
+application series, and five uniform-grid application kernels.

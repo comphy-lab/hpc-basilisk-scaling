@@ -29,6 +29,15 @@ marangoni-scale
 marangoni-multidrop
 marangoni-interact
 activity-drop
+bursting-uniform
+bursting-uniform-init
+taylorculick-uniform
+ve3d-impact-uniform
+drop-impact-uniform
+jumping-uniform
+jumping-uniform-init
+*.stl
+simulationCases/data/
 get_fields_planar
 get_facets_planar
 

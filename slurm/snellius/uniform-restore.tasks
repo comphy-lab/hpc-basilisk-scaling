@@ -1,0 +1,11 @@
+# test LEVEL NITER RANKS
+bursting-uniform 10 10 2
+bursting-uniform 10 10 8
+bursting-uniform 10 10 32
+bursting-uniform 10 10 96
+bursting-uniform 10 10 192
+jumping-uniform 7 10 2
+jumping-uniform 7 10 8
+jumping-uniform 7 10 32
+jumping-uniform 7 10 96
+jumping-uniform 7 10 192

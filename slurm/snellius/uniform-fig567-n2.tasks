@@ -1,0 +1,11 @@
+# test LEVEL NITER RANKS
+# Figures 5-7, two exclusive genoa nodes (384 ranks).
+taylorculick-uniform 9 10 384
+taylorculick-uniform 10 10 384
+taylorculick-uniform 11 10 384
+drop-impact-uniform 9 10 384
+drop-impact-uniform 10 10 384
+drop-impact-uniform 11 10 384
+bursting-uniform 9 10 384
+bursting-uniform 10 10 384
+bursting-uniform 11 10 384
