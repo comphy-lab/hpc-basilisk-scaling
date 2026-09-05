@@ -46,6 +46,14 @@ figures/*.svg
 !figures/*.pdf
 !figures/*.csv
 
+# LaTeX build intermediates; compiled public reports under docs/ are tracked.
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+*.toc
+
 # Python
 **/__pycache__/
 **/*.pyc

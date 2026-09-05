@@ -27,8 +27,9 @@ two-phase cases against the Al Saud terminal velocity.
 
 ## Layout
 
-```text
+```
 .
+├── docs/ - public reports and their compiled PDFs
 ├── simulationCases/ - kernel tests and two-phase showcase solvers
 ├── src-local/ - activity.h for activity-drop.c
 ├── scripts/ - qcc -source generation, site-env loader, staging and compile helpers
@@ -118,6 +119,9 @@ two-phase cases against the Al Saud terminal velocity.
   `figures/marangoni-uniform-ndrop-per-iter.pdf` and
   `figures/marangoni-validate-vt-fields.pdf`. Update this list when a figure
   is added or retired.
+- Public reports live in `docs/`. Keep each report's source self-contained in
+  one `.tex` file, retain its compiled PDF beside it, and reference canonical
+  figure assets from `figures/` rather than duplicating them.
 
 ## Hygiene
 

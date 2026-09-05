@@ -14,10 +14,10 @@ Developed at the
 Durham University.
 
 The standalone public report
-[Basilisk MPI CPU Benchmarks for Multiphase Flow](Basilisk-MPI-CPU-Benchmarks.pdf)
+[Basilisk MPI CPU Benchmarks for Multiphase Flow](docs/Basilisk-MPI-CPU-Benchmarks.pdf)
 summarizes the current evidence and proposes a node-aligned qualification
 matrix for future CPU systems. Its complete source is the single file
-[`Basilisk-MPI-CPU-Benchmarks.tex`](Basilisk-MPI-CPU-Benchmarks.tex).
+[`docs/Basilisk-MPI-CPU-Benchmarks.tex`](docs/Basilisk-MPI-CPU-Benchmarks.tex).
 
 ## Why these cases
 
@@ -131,8 +131,9 @@ the script URL and `--ref` with the same
 
 ## Repository structure
 
-```text
+```
 .
+├── docs/ - public reports and their compiled PDFs
 ├── simulationCases/ - kernel tests and two-phase showcase solvers
 │   ├── mpi-circle.c - 2D adaptive-mesh kernel
 │   ├── mpi-laplacian.c - 2D/3D Laplacian and Poisson kernel
@@ -154,7 +155,7 @@ the script URL and `--ref` with the same
 ├── postProcess/ - timer plots and planar/axi snapshot extractors
 ├── figures/ - generated PDFs and timing tables
 ├── reference/ - published Curie/Occigen tables and marangoni.ref
-└── results/ - collected timer tables
+└── results/ - collected timer tables (ignored except .gitkeep)
 ```
 
 ## Running
