@@ -67,54 +67,7 @@ The source cases, compact timing tables and plotting scripts are maintained at
 sources are retained without modification from the corresponding Basilisk
 tests~\cite{basilisk-mpi-circle,basilisk-mpi-laplacian}.
 
-\section{Kernel benchmark evidence}
-
-The two-dimensional kernel uses a full quadtree at level $L=14$, corresponding
-to $2^{28}$ cells. Figure~\ref{fig:2d-kernel} compares wall-clock and MPI time
-on MareNostrum~5 and Snellius with the published Curie measurements. On
-Snellius, the Poisson time continues to decrease through 8,192 ranks and is
-unchanged within the resolution of this single-run dataset at 16,384 ranks.
-The simultaneous rise in the communication fraction identifies the
-large-rank regime as communication limited rather than compute limited.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{circle-L14.pdf}
-  \caption{Strong scaling of the Poisson solve (left) and Laplacian operator
-  (right) for the two-dimensional full-quadtree kernel at $L=14$. Solid curves
-  show wall time per iteration and dashed curves show the measured MPI
-  contribution. The grey dotted line is ideal scaling from the MareNostrum~5
-  baseline. Curie data are the reference measurements distributed with the
-  Basilisk test.}
-  \label{fig:2d-kernel}
-\end{figure}
-
-The three-dimensional kernel uses a full octree at $L=9$, or $2^{27}$ cells.
-On Snellius, the Poisson time falls from $19.34$~s at two ranks to
-$0.0333$~s at 16,384 ranks. Most of the reduction has already been obtained
-by 4,096 ranks, where the corresponding time is $0.0390$~s. Figure
-\ref{fig:3d-kernel} therefore supplies both a broad scaling curve and a clear
-diagnostic of the strong-scaling limit. The Occigen measurements provide an
-independent reference for the same stock calculation.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{laplacian-L9.pdf}
-  \caption{Strong scaling of the stock three-dimensional
-  \texttt{mpi-laplacian} test on a full octree at $L=9$. Symbols and line
-  styles follow Figure~\ref{fig:2d-kernel}; the reference machine is Occigen.
-  The flattening of the Poisson curve beyond a few thousand ranks is the
-  expected fixed-problem communication limit, not a loss of numerical
-  correctness.}
-  \label{fig:3d-kernel}
-\end{figure}
-
-These results show why one number is insufficient for procurement. A
-low-rank timing measures core and memory performance, while the bend in the
-curve measures the communication stack and the implementation of collective
-operations. Both are relevant to production multiphase-flow calculations.
-
-\section{Representative multiphase workload}
+\section{Existing scaling evidence}
 
 The application benchmark follows a drop driven by a surface-tension
 gradient. The numerical formulation is the conservative, balanced treatment
@@ -123,7 +76,8 @@ Tchelepi~\cite{abu-al-saud2018}. The cluster case adds timing, restart and
 controlled output to the public Basilisk test without changing the physical
 validation target.
 
-Figure~\ref{fig:application-scaling} varies the amount of work in two ways.
+Figure~\ref{fig:application-scaling} is the scaling figure used in the final
+MareNostrum~5 report. It varies the amount of work in two ways.
 Panel~(a) increases the spatial resolution of an axisymmetric uniform mesh.
 Panel~(b) increases the number of drops in a planar domain while retaining
 64 points per radius. The larger problems continue to benefit from additional
@@ -135,14 +89,15 @@ per rank. The present application dataset stops at 1,024 ranks, approximately
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{marangoni-uniform-ndrop-per-iter.pdf}
-  \caption{Wall time per iteration for representative two-phase workloads on
-  MareNostrum~5 and Snellius. (a) Axisymmetric uniform meshes, coloured by
-  points per drop radius. (b) Planar uniform meshes at 64 points per radius,
-  coloured by the number of drops. Dashed lines show ideal scaling for each
-  workload. Each point is one recorded run; the current tables do not measure
-  run-to-run variability.}
+  \caption{Abundant-fuel active-drop scaling on MareNostrum~5 GPP (circles)
+  and Snellius Genoa (diamonds). (a) Uniform meshes at 64--512 points per
+  radius. (b) Planar 1--32-drop workloads at 64 points per radius. Dashed
+  lines show ideal scaling. Each point is one recorded run; the current tables
+  do not measure run-to-run variability.}
   \label{fig:application-scaling}
 \end{figure}
+
+\section{Verification and kernel coverage}
 
 The application remains useful only if it solves the intended flow. Figure
 \ref{fig:validation} compares the computed drop speed with the analytical
@@ -154,14 +109,27 @@ as a single second-order convergence range because their error plateaus.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{marangoni-validate-vt-fields.pdf}
-  \caption{Numerical validation of the representative two-phase case.
-  (a) Drop speed normalized by the theoretical terminal velocity.
-  (b) Relative error with the $N^{-2}$ coarse-grid trend and the public
-  Basilisk reference. (c) Resolved velocity fields at four times. The magenta
-  curve marks the interface and the colour scale gives the streamwise
-  velocity normalized by the terminal speed.}
+  \caption{Validation of active-drop migration in the abundant-fuel limit.
+  (a) Speed converges to the Young--Goldstein--Block prediction across
+  8--256 points per radius. (b) Relative error follows the $N^{-2}$ trend on
+  coarse grids. (c) Drop-frame axial velocity at 64 points per radius; magenta
+  marks the interface.}
   \label{fig:validation}
 \end{figure}
+
+The stock kernels extend the rank range beyond the representative application.
+The two-dimensional full-quadtree problem at $L=14$ contains $2^{28}$ cells;
+on Snellius, its Poisson time continues to decrease through 8,192 ranks and
+then plateaus at 16,384 ranks. The three-dimensional full-octree problem at
+$L=9$ contains $2^{27}$ cells. Its Snellius Poisson time falls from
+$19.34$~s at two ranks to $0.0333$~s at 16,384 ranks, with little reduction
+beyond 4,096 ranks. The corresponding Curie and Occigen tables distributed
+with the stock tests provide independent reference measurements.
+
+A low-rank kernel timing measures core and memory performance, while the bend
+in its rank sweep measures the communication stack and collective operations.
+The active-drop figure then tests how the complete two-phase workload shifts
+that limit as resolution and interface count increase.
 
 \section{Qualification matrix for a 192-core node}
 
