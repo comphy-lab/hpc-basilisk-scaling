@@ -1,0 +1,5 @@
+# test LEVEL NITER RANKS
+# L=11 knee hunt: 8 exclusive genoa nodes (1536 ranks).
+# Bursting L=11 already reversed at 768; do not rerun it.
+taylorculick-uniform 11 10 1536
+drop-impact-uniform 11 10 1536

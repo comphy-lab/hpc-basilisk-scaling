@@ -47,7 +47,8 @@ MULTILEVEL_CASES = {
 NX_LEVELS = (512, 1024, 2048)
 NX_NORM = LogNorm(vmin=512, vmax=2048)
 # Coarse L=9 saturates earlier; keep the ideal window on the scaling branch.
-NX_IDEAL_WINDOW = {512: 96, 1024: 384}
+# L=11 (2048) still scales at 1536 ranks; 2304 is on the floor.
+NX_IDEAL_WINDOW = {512: 96, 1024: 384, 2048: 1536}
 VIRIDIS = LinearSegmentedColormap.from_list(
     "viridis_readable",
     plt.cm.viridis(np.linspace(0.08, 0.82, 256)),

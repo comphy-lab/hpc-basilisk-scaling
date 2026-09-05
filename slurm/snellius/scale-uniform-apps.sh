@@ -100,8 +100,14 @@ case "${MODE}" in
     echo "n2-array=${n2_id}"
     echo "n4-array=${n4_id}"
     ;;
+  fig567-knee)
+    FIG567_N8="${PROJECT_DST}/slurm/snellius/uniform-fig567-n8.tasks"
+    FIG567_N12="${PROJECT_DST}/slurm/snellius/uniform-fig567-n12.tasks"
+    echo "n8-array -> $(submit_array_nodes snl-f567-n8 "${FIG567_N8}" 8 "" 1)"
+    echo "n12-array -> $(submit_array_nodes snl-f567-n12 "${FIG567_N12}" 12 "" 1)"
+    ;;
   *)
-    echo "usage: $0 [all|init|init-jump|mpi|restore [INIT_JOBID]|fig567]" >&2
+    echo "usage: $0 [all|init|init-jump|mpi|restore [INIT_JOBID]|fig567|fig567-knee]" >&2
     exit 2
     ;;
 esac

@@ -1,0 +1,4 @@
+# test LEVEL NITER RANKS
+# L=11 knee hunt: 12 exclusive genoa nodes (2304 ranks).
+taylorculick-uniform 11 10 2304
+drop-impact-uniform 11 10 2304

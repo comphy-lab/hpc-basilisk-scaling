@@ -318,7 +318,9 @@ and one uniform-grid application panel each in
 `figures/bursting-uniform.pdf`, `figures/taylorculick-uniform.pdf`,
 `figures/ve3d-impact-uniform.pdf`, `figures/drop-impact-uniform.pdf` and
 `figures/jumping-uniform.pdf`. The three axisymmetric panels cover
-$L=9/10/11$ and 2--768 ranks (colour is $N_x$); the two three-dimensional
+$L=9/10/11$ (colour is $N_x$), with $L=11$ Taylor--Culick and drop impact
+recorded through 2304 ranks so the strong-scaling knee is in the series;
+the two three-dimensional
 panels remain one-node $L=7$ sweeps.
 The timing tables behind them are the CSV files beside the PDFs.
 

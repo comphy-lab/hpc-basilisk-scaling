@@ -36,7 +36,10 @@ and a set of two-phase calculations. Measurements on MareNostrum~5
 and Snellius cover up to 16,384 MPI ranks for fixed-size kernel problems and
 up to 1,024 ranks for the Marangoni application cases. Three axisymmetric
 uniform-grid kernels---bursting bubble, elastic Taylor--Culick retraction and
-Newtonian drop impact---are timed at $L=9$, $10$ and $11$ over 2--768 ranks.
+Newtonian drop impact---are timed at $L=9$, $10$ and $11$. The $L=9$
+and $L=10$ series cover 2--768 ranks. $L=11$ Taylor--Culick and drop impact
+extend to 2304 ranks so the strong-scaling knee is in the recorded data;
+bursting $L=11$ already turns up at 768 ranks.
 Two three-dimensional kernels---viscoelastic drop impact and jumping
 drops---remain one-node $L=7$ sweeps. The kernel data support
 small-to-medium system qualification and expose the onset of
@@ -222,14 +225,17 @@ stack and change the physics: a bursting bubble, an elastic Taylor--Culick
 sheet, a three-dimensional viscoelastic impact, an axisymmetric Newtonian
 impact, and three-dimensional jumping drops. The three axisymmetric kernels
 are fixed-size strong-scaling tests at $L=9$, $10$ and $11$ ($512^2$,
-$1024^2$ and $2048^2$ cells) over 2--768 MPI ranks, one to four Snellius
-Genoa nodes. Colour encodes $N_x=2^L$, as in
-Figure~\ref{fig:application-scaling}(a). The two three-dimensional kernels
-remain one-node sweeps at $L=7$ ($128^3$ cells, 2--192 ranks). The timed
-window is the incompressible two-phase solver only. Geometric setup, and the
-serial dump used to seed the two cases whose interface comes from
-\texttt{distance.h}, sit outside that window. The MPI binaries write no
-checkpoints. The $L=11$ axisymmetric series is recorded from eight ranks.
+$1024^2$ and $2048^2$ cells). $L=9$ and $L=10$ cover 2--768 MPI ranks
+(one to four Snellius Genoa nodes). $L=11$ Taylor--Culick and drop impact
+extend to 2304 ranks (twelve nodes) so the recorded series includes the
+knee; bursting $L=11$ already turns up at 768 ranks. Colour encodes
+$N_x=2^L$, as in Figure~\ref{fig:application-scaling}(a). The two
+three-dimensional kernels remain one-node sweeps at $L=7$ ($128^3$
+cells, 2--192 ranks). The timed window is the incompressible two-phase
+solver only. Geometric setup, and the serial dump used to seed the two
+cases whose interface comes from \texttt{distance.h}, sit outside that
+window. The MPI binaries write no checkpoints. The $L=11$ axisymmetric
+series is recorded from eight ranks.
 
 Figure~\ref{fig:bursting-uniform} is the axisymmetric bursting bubble. At
 $L=10$ the wall time per iteration falls from $1.28$~s at two ranks to
@@ -254,7 +260,8 @@ Taylor--Culick retraction. The log-conformation extra-stress equations ride
 on the same projection step. At $L=10$ the wall time falls from $1.85$~s at
 two ranks to $0.0231$~s at 192 ranks and $0.0127$~s at 768 ranks. The $L=9$
 curve saturates near $0.010$~s. The $L=11$ curve continues to drop, from
-$1.90$~s at eight ranks to $0.0341$~s at 768 ranks.
+$1.90$~s at eight ranks to $0.0341$~s at 768 ranks and $0.0193$~s at
+1536 ranks, then flattens to $0.0152$~s at 2304 ranks.
 
 \begin{figure}[htbp]
   \centering
@@ -273,7 +280,8 @@ velocity toward the wall on the left boundary; Basilisk \texttt{axi.h} keeps
 the symmetry axis on the bottom. At $L=10$ the wall time falls from $2.04$~s
 at two ranks to $0.0267$~s at 192 ranks and $0.0173$~s at 768 ranks. The
 $L=9$ curve saturates near $0.011$~s. The $L=11$ curve follows the eight-rank
-ideal line to $0.0339$~s at 768 ranks.
+ideal line to $0.0339$~s at 768 ranks and $0.0250$~s at 1536 ranks, then
+rises to $0.0423$~s at 2304 ranks.
 
 \begin{figure}[htbp]
   \centering
