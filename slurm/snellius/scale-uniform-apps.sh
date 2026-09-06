@@ -106,8 +106,41 @@ case "${MODE}" in
     echo "n8-array -> $(submit_array_nodes snl-f567-n8 "${FIG567_N8}" 8 "" 1)"
     echo "n12-array -> $(submit_array_nodes snl-f567-n12 "${FIG567_N12}" 12 "" 1)"
     ;;
+  3dl10-ve3d-n4)
+    TIME=04:00:00
+    echo "ve3d-n4 -> $(submit_array_nodes snl-3dl10-v4 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-ve3d-n4.tasks" 4 "" 1)"
+    ;;
+  3dl10-ve3d-n8)
+    TIME=04:00:00
+    echo "ve3d-n8 -> $(submit_array_nodes snl-3dl10-v8 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-ve3d-n8.tasks" 8 "" 1)"
+    ;;
+  3dl10-ve3d-n12)
+    TIME=04:00:00
+    echo "ve3d-n12 -> $(submit_array_nodes snl-3dl10-v12 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-ve3d-n12.tasks" 12 "" 1)"
+    ;;
+  3dl10-jump-init)
+    TIME=04:00:00
+    SKIP_BURST=1
+    LEVEL_JUMP="${LEVEL_JUMP:-10}"
+    echo "jump-init -> $(submit_init)"
+    ;;
+  3dl10-jump-n4)
+    TIME=04:00:00
+    dep="${2:-}"
+    echo "jump-n4 -> $(submit_array_nodes snl-3dl10-j4 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-jump-n4.tasks" 4 "${dep}" 1)"
+    ;;
+  3dl10-jump-n8)
+    TIME=04:00:00
+    dep="${2:-}"
+    echo "jump-n8 -> $(submit_array_nodes snl-3dl10-j8 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-jump-n8.tasks" 8 "${dep}" 1)"
+    ;;
+  3dl10-jump-n12)
+    TIME=04:00:00
+    dep="${2:-}"
+    echo "jump-n12 -> $(submit_array_nodes snl-3dl10-j12 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-jump-n12.tasks" 12 "${dep}" 1)"
+    ;;
   *)
-    echo "usage: $0 [all|init|init-jump|mpi|restore [INIT_JOBID]|fig567|fig567-knee]" >&2
+    echo "usage: $0 [all|init|init-jump|mpi|restore [INIT_JOBID]|fig567|fig567-knee|3dl10-ve3d-n4|3dl10-ve3d-n8|3dl10-ve3d-n12|3dl10-jump-init|3dl10-jump-n4 [INIT_JOBID]|3dl10-jump-n8 [INIT_JOBID]|3dl10-jump-n12 [INIT_JOBID]]" >&2
     exit 2
     ;;
 esac

@@ -61,16 +61,28 @@ if [[ "${SKIP_JUMP}" == "1" ]]; then
 fi
 
 jump_out="${SCRATCH_DST}/runs/jumping-uniform"
-stl="${PROJECT_DST}/simulationCases/data/InitialCondition.stl"
-if [[ ! -f "${stl}" ]]; then
-  echo "missing ${stl}; run scripts/fetch-jumping-stl.sh before staging" >&2
+stl_run="${jump_out}/InitialCondition.stl"
+stl_proj="${PROJECT_DST}/simulationCases/data/InitialCondition.stl"
+if [[ -f "${stl_run}" ]]; then
+  stl="${stl_run}"
+elif [[ -f "${stl_proj}" ]]; then
+  stl="${stl_proj}"
+else
+  echo "missing InitialCondition.stl (tried ${stl_run}, ${stl_proj}); run scripts/fetch-jumping-stl.sh before staging" >&2
   exit 1
 fi
 mkdir -p "${jump_out}"
-cp -f "${stl}" "${jump_out}/InitialCondition.stl"
+if [[ "${stl}" != "${stl_run}" ]]; then
+  cp -f "${stl}" "${jump_out}/InitialCondition.stl"
+fi
 cd "${jump_out}"
+if [[ -f dumpInit && ! -f dumpInit-7 ]]; then
+  cp -f dumpInit dumpInit-7
+  echo "preserved ${jump_out}/dumpInit-7"
+fi
 echo "host=$(hostname) jumping-uniform-init LEVEL=${LEVEL_JUMP} job=${SLURM_JOB_ID}"
 "${jump_bin}" "${LEVEL_JUMP}" \
   > "init-out-${LEVEL_JUMP}" 2> "init-log-${LEVEL_JUMP}"
 test -f dumpInit
-echo "wrote ${jump_out}/dumpInit"
+mv -f dumpInit "dumpInit-${LEVEL_JUMP}"
+echo "wrote ${jump_out}/dumpInit-${LEVEL_JUMP}"

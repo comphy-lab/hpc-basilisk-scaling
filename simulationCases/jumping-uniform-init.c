@@ -43,8 +43,8 @@ int main (int argc, char * argv[])
 {
   if (argc > 1)
     LEVEL = atoi (argv[1]);
-  if (LEVEL < 5 || LEVEL > 8) {
-    fprintf (stderr, "jumping-uniform-init: LEVEL=%d out of range [5,8]\n",
+  if (LEVEL < 5 || LEVEL > 10) {
+    fprintf (stderr, "jumping-uniform-init: LEVEL=%d out of range [5,10]\n",
 	     LEVEL);
     exit (1);
   }

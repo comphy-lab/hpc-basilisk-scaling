@@ -43,8 +43,8 @@ int main (int argc, char * argv[])
     LEVEL = atoi (argv[1]);
   if (argc > 2)
     NITER = atoi (argv[2]);
-  if (LEVEL < 5 || LEVEL > 9) {
-    fprintf (stderr, "ve3d-impact-uniform: LEVEL=%d out of range [5,9]\n",
+  if (LEVEL < 5 || LEVEL > 10) {
+    fprintf (stderr, "ve3d-impact-uniform: LEVEL=%d out of range [5,10]\n",
 	     LEVEL);
     exit (1);
   }

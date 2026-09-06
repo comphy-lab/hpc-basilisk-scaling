@@ -52,8 +52,8 @@ int main (int argc, char * argv[])
     strncpy (restart_file, argv[3], sizeof(restart_file) - 1);
     restart_file[sizeof(restart_file) - 1] = '\0';
   }
-  if (LEVEL < 5 || LEVEL > 8) {
-    fprintf (stderr, "jumping-uniform: LEVEL=%d out of range [5,8]\n", LEVEL);
+  if (LEVEL < 5 || LEVEL > 10) {
+    fprintf (stderr, "jumping-uniform: LEVEL=%d out of range [5,10]\n", LEVEL);
     exit (1);
   }
   if (NITER < 1) {

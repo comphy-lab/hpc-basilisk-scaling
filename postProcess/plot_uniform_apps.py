@@ -132,6 +132,23 @@ def style(ax: plt.Axes) -> None:
     ax.set_box_aspect(1)
 
 
+def _xticks_for_ranks(ranks: list[int], min_octaves: float = 0.95) -> list[int]:
+    """Keep min/max ranks; drop interior ticks that would collide on log2."""
+    ordered = sorted({int(rank) for rank in ranks})
+    if len(ordered) < 2:
+        return ordered
+    picked = [ordered[0]]
+    for rank in ordered[1:-1]:
+        if np.log2(rank) - np.log2(picked[-1]) >= min_octaves:
+            picked.append(rank)
+    last = ordered[-1]
+    while len(picked) > 1 and np.log2(last) - np.log2(picked[-1]) < min_octaves:
+        picked.pop()
+    if picked[-1] != last:
+        picked.append(last)
+    return picked
+
+
 def _ideal_prefactor(
     rows: list[dict[str, float | int | str]],
     nx: int,
@@ -268,7 +285,7 @@ def plot_multilevel(
     )
     style(ax)
     ranks = sorted({int(row["npe"]) for row in picked})
-    ax.set_xticks(ranks)
+    ax.set_xticks(_xticks_for_ranks(ranks))
     ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter(r"%d"))
     ax.tick_params(axis="x", which="minor", length=0)
     if any(int(row["nx"]) in NX_LEVELS for row in picked):
@@ -371,7 +388,7 @@ def plot_case(
     )
     style(ax)
     ranks = sorted({int(row["npe"]) for row in picked})
-    ax.set_xticks(ranks)
+    ax.set_xticks(_xticks_for_ranks(ranks))
     ax.xaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter(r"%d"))
     ax.tick_params(axis="x", which="minor", length=0)
     out.parent.mkdir(parents=True, exist_ok=True)

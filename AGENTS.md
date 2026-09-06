@@ -78,8 +78,10 @@ two-phase cases against the Al Saud terminal velocity.
   increment-only, so `run()` exits after the `t = 0` inits. After
   restore or geometric setup they call `reset_perf()` so `#TIMING`
   covers solver steps only; the MPI binaries do not dump. Jumping-drops
-  uses LEVEL 7 ($128^3$) for the rank sweep: LEVEL 6 leaves too few
-  cells per rank on a 192-core node. After
+  uses LEVEL 7 ($128^3$) for the one-node rank sweep: LEVEL 6 leaves too few
+  cells per rank on a 192-core node. The MPI kernels accept LEVEL up to 10
+  ($1024^3$); jumping-drops serial `distance.h` init at that mesh may not
+  fit one Genoa node. After
   `qcc -source` on macOS, `generate-sources.sh` strips `fp_osx.h` and
   rewrites Darwin `MAP_PRIVATE|0x1000` to `MAP_PRIVATE|MAP_ANONYMOUS`.
 
