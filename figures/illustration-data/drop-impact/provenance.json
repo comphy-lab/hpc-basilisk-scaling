@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Regular-grid fields for the Newtonian drop-impact illustration",
+  "description": "Regular-grid fields for a four-state Newtonian drop-impact illustration",
   "source_project": "drop-impact-solid-sweeps",
   "source_dataset": "Ultimate_Drop_Impact/PaperFigures/Figure1/1082_We200Oh0p01",
   "source_solver": {
@@ -31,25 +31,45 @@
     "velocity": "impact speed U0",
     "time": "R/U0"
   },
-  "snapshot_time": 0.44,
+  "snapshot_times": [
+    0.05,
+    0.22,
+    0.44,
+    4.19
+  ],
   "phase_convention": "f = 1 in the liquid",
   "coordinate_convention": "Basilisk x is axial z from the substrate; y is radial r",
   "raw_inputs": [
     {
+      "path": "snapshot-0.0500",
+      "bytes": 5471326,
+      "sha256": "1916f5c15501342890ef20968839b4cd5c4aa84def48c9871756f596b176dc3a"
+    },
+    {
+      "path": "snapshot-0.2200",
+      "bytes": 57267137,
+      "sha256": "7766174bdddcab03379554663201b91ced2075b0dfc206521b7c97f5ee03455a"
+    },
+    {
       "path": "snapshot-0.4400",
       "bytes": 6919150,
       "sha256": "7afe334e444183a244d348e456de945baaa0ad908b7c05ec6d3fe2475624f7df"
+    },
+    {
+      "path": "snapshot-4.1900",
+      "bytes": 22010129,
+      "sha256": "85104a67eb4a83c3d68e599a368f0df0015a461787c137dde1b02c89a850c965"
     }
   ],
   "extraction": {
     "basilisk_ref": "v2026-07-20",
     "z_min": 0.0,
-    "z_max": 1.7,
+    "z_max": 2.05,
     "r_min": 0.0,
-    "r_max": 1.25,
+    "r_max": 3.25,
     "grid_shape": [
-      435,
-      320
+      302,
+      480
     ],
     "columns": [
       "z",
@@ -61,20 +81,62 @@
     ]
   },
   "render": {
+    "layout": "2 x 2, chronological by row",
+    "physical_extent": [
+      -3.25,
+      3.25,
+      0.0,
+      2.05
+    ],
+    "figure_width_mm": 166.0,
+    "figure_height_mm": 74.0,
     "velocity_min": 0.0,
     "velocity_max": 1.0,
+    "velocity_saturation_marker": "upper colourbar extension",
     "velocity_colormap": "Purples",
     "interface_colour": "#D55E00",
     "velocity_label": "|u|/U0"
   },
   "compact_files": [
     {
+      "path": "snapshot-0.0500-fields.npz",
+      "bytes": 2398673,
+      "sha256": "07568225afae5a73f94129d2a792fe0cd4ec9f2be5b871fcfc47b2bcf46a878a"
+    },
+    {
+      "path": "snapshot-0.0500-interface.npz",
+      "bytes": 15419,
+      "sha256": "1a741529d52acbfa3175d787fcff14aa4b3170545a8a856cb53ddd45b9f823d2"
+    },
+    {
+      "path": "snapshot-0.2200-fields.npz",
+      "bytes": 3306244,
+      "sha256": "935067fe9f6cf272c0960605f4eb4974bb2e8915596c32e6fbf70606d3f4b4cf"
+    },
+    {
+      "path": "snapshot-0.2200-interface.npz",
+      "bytes": 50571,
+      "sha256": "4e8a5fd3be5f07b1052070e4d16c9e07a519f0ed8e93cd7bf6da1a03d88b4c1b"
+    },
+    {
       "path": "snapshot-0.4400-fields.npz",
-      "sha256": "7a51c4d463bf2642fba6c657550df84acf17a95d7ec487eab1f5ddb4a9c2379c"
+      "bytes": 2433393,
+      "sha256": "2aa64b863820e7b58a24538f250047785ec80eff0c1dc30c47bfdcc60a92e2b3"
     },
     {
       "path": "snapshot-0.4400-interface.npz",
-      "sha256": "baf5dee1ca8cf28b06fcf75c77cb7d3426b65584e374b04edf776ecb1ce44515"
+      "bytes": 18097,
+      "sha256": "db2bc24a81a4a8458667cf2eb566f703ba9d834ff03dc934408fbe15251eb99a"
+    },
+    {
+      "path": "snapshot-4.1900-fields.npz",
+      "bytes": 3251486,
+      "sha256": "34d6fb167243e41ff83652cbf35b82cdc76c77ce090ab31afb05c6ca04d2e7e9"
+    },
+    {
+      "path": "snapshot-4.1900-interface.npz",
+      "bytes": 94567,
+      "sha256": "c37c7ffb4a05c6322dbadd56b88dfa426b2ce1eb8f5ca5c017552886c71041d7"
     }
   ],
   "copyright": "Copyright 2026 Vatsal Sanjay and the Computational Multiphase Physics Lab"

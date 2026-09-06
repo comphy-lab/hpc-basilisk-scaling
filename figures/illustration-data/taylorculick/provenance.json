@@ -1,21 +1,53 @@
 {
-  "schema_version": 1,
-  "description": "Representative axisymmetric elastic Taylor-Culick velocity and hoop-conformation fields",
-  "representative_status": "Completed physical simulation used to illustrate the benchmark physics; this is not a timing-run state or an image of the uniform-grid benchmark execution.",
+  "schema_version": 2,
+  "description": "Chronological axisymmetric elastic Taylor-Culick velocity and hoop-conformation fields",
+  "representative_status": "Completed physical simulation used to illustrate the benchmark physics; these are not timing-run states or images of the uniform-grid benchmark execution.",
   "source_archive": "ElasticTC_Results_Oct2023.key",
   "source_member": "Data/3040-python-10328.mp4",
   "source_member_sha256": "3bebadca59b30177261ba0e23169f013b94575373ac89675d0ca0d614b660b0e",
-  "source_frame": {
-    "index": 126,
-    "time": 74.9,
-    "time_scale": "t_gamma = sqrt(rho H0^3/gamma)",
-    "path": "source-frame-case3040-t74p90.png",
-    "sha256": "2267cfafaec449d0787fddccdbe3c025e29cbc43972df95993884e0d59a842a8",
-    "dimensions_px": [
-      2262,
-      1356
-    ]
+  "source_video": {
+    "codec": "H.264",
+    "dimensions_px": [2262, 1356],
+    "frame_rate_fps": 30,
+    "frame_count": 252,
+    "duration_s": 8.4
   },
+  "source_frames": [
+    {
+      "index": 30,
+      "time": 17.3,
+      "path": "source-frame-case3040-t17p30.png",
+      "sha256": "1c65153d84eaa49a1b82ea3455686438bc869ba60eb3bbef0f3ce25ed413b0d9",
+      "dimensions_px": [2262, 1356]
+    },
+    {
+      "index": 90,
+      "time": 53.3,
+      "path": "source-frame-case3040-t53p30.png",
+      "sha256": "8f5552477879d59a8e868859ef94ff5249a584a6d25dfe59cd7438649626b5f7",
+      "dimensions_px": [2262, 1356]
+    },
+    {
+      "index": 126,
+      "time": 74.9,
+      "path": "source-frame-case3040-t74p90.png",
+      "sha256": "2267cfafaec449d0787fddccdbe3c025e29cbc43972df95993884e0d59a842a8",
+      "dimensions_px": [2262, 1356]
+    },
+    {
+      "index": 200,
+      "time": 119.3,
+      "path": "source-frame-case3040-t119p30.png",
+      "sha256": "50ebe8591d50027bda6aea9098fbcf8669815bde8f0f3507ebd06d98347f39eb",
+      "dimensions_px": [2262, 1356]
+    }
+  ],
+  "time_metadata": {
+    "quantity": "t/t_gamma",
+    "time_scale": "t_gamma = sqrt(rho H0^3/gamma)",
+    "evidence": "Each value is the simulation time rendered in that decoded source frame by VideoTC_vFinal_v2.py; labels were read from the selected frames and were not inferred from video playback time or interpolated."
+  },
+  "frame_extraction": "ffmpeg -v error -i source.mp4 -vf select=eq(n\\,FRAME_INDEX) -vsync 0 -frames:v 1 output.png",
   "simulation": {
     "case": 3040,
     "geometry": "axisymmetric hole opening in a freestanding sheet",
@@ -36,34 +68,32 @@
     {
       "field": "velocity magnitude",
       "label": "||V||/V_TC",
+      "source_normalisation": "raw V maximum sqrt(2)*0.95; V_TC = sqrt(2), giving the displayed maximum 0.95",
       "colormap": "Purples",
-      "display_range": [
-        0.0,
-        0.95
-      ],
-      "crop_px": [
-        17,
-        253,
-        669,
-        468
-      ]
+      "display_range": [0.0, 0.95],
+      "crop_px": [17, 253, 669, 468],
+      "composite_half": "upper"
     },
     {
       "field": "azimuthal log-conformation",
       "label": "log(A)_theta-theta",
       "colormap": "RdBu_r",
-      "display_range": [
-        -0.1,
-        0.1
-      ],
-      "crop_px": [
-        805,
-        693,
-        1457,
-        908
-      ]
+      "display_range": [-0.1, 0.1],
+      "crop_px": [805, 693, 1457, 908],
+      "composite_half": "lower"
     }
   ],
+  "crop_verification": "Both crops are 652 x 215 pixels in every 2262 x 1356 source frame and are matched interiors of the same tip-following physical window. VideoTC_vFinal_v2.py plots the same sampled field on the positive and negative sides of the sheet mid-plane, so the upper/lower split preserves physical geometry and one real field sample per displayed half.",
+  "layout": {
+    "chronology": "2 x 2, left-to-right then top-to-bottom",
+    "figure_width_mm": 166,
+    "figure_height_mm": 90,
+    "geometry": "equal pixel aspect",
+    "field_labels_pt": 10,
+    "time_labels_pt": 10,
+    "colourbar_ticks_pt": 9,
+    "colourbars": "one shared colour bar per quantity"
+  },
   "established_workflow": [
     {
       "source": "postProcess_bundle_Mar2_2022/VideoTC_vFinal_v2.py",
@@ -78,7 +108,7 @@
       "sha256": "afadcbd94795468463bdbf833a572cf602a825e1fc6168f8bd96b2c1a1707071"
     }
   ],
-  "changes": "Selected matched physical-window crops from two source-frame panels, removed unrelated panels and empty canvas, and recreated colour bars from the verified source-script normalisations. Pixel aspect is preserved; field pixels were neither recomputed nor recoloured.",
+  "changes": "Selected four chronological source frames, retained matched physical-window pixels from the velocity and hoop-conformation panels, combined their symmetry-equivalent upper and lower halves, removed unrelated panels and empty canvas, and recreated two shared colour bars from verified source-script normalisations. Field pixels were neither recomputed nor recoloured.",
   "licence": "No open licence asserted. Reused with the author's permission for the requested HPC-scaling report.",
   "attribution": "Vatsal Sanjay and the Computational Multiphase Physics Lab",
   "composition": "uv run --frozen python postProcess/compose_taylorculick_image.py"

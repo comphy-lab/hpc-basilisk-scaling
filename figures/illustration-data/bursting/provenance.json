@@ -1,8 +1,10 @@
 {
-  "schema_version": 1,
-  "description": "Extracted fields for the bursting-bubble velocity and streamline illustration",
+  "schema_version": 2,
+  "description": "Extracted fields and interface segments for the four-frame bursting-bubble velocity and streamline sequence",
   "source_repository": "https://github.com/comphy-lab/bursting-bubble.git",
   "source_repository_commit": "898d50a12006181e89d82fbf7ad6e64a6db6bdba",
+  "source_data_capsule": "SingularJets2026/data-fig2a/manifest.json",
+  "source_data_capsule_sha256": "67f8d32845688d2ade306b2da6cb2e309808fdf4d6e72c820543f307bc064d90",
   "simulation_source_commit": "e35ebdc3c0f8dfc60d45a96eae426b38b75f22b1",
   "basilisk_ref": "v2026-01-13",
   "basilisk_commit": "0aef3771998d04a7636efe6fdbb7691d947561f2",
@@ -13,14 +15,18 @@
     "max_level": 15,
     "pre_inception_focus_level": 14
   },
-  "snapshot_time": 0.496719,
-  "inception_time": 0.49443,
-  "time_from_inception": 0.002289,
-  "scales": {
-    "length": "R",
-    "velocity": "Vc = sqrt(sigma/(rho_l R))",
-    "time": "R/Vc"
+  "time": {
+    "label": "t*",
+    "definition": "t/(R/Vc)",
+    "scale": "R/Vc",
+    "inception_time": 0.49443
   },
+  "snapshots": [
+    {"label": "0.492500", "chronological_index": 1},
+    {"label": "0.494219", "chronological_index": 2},
+    {"label": "0.496719", "chronological_index": 3},
+    {"label": "0.499844", "chronological_index": 4}
+  ],
   "grid": {
     "shape": [294, 190],
     "z_min": -1.72,
@@ -33,9 +39,29 @@
     "velocity_min": 0.0,
     "velocity_max": 50.0,
     "velocity_colormap": "Blues",
-    "interface_colour": "#D55E00"
+    "velocity_saturation": "extend=max",
+    "interface_colour": "#D55E00",
+    "layout": "2x2 chronological sequence, left-to-right then next row",
+    "physical_width_mm": 166.0,
+    "physical_height_mm": 143.0
   },
   "files": [
+    {
+      "path": "snapshot-0.492500-fields.npz",
+      "sha256": "55fc4feca838c637bec35292a23ec0785ca88c373e0257fbad3bc2a1ef5cefd2"
+    },
+    {
+      "path": "snapshot-0.492500-interface.npz",
+      "sha256": "796accf1632ee96f043117d9d18d2a2732e278303efb1ec74084e5320bdafec3"
+    },
+    {
+      "path": "snapshot-0.494219-fields.npz",
+      "sha256": "b0ca4d5b97e69aa6efb6143c9d6c489616b5799160ae35a6389208c1186d1f2c"
+    },
+    {
+      "path": "snapshot-0.494219-interface.npz",
+      "sha256": "751283e98e1549b479275a6610467e385538f237b709dd9fe0eb7e02313dbb6b"
+    },
     {
       "path": "snapshot-0.496719-fields.npz",
       "sha256": "0f15dacf8f1eae4d1732ccd725a3a19e78128f496723f0566e083934488ac361"
@@ -43,6 +69,14 @@
     {
       "path": "snapshot-0.496719-interface.npz",
       "sha256": "abddfad52c25ca719c4e8866cea6ae8aecbf43f87505de64c6d327e0130d1839"
+    },
+    {
+      "path": "snapshot-0.499844-fields.npz",
+      "sha256": "c8c4efed9e2dda9aff7110bb9d970de110a65434adb89e1862dde053d326e4d0"
+    },
+    {
+      "path": "snapshot-0.499844-interface.npz",
+      "sha256": "5a27cb7b1bbb040092f4b2616df7940df074c0c0179e29ac94c977c06e165d7a"
     }
   ],
   "licence": "CC-BY-4.0",

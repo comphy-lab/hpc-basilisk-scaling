@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pair the existing vector scaling plots with representative simulation images.
+"""Stack scaling plots and temporal sequences at their final 166 mm width.
 
 Requires pdflatex and its standalone, graphicx and amsmath packages. The input
 scaling PDFs are embedded unchanged; this step never reads simulation timings.
@@ -17,14 +17,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "figures"
 PANELS = {
-    "bursting": ("bursting-uniform.pdf", "bursting-simulation.pdf",
-                 "bursting-uniform-illustrated.pdf", "Representative simulation"),
-    "taylorculick": ("taylorculick-uniform.pdf", "taylorculick-simulation.pdf",
-                    "taylorculick-uniform-illustrated.pdf", "Representative simulation"),
-    "drop-impact": ("drop-impact-uniform.pdf", "drop-impact-simulation.pdf",
-                   "drop-impact-uniform-illustrated.pdf", "Representative simulation"),
-    "ve3d": ("ve3d-impact-uniform.pdf", "three-dimensional-simulation.pdf",
-             "ve3d-impact-uniform-illustrated.pdf", "3D coalescence illustration"),
+    "bursting": ("bursting-uniform-report.pdf", "bursting-simulation.pdf",
+                 "bursting-uniform-illustrated.pdf"),
+    "taylorculick": ("taylorculick-uniform-report.pdf", "taylorculick-simulation.pdf",
+                    "taylorculick-uniform-illustrated.pdf"),
+    "drop-impact": ("drop-impact-uniform-report.pdf", "drop-impact-simulation.pdf",
+                   "drop-impact-uniform-illustrated.pdf"),
+    "ve3d": ("ve3d-impact-uniform-report.pdf", "three-dimensional-simulation.pdf",
+             "ve3d-impact-uniform-illustrated.pdf"),
 }
 
 
@@ -39,27 +39,22 @@ def tex_path(path: Path) -> str:
 
 
 def compose(case: str, output_dir: Path) -> Path:
-    scaling, snapshot, filename, heading = PANELS[case]
-    left = tex_path(FIGURES / scaling)
-    right = tex_path(FIGURES / snapshot)
-    document = r"""\documentclass[border=2mm]{standalone}
+    scaling, snapshot, filename = PANELS[case]
+    top = tex_path(FIGURES / scaling)
+    bottom = tex_path(FIGURES / snapshot)
+    document = r"""\documentclass[border=0pt]{standalone}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \setlength{\parindent}{0pt}
 \begin{document}
-\begin{tabular}{@{}c@{\hspace{5mm}}c@{}}
-\begin{minipage}[t]{170mm}
-  {\fontsize{24}{28}\selectfont $(a)$}\par\vspace{2mm}
-  \makebox[170mm][c]{\includegraphics[width=168mm,height=160mm,keepaspectratio]{LEFT}}
-\end{minipage}&
-\begin{minipage}[t]{170mm}
-  {\fontsize{24}{28}\selectfont $(b)$\hfill
-   \fontsize{18}{22}\selectfont HEADING\hfill}\par\vspace{2mm}
-  \makebox[170mm][c]{\includegraphics[width=168mm,height=160mm,keepaspectratio]{RIGHT}}
+\begin{minipage}{166mm}
+  {\fontsize{11}{12}\selectfont $(a)$}\par
+  \includegraphics[width=166mm]{TOP}\par\vspace{1mm}
+  {\fontsize{11}{12}\selectfont $(b)$}\par
+  \includegraphics[width=166mm]{BOTTOM}
 \end{minipage}
-\end{tabular}
 \end{document}
-""".replace("LEFT", left).replace("RIGHT", right).replace("HEADING", heading)
+""".replace("TOP", top).replace("BOTTOM", bottom)
     output_dir.mkdir(parents=True, exist_ok=True)
     output = output_dir / filename
     with tempfile.TemporaryDirectory(prefix="benchmark-panels-") as temporary:

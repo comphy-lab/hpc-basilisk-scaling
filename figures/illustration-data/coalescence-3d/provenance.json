@@ -1,5 +1,5 @@
 {
-  "description": "Two illustrative states from a separate three-dimensional coalescence-induced jumping simulation; these are not outputs of the VE3D scaling benchmark.",
+  "description": "Four chronological states of three-dimensional coalescence-induced jumping; the image sequence is independent of the VE3D scaling benchmark.",
   "source": {
     "repository": "https://github.com/VatsalSy/jumping-drops-paper",
     "commit": "9036befa95e145b800c01491ae2f8a039fc4edba",
@@ -22,6 +22,26 @@
   },
   "images": [
     {
+      "file": "state-t0p24.png",
+      "source_image_object": 0,
+      "time_over_tau_gamma": 0.24,
+      "dimensions_pixels": [
+        1024,
+        768
+      ],
+      "sha256": "c064582d51a7423d08552fb9f368d9e3b9983010c6145fa8529fde26285d9f35"
+    },
+    {
+      "file": "state-t1p00.png",
+      "source_image_object": 1,
+      "time_over_tau_gamma": 1.0,
+      "dimensions_pixels": [
+        1024,
+        768
+      ],
+      "sha256": "1ab8c0bceca7615ce2e0a74af2a30cdb7553fb8a8fb447dc760bf4b5b919f19f"
+    },
+    {
       "file": "state-t1p75.png",
       "source_image_object": 2,
       "time_over_tau_gamma": 1.75,
@@ -43,5 +63,6 @@
     }
   ],
   "extraction": "pdfimages -png fig_phenomenology.pdf jd-img",
-  "composition": "uv run --frozen python postProcess/compose_3d_illustration.py"
+  "composition": "uv run --frozen python postProcess/compose_3d_illustration.py",
+  "composition_notes": "Chronological 2 by 2 layout, common camera and identical crop. Times are read from the original embedded raster labels; the first state is t/tau_gamma=0.24."
 }

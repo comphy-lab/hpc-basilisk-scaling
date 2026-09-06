@@ -322,15 +322,18 @@ The timing tables behind them are the CSV files beside the PDFs.
 
 ### Simulation image panels
 
-The report pairs its four application scaling plots with representative
-images from completed simulations. The original scaling PDFs and timing
-tables remain separate from these illustrations. The 3D coalescence images
-are labelled independently of the viscoelastic-impact benchmark.
+The report accompanies each application scaling curve with four chronological
+states from a completed simulation. The sequences use a common spatial scale
+and colour normalization within each case. The 3D sequence shows coalescence,
+identified separately from the viscoelastic-impact timing curve.
 
 Reproduce the image panels and combined PDFs from the bundled compact inputs:
 
 ```bash
 uv sync --frozen
+uv run --frozen python postProcess/plot_report_overview.py
+uv run --frozen python postProcess/plot_report_apps.py
+uv run --frozen python postProcess/reletter_validation_figure.py
 uv run --frozen python postProcess/plot_bursting_image.py
 uv run --frozen python postProcess/compose_taylorculick_image.py
 uv run --frozen python postProcess/plot_drop_impact_image.py
@@ -339,11 +342,18 @@ uv run --frozen python postProcess/compose_benchmark_panels.py
 ```
 
 LaTeX with Computer Modern fonts and the `standalone` package is required.
+The validation-figure typography step also requires Ghostscript and Poppler;
+it retains the original vector curves and embedded field images.
 Normal reproduction uses only the checked-in extracted fields and source
 images; it does not launch simulations or restore raw dumps. Source
 parameters, checksums and attribution are recorded in
 [`figures/illustration-data/`](figures/illustration-data/README.md).
-The combined report assets have the suffix `-uniform-illustrated.pdf`.
+The report figures are authored at their final width of 166 mm, with Computer
+Modern type: 10 pt labels, 9 pt ticks and legends, and 11 pt panel letters.
+The report captions use 10 pt type. The combined application figures stack
+the scaling curve above a two-by-two temporal sequence and have the suffix
+`-uniform-illustrated.pdf`. The original scaling assets and timing tables
+remain available alongside the report-sized `-report.pdf` variants.
 
 ## Licence
 
