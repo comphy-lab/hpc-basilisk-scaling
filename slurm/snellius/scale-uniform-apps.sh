@@ -117,8 +117,29 @@ case "${MODE}" in
     nodes="${MODE##*-n}"
     echo "ve3d-n${nodes} -> $(submit_array_nodes "snl-3dl10-v${nodes}" "${PROJECT_DST}/slurm/snellius/uniform-3dl10-ve3d-n${nodes}.tasks" "${nodes}" "" 1)"
     ;;
+  3dl8-ve3d-n1)
+    echo "ve3d-l8-n1 -> $(submit_array_nodes snl-3dl8-v1 "${PROJECT_DST}/slurm/snellius/uniform-3dl8-ve3d-n1.tasks" 1 "" 1)"
+    ;;
+  3dl8-ve3d-n2)
+    echo "ve3d-l8-n2 -> $(submit_array_nodes snl-3dl8-v2 "${PROJECT_DST}/slurm/snellius/uniform-3dl8-ve3d-n2.tasks" 2 "" 1)"
+    ;;
+  3dl8-ve3d-n4)
+    echo "ve3d-l8-n4 -> $(submit_array_nodes snl-3dl8-v4 "${PROJECT_DST}/slurm/snellius/uniform-3dl8-ve3d-n4.tasks" 4 "" 1)"
+    ;;
+  3dl9-ve3d-n1)
+    echo "ve3d-l9-n1 -> $(submit_array_nodes snl-3dl9-v1 "${PROJECT_DST}/slurm/snellius/uniform-3dl9-ve3d-n1.tasks" 1 "" 1)"
+    ;;
+  3dl9-ve3d-n2)
+    echo "ve3d-l9-n2 -> $(submit_array_nodes snl-3dl9-v2 "${PROJECT_DST}/slurm/snellius/uniform-3dl9-ve3d-n2.tasks" 2 "" 1)"
+    ;;
+  3dl9-ve3d-n4)
+    echo "ve3d-l9-n4 -> $(submit_array_nodes snl-3dl9-v4 "${PROJECT_DST}/slurm/snellius/uniform-3dl9-ve3d-n4.tasks" 4 "" 1)"
+    ;;
+  3dl9-ve3d-n8)
+    echo "ve3d-l9-n8 -> $(submit_array_nodes snl-3dl9-v8 "${PROJECT_DST}/slurm/snellius/uniform-3dl9-ve3d-n8.tasks" 8 "" 1)"
+    ;;
   *)
-    echo "usage: $0 [all|init|mpi|restore [INIT_JOBID]|fig567|fig567-knee|3dl10-ve3d-n4|3dl10-ve3d-n8|3dl10-ve3d-n12|3dl10-ve3d-n16|3dl10-ve3d-n32|3dl10-ve3d-n64]" >&2
+    echo "usage: $0 [all|init|mpi|restore [INIT_JOBID]|fig567|fig567-knee|3dl8-ve3d-n1|3dl8-ve3d-n2|3dl8-ve3d-n4|3dl9-ve3d-n1|3dl9-ve3d-n2|3dl9-ve3d-n4|3dl9-ve3d-n8|3dl10-ve3d-n4|3dl10-ve3d-n8|3dl10-ve3d-n12|3dl10-ve3d-n16|3dl10-ve3d-n32|3dl10-ve3d-n64]" >&2
     exit 2
     ;;
 esac
