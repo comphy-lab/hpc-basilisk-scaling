@@ -244,7 +244,7 @@ reconstruction and dump used to seed the bursting case. The MPI binaries
 write no checkpoints. The $L=11$ axisymmetric
 series is recorded from eight ranks.
 
-Figure~\ref{fig:bursting-uniform} is the axisymmetric bursting bubble. At
+Figure~\ref{fig:bursting-uniform}(a) is the axisymmetric bursting bubble. At
 $L=10$ the wall time per iteration falls from $1.28$~s at two ranks to
 $0.0174$~s at 192 ranks and $0.0108$~s at 768 ranks. The $L=9$ curve
 saturates near $0.008$~s beyond 96 ranks. The $L=11$ curve follows the
@@ -253,16 +253,22 @@ at 768 ranks.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.72\textwidth]{bursting-uniform.pdf}
-  \caption{Strong scaling of the uniform-grid bursting-bubble kernel on
+  \includegraphics[width=\textwidth]{bursting-uniform-illustrated.pdf}
+  \caption{(a) Strong scaling of the uniform-grid bursting-bubble kernel on
   Snellius Genoa. Axisymmetric Navier--Stokes with VOF and surface tension at
   $L=9$, $10$ and $11$; colour encodes $N_x=2^L$. Each point is one recorded
   run of ten solver steps after initialisation; the serial interface
-  reconstruction is not included. The $L=11$ series starts at eight ranks.}
+  reconstruction is not included. The $L=11$ series starts at eight ranks.
+  (b) Jet and feeding flow from a separate, completed axisymmetric simulation
+  at $Oh=0.03$ and $Bo=0$. Blue shows speed normalised by the capillary
+  velocity $V_c=\sqrt{\sigma/(\rho_l R)}$, with colours saturated above
+  $50V_c$; grey curves are instantaneous
+  streamlines and orange marks the interface. The view follows jet inception
+  and includes the small entrapped bubble below the jet.}
   \label{fig:bursting-uniform}
 \end{figure}
 
-Figure~\ref{fig:taylorculick-uniform} is the axisymmetric elastic
+Figure~\ref{fig:taylorculick-uniform}(a) is the axisymmetric elastic
 Taylor--Culick retraction. The log-conformation extra-stress equations ride
 on the same projection step. At $L=10$ the wall time falls from $1.85$~s at
 two ranks to $0.0231$~s at 192 ranks and $0.0127$~s at 768 ranks. The $L=9$
@@ -272,16 +278,21 @@ $1.90$~s at eight ranks to $0.0341$~s at 768 ranks and $0.0193$~s at
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.72\textwidth]{taylorculick-uniform.pdf}
-  \caption{Strong scaling of the uniform-grid elastic Taylor--Culick kernel on
+  \includegraphics[width=\textwidth]{taylorculick-uniform-illustrated.pdf}
+  \caption{(a) Strong scaling of the uniform-grid elastic Taylor--Culick kernel on
   Snellius Genoa. Axisymmetric two-phase viscoelastic flow at $L=9$, $10$ and
   $11$; colour encodes $N_x=2^L$. Timed window: ten solver steps after
   geometric initialisation of the sheet. The $L=11$ series starts at eight
-  ranks.}
+  ranks. (b) Representative axisymmetric elastic retraction at
+  $t/t_\gamma=74.90$, $Ec=0.1$ and $Oh=0.05$. The upper image shows speed
+  normalised by the Taylor--Culick velocity; the lower image shows the
+  azimuthal component $(\log\mathcal{A})_{\theta\theta}$ of the
+  log-conformation tensor. Green marks the interface. Both images show the
+  same rim window from a completed relaxation-free calculation.}
   \label{fig:taylorculick-uniform}
 \end{figure}
 
-Figure~\ref{fig:drop-impact-uniform} is the axisymmetric Newtonian drop
+Figure~\ref{fig:drop-impact-uniform}(a) is the axisymmetric Newtonian drop
 impact on a box of side 8. The drop is placed at $(1.05,0)$ with impact
 velocity toward the wall on the left boundary; Basilisk \texttt{axi.h} keeps
 the symmetry axis on the bottom. At $L=10$ the wall time falls from $2.04$~s
@@ -292,17 +303,21 @@ rises to $0.0423$~s at 2304 ranks.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.72\textwidth]{drop-impact-uniform.pdf}
-  \caption{Strong scaling of the uniform-grid Newtonian drop-impact kernel on
+  \includegraphics[width=\textwidth]{drop-impact-uniform-illustrated.pdf}
+  \caption{(a) Strong scaling of the uniform-grid Newtonian drop-impact kernel on
   Snellius Genoa. Axisymmetric VOF with surface tension at $L=9$, $10$ and
   $11$; colour encodes $N_x=2^L$. Timed window: ten solver steps after
   geometric initialisation of the drop. The $L=11$ series starts at eight
-  ranks.}
+  ranks. (b) Representative impact at $We_D=200$, $Oh_D=0.01$ and
+  $tU_0/R=0.44$, with diameter-based Weber and Ohnesorge numbers. Here $R$
+  is the initial drop radius and $U_0$ the impact speed. Purple shows speed,
+  grey curves are instantaneous streamlines, orange marks the interface and
+  black marks the substrate. The colour scale is saturated above $U_0$.}
   \label{fig:drop-impact-uniform}
 \end{figure}
 
 The three-dimensional kernel uses a uniform octree. Figure
-\ref{fig:ve3d-impact-uniform} is a viscoelastic drop impact at $L=7$
+\ref{fig:ve3d-impact-uniform}(a) is a viscoelastic drop impact at $L=7$
 ($128^3$ cells). Wall time per iteration falls from $10.8$~s at two ranks to
 $0.331$~s at 192 ranks, a factor of 32. The curve is monotonic but bends away
 from ideal scaling earlier than the two-dimensional cases. These timings do
@@ -311,17 +326,25 @@ identify the cause of the bend.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.72\textwidth]{ve3d-impact-uniform.pdf}
-  \caption{Strong scaling of the uniform-grid three-dimensional viscoelastic
+  \includegraphics[width=\textwidth]{ve3d-impact-uniform-illustrated.pdf}
+  \caption{(a) Strong scaling of the uniform-grid three-dimensional viscoelastic
   drop-impact kernel on Snellius Genoa. Full octree at $L=7$. Timed window:
-  ten solver steps after geometric initialisation of the drop.}
+  ten solver steps after geometric initialisation of the drop.
+  (b) Separate illustrative three-dimensional coalescence-induced jumping
+  of two equal drops at $Oh=0.05$, $Bo=0$ and
+  $t/\tau_\gamma=1.75$ and $3.00$, where
+  $\tau_\gamma=\sqrt{\rho R^3/\sigma}$. Orange shows the free surface and
+  the substrate plane displays the adaptive mesh. These source images
+  illustrate three-dimensional interface geometry; they are independent of
+  the viscoelastic-impact timing calculation in panel (a).}
   \label{fig:ve3d-impact-uniform}
 \end{figure}
 
-These four figures are one panel each so that a snapshot of the corresponding
-flow can be placed beside the scaling curve later. They are Snellius
-measurements only and, like the other tables in this report, record a single
-observation per rank count.
+The scaling panels contain Snellius measurements and record a single
+observation per rank count. The image panels come from separate completed
+simulations and are not part of the timed trajectories. Compact image inputs,
+source parameters, attribution and reproduction scripts accompany the figures
+in the repository.
 
 \section{Reproducibility and reporting}
 

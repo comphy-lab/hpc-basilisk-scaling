@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "description": "Regular-grid fields for the Newtonian drop-impact illustration",
+  "source_project": "drop-impact-solid-sweeps",
+  "source_dataset": "Ultimate_Drop_Impact/PaperFigures/Figure1/1082_We200Oh0p01",
+  "source_solver": {
+    "path": "TestCases/1000-1008/bounce.c",
+    "sha256": "c6d468da36740247870bce0148fa29a3bd3ac0d760418aa433ee7da47f61161a"
+  },
+  "source_postprocessing": [
+    {
+      "path": "PaperFigures/getData.c",
+      "sha256": "bd395f5a4c63e289b66ed58b9ea0453d97cb502cef8bd67be5e97267718bc644"
+    },
+    {
+      "path": "PaperFigures/getFacet.c",
+      "sha256": "9ff8c50d1a706031693c343a4c2b4e34b341dd047f9087a564f5ee9b9d62cc51"
+    }
+  ],
+  "case": 1082,
+  "nominal_diameter_based_parameters": {
+    "We_D": 200.0,
+    "Oh_D": 0.01
+  },
+  "solver_radius_based_parameters": {
+    "We_R": 100.0,
+    "Oh_R": 0.01414213562373095
+  },
+  "scales": {
+    "length": "initial drop radius R",
+    "velocity": "impact speed U0",
+    "time": "R/U0"
+  },
+  "snapshot_time": 0.44,
+  "phase_convention": "f = 1 in the liquid",
+  "coordinate_convention": "Basilisk x is axial z from the substrate; y is radial r",
+  "raw_inputs": [
+    {
+      "path": "snapshot-0.4400",
+      "bytes": 6919150,
+      "sha256": "7afe334e444183a244d348e456de945baaa0ad908b7c05ec6d3fe2475624f7df"
+    }
+  ],
+  "extraction": {
+    "basilisk_ref": "v2026-07-20",
+    "z_min": 0.0,
+    "z_max": 1.7,
+    "r_min": 0.0,
+    "r_max": 1.25,
+    "grid_shape": [
+      435,
+      320
+    ],
+    "columns": [
+      "z",
+      "r",
+      "f",
+      "uz",
+      "ur",
+      "speed"
+    ]
+  },
+  "render": {
+    "velocity_min": 0.0,
+    "velocity_max": 1.0,
+    "velocity_colormap": "Purples",
+    "interface_colour": "#D55E00",
+    "velocity_label": "|u|/U0"
+  },
+  "compact_files": [
+    {
+      "path": "snapshot-0.4400-fields.npz",
+      "sha256": "7a51c4d463bf2642fba6c657550df84acf17a95d7ec487eab1f5ddb4a9c2379c"
+    },
+    {
+      "path": "snapshot-0.4400-interface.npz",
+      "sha256": "baf5dee1ca8cf28b06fcf75c77cb7d3426b65584e374b04edf776ecb1ce44515"
+    }
+  ],
+  "copyright": "Copyright 2026 Vatsal Sanjay and the Computational Multiphase Physics Lab"
+}

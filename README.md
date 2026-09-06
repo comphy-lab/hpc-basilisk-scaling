@@ -320,6 +320,31 @@ recorded through 2304 ranks so the strong-scaling knee is in the series;
 the three-dimensional panel remains a one-node $L=7$ sweep.
 The timing tables behind them are the CSV files beside the PDFs.
 
+### Simulation image panels
+
+The report pairs its four application scaling plots with representative
+images from completed simulations. The original scaling PDFs and timing
+tables remain separate from these illustrations. The 3D coalescence images
+are labelled independently of the viscoelastic-impact benchmark.
+
+Reproduce the image panels and combined PDFs from the bundled compact inputs:
+
+```bash
+uv sync --frozen
+uv run --frozen python postProcess/plot_bursting_image.py
+uv run --frozen python postProcess/compose_taylorculick_image.py
+uv run --frozen python postProcess/plot_drop_impact_image.py
+uv run --frozen python postProcess/compose_3d_illustration.py
+uv run --frozen python postProcess/compose_benchmark_panels.py
+```
+
+LaTeX with Computer Modern fonts and the `standalone` package is required.
+Normal reproduction uses only the checked-in extracted fields and source
+images; it does not launch simulations or restore raw dumps. Source
+parameters, checksums and attribution are recorded in
+[`figures/illustration-data/`](figures/illustration-data/README.md).
+The combined report assets have the suffix `-uniform-illustrated.pdf`.
+
 ## Licence
 
 The stock tests are part of Basilisk and remain under the Basilisk GPLv3

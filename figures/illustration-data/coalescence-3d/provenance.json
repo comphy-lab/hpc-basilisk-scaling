@@ -1,0 +1,47 @@
+{
+  "description": "Two illustrative states from a separate three-dimensional coalescence-induced jumping simulation; these are not outputs of the VE3D scaling benchmark.",
+  "source": {
+    "repository": "https://github.com/VatsalSy/jumping-drops-paper",
+    "commit": "9036befa95e145b800c01491ae2f8a039fc4edba",
+    "path": "main/figures/fig_phenomenology.pdf",
+    "sha256": "96cd25e34679867cb54c7da116c920a519f60037216f766a40baae3700df97e2",
+    "paper_title": "When do coalescing drops jump?",
+    "authors": [
+      "Vatsal Sanjay",
+      "Wilko Rohlfs",
+      "Detlef Lohse"
+    ],
+    "licence": "Not specified in the source repository; no new open licence is asserted.",
+    "reuse_basis": "Included at the source author's request as an illustration for this benchmark report."
+  },
+  "simulation": {
+    "physical_content": "Two equal liquid drops coalescing on an ideal non-wetting substrate",
+    "ohnesorge_number": 0.05,
+    "bond_number": 0.0,
+    "time_scale": "tau_gamma = sqrt(rho R^3 / gamma)"
+  },
+  "images": [
+    {
+      "file": "state-t1p75.png",
+      "source_image_object": 2,
+      "time_over_tau_gamma": 1.75,
+      "dimensions_pixels": [
+        1024,
+        768
+      ],
+      "sha256": "26d7e3ed32f26b9077cc7cf2f9d960ded3bd626953bcdd69489fd30f82084fe6"
+    },
+    {
+      "file": "state-t3p00.png",
+      "source_image_object": 3,
+      "time_over_tau_gamma": 3.0,
+      "dimensions_pixels": [
+        1024,
+        768
+      ],
+      "sha256": "d3330ee16a6c36ef2c91451897c1003e52b62dd362051351d845da023110578d"
+    }
+  ],
+  "extraction": "pdfimages -png fig_phenomenology.pdf jd-img",
+  "composition": "uv run --frozen python postProcess/compose_3d_illustration.py"
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "description": "Representative axisymmetric elastic Taylor-Culick velocity and hoop-conformation fields",
+  "representative_status": "Completed physical simulation used to illustrate the benchmark physics; this is not a timing-run state or an image of the uniform-grid benchmark execution.",
+  "source_archive": "ElasticTC_Results_Oct2023.key",
+  "source_member": "Data/3040-python-10328.mp4",
+  "source_member_sha256": "3bebadca59b30177261ba0e23169f013b94575373ac89675d0ca0d614b660b0e",
+  "source_frame": {
+    "index": 126,
+    "time": 74.9,
+    "time_scale": "t_gamma = sqrt(rho H0^3/gamma)",
+    "path": "source-frame-case3040-t74p90.png",
+    "sha256": "2267cfafaec449d0787fddccdbe3c025e29cbc43972df95993884e0d59a842a8",
+    "dimensions_px": [
+      2262,
+      1356
+    ]
+  },
+  "simulation": {
+    "case": 3040,
+    "geometry": "axisymmetric hole opening in a freestanding sheet",
+    "constitutive_model": "relaxation-free Oldroyd-B (lambda = infinity)",
+    "parameters": {
+      "Oh_liquid": 0.05,
+      "Oh_ambient": 1e-05,
+      "Ec": 0.1,
+      "Ec_definition": "G H0/gamma",
+      "liquid_to_ambient_viscosity_ratio": 5000,
+      "max_level": 14,
+      "domain_size_over_H0": 300,
+      "initial_hole_radius_over_H0": 1,
+      "tmax_over_t_gamma": 150
+    }
+  },
+  "panels": [
+    {
+      "field": "velocity magnitude",
+      "label": "||V||/V_TC",
+      "colormap": "Purples",
+      "display_range": [
+        0.0,
+        0.95
+      ],
+      "crop_px": [
+        17,
+        253,
+        669,
+        468
+      ]
+    },
+    {
+      "field": "azimuthal log-conformation",
+      "label": "log(A)_theta-theta",
+      "colormap": "RdBu_r",
+      "display_range": [
+        -0.1,
+        0.1
+      ],
+      "crop_px": [
+        805,
+        693,
+        1457,
+        908
+      ]
+    }
+  ],
+  "established_workflow": [
+    {
+      "source": "postProcess_bundle_Mar2_2022/VideoTC_vFinal_v2.py",
+      "sha256": "1eddc4b3b02ca0c499a23634cc9eaa1fd1a1d9614eb09ffde9e9a5811277ce9a"
+    },
+    {
+      "source": "postProcess_bundle_Mar2_2022/getData.c",
+      "sha256": "99d0ef900fb8f876e46b4b7f3a86409f9c023c4212222aaffe90c932ff6cc52d"
+    },
+    {
+      "source": "postProcess_bundle_Mar2_2022/getFacets.c",
+      "sha256": "afadcbd94795468463bdbf833a572cf602a825e1fc6168f8bd96b2c1a1707071"
+    }
+  ],
+  "changes": "Selected matched physical-window crops from two source-frame panels, removed unrelated panels and empty canvas, and recreated colour bars from the verified source-script normalisations. Pixel aspect is preserved; field pixels were neither recomputed nor recoloured.",
+  "licence": "No open licence asserted. Reused with the author's permission for the requested HPC-scaling report.",
+  "attribution": "Vatsal Sanjay and the Computational Multiphase Physics Lab",
+  "composition": "uv run --frozen python postProcess/compose_taylorculick_image.py"
+}

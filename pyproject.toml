@@ -1,0 +1,10 @@
+[project]
+name = "hpc-basilisk-scaling-figures"
+version = "0.1.0"
+description = "Reproducible plotting environment for the Basilisk CPU benchmark figures"
+requires-python = "==3.12.*"
+dependencies = [
+  "matplotlib==3.10.6",
+  "numpy==2.4.6",
+  "pillow==12.3.0",
+]

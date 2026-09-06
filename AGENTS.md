@@ -143,6 +143,14 @@ two-phase cases against the Al Saud terminal velocity.
 - Public reports live in `docs/`. Keep each report's source self-contained in
   one `.tex` file, retain its compiled PDF beside it, and reference canonical
   figure assets from `figures/` rather than duplicating them.
+- Reproduce representative image panels with the locked `uv` environment and
+  the four image scripts listed in README. `compose_benchmark_panels.py`
+  embeds the original scaling PDFs unchanged into the `*-uniform-illustrated.pdf`
+  assets. Keep the image-source parameters and benchmark parameters distinct.
+  The coalescence images beside VE3D scaling illustrate a separate physical
+  case; they are never labelled as output from the impact timing run.
+  Raw drop-impact re-extraction requires the recorded project-local Basilisk
+  pin; the normal image path uses the bundled compact inputs only.
 
 ## Hygiene
 
