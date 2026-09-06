@@ -51,7 +51,7 @@ TAG="${LEVEL}-${RANKS}"
 echo "host=$(hostname) test=${TEST} level=${LEVEL} niter=${TASK_NITER} ranks=${RANKS} job=${SLURM_JOB_ID} array=${SLURM_ARRAY_TASK_ID}"
 export OMP_NUM_THREADS=1
 
-if [[ "${TEST}" == "bursting-uniform" || "${TEST}" == "jumping-uniform" ]]; then
+if [[ "${TEST}" == "bursting-uniform" ]]; then
   RESTART="${RESTART:-}"
   if [[ -z "${RESTART}" ]]; then
     if [[ -f "dumpInit-${LEVEL}" ]]; then

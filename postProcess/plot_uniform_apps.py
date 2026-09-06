@@ -61,7 +61,6 @@ CASES = (
      r"Viscoelastic drop impact, $L=7$"),
     ("drop-impact-uniform", "drop-impact-uniform.pdf",
      r"Newtonian drop impact"),
-    ("jumping-uniform", "jumping-uniform.pdf", r"Jumping drops, $L=7$"),
 )
 LABEL_FONT = 40
 TICK_FONT = 30

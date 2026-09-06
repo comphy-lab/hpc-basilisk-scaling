@@ -24,8 +24,6 @@ cp "${ROOT}/simulationCases/mpi-circle.c" \
    "${ROOT}/simulationCases/taylorculick-uniform.c" \
    "${ROOT}/simulationCases/ve3d-impact-uniform.c" \
    "${ROOT}/simulationCases/drop-impact-uniform.c" \
-   "${ROOT}/simulationCases/jumping-uniform-init.c" \
-   "${ROOT}/simulationCases/jumping-uniform.c" \
    "${WORKDIR}/"
 mkdir -p "${WORKDIR}/src-local"
 cp "${ROOT}/simulationCases/activity-drop.c" "${WORKDIR}/"
@@ -62,8 +60,6 @@ mkdir -p "${ROOT}/generated"
   "${QCC}" -source -D_MPI=1 -disable-dimensions taylorculick-uniform.c
   "${QCC}" -grid=octree -source -D_MPI=1 -disable-dimensions ve3d-impact-uniform.c
   "${QCC}" -source -D_MPI=1 -disable-dimensions drop-impact-uniform.c
-  "${QCC}" -grid=octree -source -disable-dimensions jumping-uniform-init.c
-  "${QCC}" -grid=octree -source -D_MPI=1 -disable-dimensions jumping-uniform.c
 )
 
 install_gen() {
@@ -99,7 +95,5 @@ install_gen _bursting-uniform.c
 install_gen _taylorculick-uniform.c
 install_gen _ve3d-impact-uniform.c
 install_gen _drop-impact-uniform.c
-install_gen _jumping-uniform-init.c
-install_gen _jumping-uniform.c
 echo "qcc=${QCC}"
 echo "BASILISK=${BASILISK}"

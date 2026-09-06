@@ -40,8 +40,8 @@ Newtonian drop impact---are timed at $L=9$, $10$ and $11$. The $L=9$
 and $L=10$ series cover 2--768 ranks. $L=11$ Taylor--Culick and drop impact
 extend to 2304 ranks so the strong-scaling knee is in the recorded data;
 bursting $L=11$ already turns up at 768 ranks.
-Two three-dimensional kernels---viscoelastic drop impact and jumping
-drops---remain one-node $L=7$ sweeps. The kernel data support
+One three-dimensional kernel---viscoelastic drop impact---remains a one-node
+$L=7$ sweep. The kernel data support
 small-to-medium system qualification and expose the onset of
 communication-limited scaling. Tests above 100 fully populated 192-core nodes
 remain a proposed campaign rather than a demonstrated result.
@@ -65,7 +65,7 @@ The proposed suite has three layers:
         comparison;
   \item two-phase timing workloads that exercise the same solver stack with
         interface reconstruction and surface tension: the Marangoni series
-        includes a terminal-velocity reference comparison, while the five
+        includes a terminal-velocity reference comparison, while the four
         uniform-grid application kernels provide scaling timings without a
         separate physical-validation result here; and
   \item a workload series in which spatial resolution or the number of drops
@@ -176,7 +176,7 @@ as a single second-order convergence range because their error plateaus.
 
 The stock kernels extend the measured rank range beyond the representative
 application. The Marangoni series combines the timing sweep with the reference
-comparison above; the five uniform-grid application kernels supply additional
+comparison above; the four uniform-grid application kernels supply additional
 two-phase timing cases without a separate physical-validation result in this
 report.
 
@@ -227,21 +227,21 @@ machine performs the same physical and numerical work.
 \section{Uniform-grid application kernels}
 
 The Marangoni series tests one interfacial mechanism while the mesh or the
-drop count is varied. The five kernels below keep that same uniform-tree MPI
+drop count is varied. The four kernels below keep that same uniform-tree MPI
 stack and change the physics: a bursting bubble, an elastic Taylor--Culick
-sheet, a three-dimensional viscoelastic impact, an axisymmetric Newtonian
-impact, and three-dimensional jumping drops. The three axisymmetric kernels
+sheet, a three-dimensional viscoelastic impact, and an axisymmetric Newtonian
+impact. The three axisymmetric kernels
 are fixed-size strong-scaling tests at $L=9$, $10$ and $11$ ($512^2$,
 $1024^2$ and $2048^2$ cells). $L=9$ and $L=10$ cover 2--768 MPI ranks
 (one to four Snellius Genoa nodes). $L=11$ Taylor--Culick and drop impact
 extend to 2304 ranks (twelve nodes) so the recorded series includes the
 knee; bursting $L=11$ already turns up at 768 ranks. Colour encodes
-$N_x=2^L$, as in Figure~\ref{fig:application-scaling}(a). The two
-three-dimensional kernels remain one-node sweeps at $L=7$ ($128^3$
-cells, 2--192 ranks). The timed window is the incompressible two-phase
-solver only. Geometric setup, and the serial dump used to seed the two
-cases whose interface comes from \texttt{distance.h}, sit outside that
-window. The MPI binaries write no checkpoints. The $L=11$ axisymmetric
+$N_x=2^L$, as in Figure~\ref{fig:application-scaling}(a). The
+three-dimensional kernel remains a one-node sweep at $L=7$ ($128^3$ cells,
+2--192 ranks). The timed window is the incompressible two-phase solver only.
+Geometric setup is outside that window, as is the serial interface
+reconstruction and dump used to seed the bursting case. The MPI binaries
+write no checkpoints. The $L=11$ axisymmetric
 series is recorded from eight ranks.
 
 Figure~\ref{fig:bursting-uniform} is the axisymmetric bursting bubble. At
@@ -301,7 +301,7 @@ rises to $0.0423$~s at 2304 ranks.
   \label{fig:drop-impact-uniform}
 \end{figure}
 
-The two three-dimensional kernels use a uniform octree. Figure
+The three-dimensional kernel uses a uniform octree. Figure
 \ref{fig:ve3d-impact-uniform} is a viscoelastic drop impact at $L=7$
 ($128^3$ cells). Wall time per iteration falls from $10.8$~s at two ranks to
 $0.331$~s at 192 ranks, a factor of 32. The curve is monotonic but bends away
@@ -318,25 +318,7 @@ identify the cause of the bend.
   \label{fig:ve3d-impact-uniform}
 \end{figure}
 
-Figure~\ref{fig:jumping-uniform} is the jumping-drop kernel at $L=7$ (again
-$128^3$ cells). An $L=6$ mesh ($64^3$) leaves too few cells per rank on a
-192-core node and saturates; the $L=7$ sweep is monotonic from $5.75$~s at two
-ranks to $0.189$~s at 192 ranks (a factor of 30). The sweep remains useful
-across the node, with a lower parallel efficiency than the $1024^2$
-axisymmetric kernels. The timing data identify that difference but do not
-isolate its cause.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.72\textwidth]{jumping-uniform.pdf}
-  \caption{Strong scaling of the uniform-grid jumping-drop kernel on Snellius
-  Genoa. Full octree at $L=7$. The serial STL reconstruction writes a dump
-  that the MPI ranks restore before the timed window; the ten solver steps
-  themselves write no output.}
-  \label{fig:jumping-uniform}
-\end{figure}
-
-These five figures are one panel each so that a snapshot of the corresponding
+These four figures are one panel each so that a snapshot of the corresponding
 flow can be placed beside the scaling curve later. They are Snellius
 measurements only and, like the other tables in this report, record a single
 observation per rank count.
@@ -363,7 +345,7 @@ not quantify system variability.
 Basilisk provides a compact CPU benchmark with a direct connection to
 production multiphase-flow workloads. The stock Poisson and Laplacian kernels
 separate local computation from MPI communication, while the Marangoni case is
-compared with reference data and the five uniform-grid cases extend timing
+compared with reference data and the four uniform-grid cases extend timing
 coverage across the two-phase solver stack. Existing measurements cover the
 small class and bracket a 64-node, 192-core-per-node test. The next useful
 measurement is the VE3D $L=10$ continuation at 16, 32 and 64 nodes, conditional

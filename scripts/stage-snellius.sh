@@ -24,8 +24,6 @@ need=(
   _taylorculick-uniform.c
   _ve3d-impact-uniform.c
   _drop-impact-uniform.c
-  _jumping-uniform-init.c
-  _jumping-uniform.c
 )
 for f in "${need[@]}"; do
   if [[ ! -f "${ROOT}/generated/${f}" ]]; then
@@ -62,8 +60,6 @@ rsync -a \
   "${ROOT}/generated/_taylorculick-uniform.c" \
   "${ROOT}/generated/_ve3d-impact-uniform.c" \
   "${ROOT}/generated/_drop-impact-uniform.c" \
-  "${ROOT}/generated/_jumping-uniform-init.c" \
-  "${ROOT}/generated/_jumping-uniform.c" \
   "${HOST}:${SCRATCH_DST}/generated/"
 
 echo "staged scripts -> ${HOST}:${PROJECT_DST}"

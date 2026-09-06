@@ -65,23 +65,16 @@ two-phase cases against the Al Saud terminal velocity.
 - Uniform application kernels (always `init_grid(1<<LEVEL)`, no
   `adapt_wavelet`):   `bursting-uniform.c` (serial `distance.h` init from
   `DataFiles/Bo0.0010.dat`, then MPI restore of `dumpInit-${LEVEL}`; keep
-  one dump per mesh and do not overwrite a finished LEVEL with another), `taylorculick-uniform.c`,
-  `ve3d-impact-uniform.c`, `drop-impact-uniform.c`, and
-  `jumping-uniform-init.c` plus `jumping-uniform.c` (serial STL init, then
-  MPI restore). Do not include Jumping-Drops `jumpingDrops_common.h`: it
-  always registers adaptation. `qcc` rewrites the VE headers next to the
+  one dump per mesh and do not overwrite a finished LEVEL with another),
+  `taylorculick-uniform.c`, `ve3d-impact-uniform.c`, and
+  `drop-impact-uniform.c`. `qcc` rewrites the VE headers next to the
   translation unit; generate them only through `scripts/generate-sources.sh`.
   Basilisk `axi.h` keeps the axis on the bottom boundary; left is the wall.
-  The Jumping-Drops STL is Git LFS (~282 MiB), gitignored, and fetched with
-  `scripts/fetch-jumping-stl.sh` before staging. Default NITER is 10. MPI
-  kernels must stop with `event stop (i = NITER)`: a lone `(i++)` is
-  increment-only, so `run()` exits after the `t = 0` inits. After
-  restore or geometric setup they call `reset_perf()` so `#TIMING`
-  covers solver steps only; the MPI binaries do not dump. Jumping-drops
-  uses LEVEL 7 ($128^3$) for the one-node rank sweep: LEVEL 6 leaves too few
-  cells per rank on a 192-core node. The MPI kernels accept LEVEL up to 10
-  ($1024^3$); jumping-drops serial `distance.h` init at that mesh may not
-  fit one Genoa node. After
+  Default NITER is 10. MPI kernels must stop with `event stop (i = NITER)`:
+  a lone `(i++)` is increment-only, so `run()` exits after the `t = 0` inits.
+  After restore or geometric setup they call `reset_perf()` so `#TIMING`
+  covers solver steps only; the MPI binaries do not dump.
+  The VE3D kernel accepts LEVEL up to 10 ($1024^3$). After
   `qcc -source` on macOS, `generate-sources.sh` strips `fp_osx.h` and
   rewrites Darwin `MAP_PRIVATE|0x1000` to `MAP_PRIVATE|MAP_ANONYMOUS`.
 
@@ -97,8 +90,8 @@ two-phase cases against the Al Saud terminal velocity.
 - `scripts/generate-sources.sh` emits every portable C99 file, including the
   2D and 3D Laplacian kernels, the uniform Marangoni variants, and the
   uniform application kernels, into `generated/`. That directory is ignored;
-  the cluster compiles from it. Serial bursting and jumping-drops inits are
-  generated *without* `-D_MPI=1`.
+  the cluster compiles from it. The serial bursting init is generated
+  *without* `-D_MPI=1`.
 
 ## Cluster sites
 
@@ -144,8 +137,8 @@ two-phase cases against the Al Saud terminal velocity.
   `figures/marangoni-uniform-ndrop-per-iter.pdf`,
   `figures/marangoni-validate-vt-fields.pdf`,
   `figures/bursting-uniform.pdf`, `figures/taylorculick-uniform.pdf`,
-  `figures/ve3d-impact-uniform.pdf`, `figures/drop-impact-uniform.pdf` and
-  `figures/jumping-uniform.pdf`. Update this list when a figure
+  `figures/ve3d-impact-uniform.pdf`, `figures/drop-impact-uniform.pdf`.
+  Update this list when a figure
   is added or retired.
 - Public reports live in `docs/`. Keep each report's source self-contained in
   one `.tex` file, retain its compiled PDF beside it, and reference canonical

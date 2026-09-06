@@ -1,3 +1,0 @@
-# test LEVEL NITER RANKS
-# Jumping drops L=10, eight exclusive genoa nodes (1536 ranks).
-jumping-uniform 10 10 1536

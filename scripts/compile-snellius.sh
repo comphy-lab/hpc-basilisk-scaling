@@ -24,8 +24,6 @@ need=(
   _taylorculick-uniform.c
   _ve3d-impact-uniform.c
   _drop-impact-uniform.c
-  _jumping-uniform-init.c
-  _jumping-uniform.c
 )
 for f in "${need[@]}"; do
   if [[ ! -f "${SCRATCH_DST}/generated/${f}" ]]; then
@@ -74,14 +72,10 @@ mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
   "${SCRATCH_DST}/generated/_ve3d-impact-uniform.c" -o ve3d-impact-uniform -lm
 mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
   "${SCRATCH_DST}/generated/_drop-impact-uniform.c" -o drop-impact-uniform -lm
-gcc ${TWOPHASE_CFLAGS} -fopenmp \
-  "${SCRATCH_DST}/generated/_jumping-uniform-init.c" -o jumping-uniform-init -lm
-mpicc ${TWOPHASE_CFLAGS} -D_MPI=1 \
-  "${SCRATCH_DST}/generated/_jumping-uniform.c" -o jumping-uniform -lm
 
 echo "compiled binaries under ${SCRATCH_DST}/bin"
 ls -l bursting-uniform-init bursting-uniform taylorculick-uniform \
-  ve3d-impact-uniform drop-impact-uniform jumping-uniform-init jumping-uniform
+  ve3d-impact-uniform drop-impact-uniform
 if [[ "${COMPILE_SET}" == "all" ]]; then
   ls -l mpi-circle mpi-laplacian mpi-laplacian-2d marangoni-scale \
     marangoni-multidrop marangoni-scale-uniform marangoni-multidrop-uniform \

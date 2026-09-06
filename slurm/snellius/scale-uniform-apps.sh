@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Serial dumpInit for bursting and jumping-drops, then the MPI rank sweeps.
-# Geometric-init cases (2-4) can be submitted immediately; restore cases
-# (1, 5) take an optional init job id for --dependency=afterok. Omit it
-# when dumpInit is already on scratch.
+# Serial dumpInit for bursting, then the MPI rank sweeps.
+# Geometric-init cases can be submitted immediately; the bursting restore
+# array takes an optional init job id for --dependency=afterok. Omit it when
+# dumpInit is already on scratch.
 set -euo pipefail
 
 # shellcheck source=scripts/site-env.sh
@@ -29,7 +29,7 @@ submit_init() {
     --cpus-per-task=192 \
     --exclusive \
     --time="${TIME}" \
-    --export=ALL,SKIP_BURST="${SKIP_BURST:-0}",SKIP_JUMP="${SKIP_JUMP:-0}",LEVEL_JUMP="${LEVEL_JUMP:-7}",LEVELS_BURST="${LEVELS_BURST:-10}" \
+    --export=ALL,SKIP_BURST="${SKIP_BURST:-0}",LEVELS_BURST="${LEVELS_BURST:-10}" \
     "${INIT_SBATCH}"
 }
 
@@ -66,10 +66,6 @@ case "${MODE}" in
   init)
     echo "init -> $(submit_init)"
     ;;
-  init-jump)
-    SKIP_BURST=1
-    echo "init -> $(submit_init)"
-    ;;
   mpi)
     echo "mpi-array -> $(submit_array snl-unif-mpi "${MPI_TASKS}")"
     ;;
@@ -89,7 +85,6 @@ case "${MODE}" in
     FIG567_N1="${PROJECT_DST}/slurm/snellius/uniform-fig567-n1.tasks"
     FIG567_N2="${PROJECT_DST}/slurm/snellius/uniform-fig567-n2.tasks"
     FIG567_N4="${PROJECT_DST}/slurm/snellius/uniform-fig567-n4.tasks"
-    SKIP_JUMP=1
     LEVELS_BURST="9 11"
     init_id="$(submit_init)"
     n1_id="$(submit_array_nodes snl-f567-n1 "${FIG567_N1}" 1 "${init_id}" 6)"
@@ -122,29 +117,8 @@ case "${MODE}" in
     nodes="${MODE##*-n}"
     echo "ve3d-n${nodes} -> $(submit_array_nodes "snl-3dl10-v${nodes}" "${PROJECT_DST}/slurm/snellius/uniform-3dl10-ve3d-n${nodes}.tasks" "${nodes}" "" 1)"
     ;;
-  3dl10-jump-init)
-    TIME=04:00:00
-    SKIP_BURST=1
-    LEVEL_JUMP="${LEVEL_JUMP:-10}"
-    echo "jump-init -> $(submit_init)"
-    ;;
-  3dl10-jump-n4)
-    TIME=04:00:00
-    dep="${2:-}"
-    echo "jump-n4 -> $(submit_array_nodes snl-3dl10-j4 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-jump-n4.tasks" 4 "${dep}" 1)"
-    ;;
-  3dl10-jump-n8)
-    TIME=04:00:00
-    dep="${2:-}"
-    echo "jump-n8 -> $(submit_array_nodes snl-3dl10-j8 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-jump-n8.tasks" 8 "${dep}" 1)"
-    ;;
-  3dl10-jump-n12)
-    TIME=04:00:00
-    dep="${2:-}"
-    echo "jump-n12 -> $(submit_array_nodes snl-3dl10-j12 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-jump-n12.tasks" 12 "${dep}" 1)"
-    ;;
   *)
-    echo "usage: $0 [all|init|init-jump|mpi|restore [INIT_JOBID]|fig567|fig567-knee|3dl10-ve3d-n4|3dl10-ve3d-n8|3dl10-ve3d-n12|3dl10-ve3d-n16|3dl10-ve3d-n32|3dl10-ve3d-n64|3dl10-jump-init|3dl10-jump-n4 [INIT_JOBID]|3dl10-jump-n8 [INIT_JOBID]|3dl10-jump-n12 [INIT_JOBID]]" >&2
+    echo "usage: $0 [all|init|mpi|restore [INIT_JOBID]|fig567|fig567-knee|3dl10-ve3d-n4|3dl10-ve3d-n8|3dl10-ve3d-n12|3dl10-ve3d-n16|3dl10-ve3d-n32|3dl10-ve3d-n64]" >&2
     exit 2
     ;;
 esac

@@ -14,4 +14,4 @@ The report references canonical plots from [`../figures/`](../figures/). The
 plotting scripts remain in [`../postProcess/`](../postProcess/), compact timing
 tables stay beside the generated figures, and raw run output remains excluded
 from Git. The present source covers the stock kernels, the Marangoni
-application series, and five uniform-grid application kernels.
+application series, and four uniform-grid application kernels.

@@ -6,7 +6,7 @@
 #SBATCH --time=01:00:00
 #SBATCH --exclusive
 
-# Serial dumpInit for bursting and/or jumping-drops.
+# Serial dumpInit for bursting.
 set -euo pipefail
 ulimit -s unlimited
 
@@ -18,18 +18,11 @@ SCRATCH_DST="${SCRATCH_DST:?set SCRATCH_DST through site/*.env}"
 PROJECT_DST="${PROJECT_DST:?set PROJECT_DST through site/*.env}"
 LEVEL_BURST="${LEVEL_BURST:-10}"
 LEVELS_BURST="${LEVELS_BURST:-${LEVEL_BURST}}"
-LEVEL_JUMP="${LEVEL_JUMP:-7}"
 SKIP_BURST="${SKIP_BURST:-0}"
-SKIP_JUMP="${SKIP_JUMP:-0}"
 
 burst_bin="${SCRATCH_DST}/bin/bursting-uniform-init"
-jump_bin="${SCRATCH_DST}/bin/jumping-uniform-init"
 if [[ "${SKIP_BURST}" != "1" && ! -x "${burst_bin}" ]]; then
   echo "missing ${burst_bin}" >&2
-  exit 1
-fi
-if [[ "${SKIP_JUMP}" != "1" && ! -x "${jump_bin}" ]]; then
-  echo "missing ${jump_bin}" >&2
   exit 1
 fi
 
@@ -54,35 +47,3 @@ if [[ "${SKIP_BURST}" != "1" ]]; then
 else
   echo "skipped bursting-uniform-init"
 fi
-
-if [[ "${SKIP_JUMP}" == "1" ]]; then
-  echo "skipped jumping-uniform-init"
-  exit 0
-fi
-
-jump_out="${SCRATCH_DST}/runs/jumping-uniform"
-stl_run="${jump_out}/InitialCondition.stl"
-stl_proj="${PROJECT_DST}/simulationCases/data/InitialCondition.stl"
-if [[ -f "${stl_run}" ]]; then
-  stl="${stl_run}"
-elif [[ -f "${stl_proj}" ]]; then
-  stl="${stl_proj}"
-else
-  echo "missing InitialCondition.stl (tried ${stl_run}, ${stl_proj}); run scripts/fetch-jumping-stl.sh before staging" >&2
-  exit 1
-fi
-mkdir -p "${jump_out}"
-if [[ "${stl}" != "${stl_run}" ]]; then
-  cp -f "${stl}" "${jump_out}/InitialCondition.stl"
-fi
-cd "${jump_out}"
-if [[ -f dumpInit && ! -f dumpInit-7 ]]; then
-  cp -f dumpInit dumpInit-7
-  echo "preserved ${jump_out}/dumpInit-7"
-fi
-echo "host=$(hostname) jumping-uniform-init LEVEL=${LEVEL_JUMP} job=${SLURM_JOB_ID}"
-"${jump_bin}" "${LEVEL_JUMP}" \
-  > "init-out-${LEVEL_JUMP}" 2> "init-log-${LEVEL_JUMP}"
-test -f dumpInit
-mv -f dumpInit "dumpInit-${LEVEL_JUMP}"
-echo "wrote ${jump_out}/dumpInit-${LEVEL_JUMP}"

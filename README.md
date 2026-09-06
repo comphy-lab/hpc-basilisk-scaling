@@ -53,7 +53,6 @@ from one source tree.
 | `taylorculick-uniform.c` | Axisymmetric elastic Taylor--Culick sheet, uniform grid |
 | `ve3d-impact-uniform.c` | 3D viscoelastic drop impact, uniform octree |
 | `drop-impact-uniform.c` | Axisymmetric Newtonian drop impact, uniform grid |
-| `jumping-uniform.c` | 3D jumping drops, uniform octree; serial STL init |
 
 `marangoni.c` is the unmodified basilisk.fr `src/test/marangoni.c`. The
 `-scale`, `-multidrop`, `-interact` and `activity-drop` files keep its
@@ -154,8 +153,6 @@ the script URL and `--ref` with the same
 │   ├── taylorculick-uniform.c - elastic Taylor--Culick, uniform
 │   ├── ve3d-impact-uniform.c - 3D viscoelastic impact, uniform
 │   ├── drop-impact-uniform.c - Newtonian drop impact, uniform
-│   ├── jumping-uniform-init.c - jumping-drops serial STL init
-│   ├── jumping-uniform.c - jumping-drops MPI continuation
 │   └── DataFiles/ - bursting interface polyline (Bo = 0.001)
 ├── src-local/ - activity.h and vendored viscoelastic headers
 │   └── activity.h - activity tracer transport
@@ -245,7 +242,7 @@ wrapper submits one campaign: `smoke*.sh` for a two-rank check,
 `scale-marangoni*.sh` for the drop cases, and `scale-marangoni-io-validate.sh`
 for a timed dump-and-restart plus the Al Saud resolution study, and
 `scale-uniform-apps.sh` for the uniform bursting, Taylor--Culick, 3D VE
-impact, drop-impact and jumping-drops kernels. Rank lists, levels and
+impact and drop-impact kernels. Rank lists, levels and
 windows are environment variables with sensible defaults; read the header
 of the wrapper before changing them.
 
@@ -316,12 +313,11 @@ together in `figures/marangoni-uniform-ndrop-per-iter.pdf`; the
 adaptive Al Saud validation in `figures/marangoni-validate-vt-fields.pdf`;
 and one uniform-grid application panel each in
 `figures/bursting-uniform.pdf`, `figures/taylorculick-uniform.pdf`,
-`figures/ve3d-impact-uniform.pdf`, `figures/drop-impact-uniform.pdf` and
-`figures/jumping-uniform.pdf`. The three axisymmetric panels cover
+`figures/ve3d-impact-uniform.pdf` and `figures/drop-impact-uniform.pdf`.
+The three axisymmetric panels cover
 $L=9/10/11$ (colour is $N_x$), with $L=11$ Taylor--Culick and drop impact
 recorded through 2304 ranks so the strong-scaling knee is in the series;
-the two three-dimensional
-panels remain one-node $L=7$ sweeps.
+the three-dimensional panel remains a one-node $L=7$ sweep.
 The timing tables behind them are the CSV files beside the PDFs.
 
 ## Licence
