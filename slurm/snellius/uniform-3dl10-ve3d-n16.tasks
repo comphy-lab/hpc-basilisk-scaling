@@ -1,0 +1,3 @@
+# test LEVEL NITER RANKS
+# 3D viscoelastic drop impact L=10, sixteen exclusive Genoa nodes.
+ve3d-impact-uniform 10 10 3072

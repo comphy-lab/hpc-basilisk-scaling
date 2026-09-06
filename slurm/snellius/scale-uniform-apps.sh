@@ -118,6 +118,10 @@ case "${MODE}" in
     TIME=04:00:00
     echo "ve3d-n12 -> $(submit_array_nodes snl-3dl10-v12 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-ve3d-n12.tasks" 12 "" 1)"
     ;;
+  3dl10-ve3d-n16|3dl10-ve3d-n32|3dl10-ve3d-n64)
+    nodes="${MODE##*-n}"
+    echo "ve3d-n${nodes} -> $(submit_array_nodes "snl-3dl10-v${nodes}" "${PROJECT_DST}/slurm/snellius/uniform-3dl10-ve3d-n${nodes}.tasks" "${nodes}" "" 1)"
+    ;;
   3dl10-jump-init)
     TIME=04:00:00
     SKIP_BURST=1
@@ -140,7 +144,7 @@ case "${MODE}" in
     echo "jump-n12 -> $(submit_array_nodes snl-3dl10-j12 "${PROJECT_DST}/slurm/snellius/uniform-3dl10-jump-n12.tasks" 12 "${dep}" 1)"
     ;;
   *)
-    echo "usage: $0 [all|init|init-jump|mpi|restore [INIT_JOBID]|fig567|fig567-knee|3dl10-ve3d-n4|3dl10-ve3d-n8|3dl10-ve3d-n12|3dl10-jump-init|3dl10-jump-n4 [INIT_JOBID]|3dl10-jump-n8 [INIT_JOBID]|3dl10-jump-n12 [INIT_JOBID]]" >&2
+    echo "usage: $0 [all|init|init-jump|mpi|restore [INIT_JOBID]|fig567|fig567-knee|3dl10-ve3d-n4|3dl10-ve3d-n8|3dl10-ve3d-n12|3dl10-ve3d-n16|3dl10-ve3d-n32|3dl10-ve3d-n64|3dl10-jump-init|3dl10-jump-n4 [INIT_JOBID]|3dl10-jump-n8 [INIT_JOBID]|3dl10-jump-n12 [INIT_JOBID]]" >&2
     exit 2
     ;;
 esac
