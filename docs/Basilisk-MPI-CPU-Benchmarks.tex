@@ -63,9 +63,11 @@ The proposed suite has three layers:
 \begin{enumerate}
   \item stock Poisson and Laplacian kernels for reproducible machine-to-machine
         comparison;
-  \item verified two-phase workloads that exercise the same solver
-        stack with interface reconstruction and surface tension, including
-        the Marangoni series and five uniform-grid application kernels; and
+  \item two-phase timing workloads that exercise the same solver stack with
+        interface reconstruction and surface tension: the Marangoni series
+        includes a terminal-velocity reference comparison, while the five
+        uniform-grid application kernels provide scaling timings without a
+        separate physical-validation result here; and
   \item a workload series in which spatial resolution or the number of drops
         is increased, testing whether a larger application postpones
         strong-scaling saturation.
@@ -138,7 +140,7 @@ Panel~(b) increases the number of drops in a planar domain while retaining
 64 points per radius. The larger problems continue to benefit from additional
 ranks after the smaller problems have saturated. This is the expected
 application behaviour: the useful rank count grows with the work available
-per rank. The present application dataset stops at 1,024 ranks, approximately
+per rank. The present Marangoni dataset stops at 1,024 ranks, approximately
 5.3 fully populated 192-core nodes, and should be used as small-scale evidence.
 
 \begin{figure}[htbp]
@@ -152,9 +154,9 @@ per rank. The present application dataset stops at 1,024 ranks, approximately
   \label{fig:application-scaling}
 \end{figure}
 
-\section{Verification and benchmark coverage}
+\section{Reference comparison and benchmark coverage}
 
-The application remains useful only if it solves the intended flow. Figure
+The Marangoni application remains useful only if it solves the intended flow. Figure
 \ref{fig:validation} compares the computed drop speed with the analytical
 terminal velocity and with the Basilisk reference data. The coarse-resolution
 error follows the expected second-order trend through 32 points per radius;
@@ -173,9 +175,10 @@ as a single second-order convergence range because their error plateaus.
 \end{figure}
 
 The stock kernels extend the measured rank range beyond the representative
-application. The active-drop figure then tests how the complete two-phase
-workload shifts the strong-scaling limit as resolution and interface count
-increase.
+application. The Marangoni series combines the timing sweep with the reference
+comparison above; the five uniform-grid application kernels supply additional
+two-phase timing cases without a separate physical-validation result in this
+report.
 
 \section{Qualification matrix for a 192-core node}
 
@@ -193,9 +196,9 @@ performance at 8,192 or 16,384 ranks should not be silently substituted for a
 \toprule
 Class & Proposed nodes & MPI ranks & Present evidence \\
 \midrule
-Small & 1, 2, 4, 8, 10 & 192--1,920 & Kernel curves bracket the range; application to 1,024 ranks \\
+Small & 1, 2, 4, 8, 10 & 192--1,920 & Kernel curves bracket the range; Marangoni to 1,024 ranks; axisymmetric Taylor--Culick and drop impact to 2,304 ranks \\
 Medium & 16, 32, 64 & 3,072--12,288 & Kernel data at 4,096 and 8,192 ranks; 64 nodes bracketed \\
-Large & 128, 256 & 24,576--49,152 & Not yet measured; requires a scaled problem and memory pilot \\
+Large & 128, 256 & 24,576--49,152 & Not yet measured; workload size to be selected after scaling and memory pilots \\
 \bottomrule
 \end{tabularx}
 \caption{Proposed node-aligned qualification points for a system with 192 CPU
@@ -206,11 +209,15 @@ separated.}
 
 For the small class, the current $L=9$ three-dimensional and $L=14$
 two-dimensional problems can be retained as fixed-size strong-scaling tests.
-For 16--64 nodes, a three-dimensional $L=10$ case should be added after a
-memory check. The 128- and 256-node points require a larger problem, such as an
-$L=11$ octree, after a short pilot has established memory use and initialization
-cost. The purpose of the large case is to preserve enough cells per rank to
-measure the network at scale rather than to time an already saturated problem.
+For 16--64 nodes, the viscoelastic drop-impact (VE3D) case is the lead
+candidate for a three-dimensional $L=10$ continuation. Test this case first at
+16, 32 and 64 nodes, subject to a memory check. If the $L=10$ problem leaves
+too little work per rank at the target scale, a larger problem such as an
+$L=11$ octree can then be considered for 128 nodes and, if needed, beyond; a
+short pilot would establish memory use and initialization cost before that
+extension. The purpose of the large case is to preserve enough cells per rank
+to measure the network at scale rather than to time an already saturated
+problem.
 
 The representative two-phase case should accompany the kernels at small and
 medium scales. A large-scale application case should be promoted only after
@@ -298,8 +305,9 @@ The two three-dimensional kernels use a uniform octree. Figure
 \ref{fig:ve3d-impact-uniform} is a viscoelastic drop impact at $L=7$
 ($128^3$ cells). Wall time per iteration falls from $10.8$~s at two ranks to
 $0.331$~s at 192 ranks, a factor of 32. The curve is monotonic but bends away
-from ideal scaling earlier than the two-dimensional cases, as expected from
-the extra log-conformation work and the octree halo exchange.
+from ideal scaling earlier than the two-dimensional cases. These timings do
+not separate computation, communication and other overheads, so they do not
+identify the cause of the bend.
 
 \begin{figure}[htbp]
   \centering
@@ -313,10 +321,10 @@ the extra log-conformation work and the octree halo exchange.
 Figure~\ref{fig:jumping-uniform} is the jumping-drop kernel at $L=7$ (again
 $128^3$ cells). An $L=6$ mesh ($64^3$) leaves too few cells per rank on a
 192-core node and saturates; the $L=7$ sweep is monotonic from $5.75$~s at two
-ranks to $0.189$~s at 192 ranks (a factor of 30). That is the same
-three-dimensional pattern as the viscoelastic impact: useful scaling across
-the node, with a lower parallel efficiency than the $1024^2$ axisymmetric
-kernels.
+ranks to $0.189$~s at 192 ranks (a factor of 30). The sweep remains useful
+across the node, with a lower parallel efficiency than the $1024^2$
+axisymmetric kernels. The timing data identify that difference but do not
+isolate its cause.
 
 \begin{figure}[htbp]
   \centering
@@ -343,27 +351,28 @@ timing:
   \item node type, ranks per node, thread affinity and rank binding;
   \item mesh dimensionality, level, total cell count and cells per rank;
   \item wall time, MPI time, iteration count and any initialization excluded
-        from the timed region; and
-  \item at least three repeats after the initial qualification run, reporting
-        the median and spread rather than only the best observation.
+        from the timed region.
 \end{itemize}
 
 The current CSV files contain one observation for each configuration. They are
 sufficient to locate scaling regimes and design the next campaign, but they do
-not quantify system variability. Repeated node-aligned runs are therefore part
-of the proposed qualification procedure.
+not quantify system variability.
 
 \section{Conclusion}
 
 Basilisk provides a compact CPU benchmark with a direct connection to
 production multiphase-flow workloads. The stock Poisson and Laplacian kernels
-separate local computation from MPI communication, while the verified
-two-phase cases test interface reconstruction, surface tension, extra-stress
-transport and the full projection step. Existing measurements cover the small
-class and bracket a 64-node, 192-core-per-node test. The next useful
-measurements are exact node-aligned repeats and scaled three-dimensional
-problems at 128 and 256 nodes. This distinction keeps present evidence
-separate from the capabilities that a future system must demonstrate.
+separate local computation from MPI communication, while the Marangoni case is
+compared with reference data and the five uniform-grid cases extend timing
+coverage across the two-phase solver stack. Existing measurements cover the
+small class and bracket a 64-node, 192-core-per-node test. The next useful
+measurement is the VE3D $L=10$ continuation at 16, 32 and 64 nodes, conditional
+on the memory check and observed scaling. An $L=11$ case at 128 nodes can then
+be considered only if the $L=10$ problem leaves too little work per rank there;
+extension beyond 128 nodes remains optional and would require the same
+evidence. Current timings remain single observations and do not measure
+run-to-run variability. This distinction keeps present evidence separate from
+the capabilities that a future system must demonstrate.
 
 \begin{thebibliography}{9}
 
