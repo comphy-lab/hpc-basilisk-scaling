@@ -314,13 +314,34 @@ def plot_kernel_comparison(rows: list[dict[str, str]], out: Path) -> None:
     save_report_figure(fig, axes, out)
 
 
+def ideal_prefactor(
+    rows: list[dict[str, str]], key: str, value: int, npe_max: int | None
+) -> float | None:
+    values = [
+        int(row["npe"]) * float(row["per_step"])
+        for row in rows
+        if int(row[key]) == value
+        and (npe_max is None or int(row["npe"]) <= npe_max)
+        and int(row["npe"]) > 0
+        and float(row["per_step"]) > 0
+    ]
+    return float(np.exp(np.mean(np.log(values)))) if values else None
+
+
 def draw_application_series(
     ax: plt.Axes,
     rows: list[dict[str, str]],
     key: str,
     levels: tuple[int, ...],
     norm: LogNorm,
+    ideal_window: dict[int, int],
 ) -> None:
+    rank_axis = np.array([2**k for k in range(1, 11)], dtype=float)
+    for value in levels:
+        prefactor = ideal_prefactor(rows, key, value, ideal_window.get(value))
+        if prefactor is not None:
+            ax.plot(rank_axis, prefactor / rank_axis, "--", lw=0.95,
+                    color=VIRIDIS(norm(value)), zorder=1)
     for value in levels:
         colour = VIRIDIS(norm(value))
         for machine, marker in COMBINED_MARKERS.items():
@@ -378,9 +399,10 @@ def plot_application_report(
             APPLICATION_HEIGHT_MM,
         ),
     ]
-    draw_application_series(axes[0], pts_rows, "pts", PTS_LEVELS, PTS_NORM)
+    draw_application_series(axes[0], pts_rows, "pts", PTS_LEVELS, PTS_NORM, {64: 256})
     draw_application_series(
         axes[1], drop_rows, "ndrops", DROP_LEVELS, DROP_NORM,
+        {1: 256, 2: 256, 4: 256, 8: 256, 16: 512, 32: 512},
     )
     for ax, rows, title in (
         (axes[0], pts_rows, r"$(a)$~axisymmetric, uniform mesh"),
@@ -391,7 +413,6 @@ def plot_application_report(
         ax.set_title(title, pad=5)
         ax.set_xlabel("MPI ranks", labelpad=3)
         style_log_axes(ax, 2, 1024)
-        add_corner_guides(ax)
     axes[0].set_ylabel("Wall time / iteration (s)", labelpad=3)
     colourbar0 = add_colourbar_axes(
         fig,
@@ -420,7 +441,7 @@ def plot_application_report(
                mew=0.6, label=machine)
         for machine, marker in COMBINED_MARKERS.items()
     ]
-    machine_handles.append(ideal_legend_handle())
+    machine_handles.append(Line2D([0], [0], ls="--", lw=1, color="0.25", label="ideal"))
     fig.legend(
         handles=machine_handles, loc="lower center", ncol=3, frameon=False,
         bbox_to_anchor=(0.5, 0.025), handlelength=1.8, columnspacing=1.4,

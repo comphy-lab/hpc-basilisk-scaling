@@ -32,7 +32,6 @@ from matplotlib.lines import Line2D
 from matplotlib.ticker import FormatStrFormatter
 
 import plot_uniform_apps as source_plot
-from scaling_guides import add_corner_guides, ideal_legend_handle
 
 
 REPO = Path(__file__).resolve().parents[1]
@@ -52,6 +51,7 @@ REPORT_CASES = tuple(
 MULTILEVEL_CASES = source_plot.MULTILEVEL_CASES
 NX_LEVELS = source_plot.NX_LEVELS
 NX_NORM = source_plot.NX_NORM
+NX_IDEAL_WINDOW = source_plot.NX_IDEAL_WINDOW
 VIRIDIS = source_plot.VIRIDIS
 MACHINE_STYLE = source_plot.MACHINE_STYLE
 
@@ -94,14 +94,38 @@ def load_rows(path: Path) -> list[dict[str, float | int | str]]:
     return rows
 
 
-def _rank_limits(
+def _rank_axis_multilevel(
     picked: list[dict[str, float | int | str]],
-) -> tuple[float, float]:
-    """Match the source plotter's rank limits without drawing an ideal line."""
+) -> tuple[float, float, np.ndarray]:
+    """Match plot_uniform_apps.plot_multilevel() exactly."""
     npe = np.array([int(row["npe"]) for row in picked], dtype=float)
     rank_min = float(npe.min())
     rank_max = max(float(npe.max()), 192.0)
-    return rank_min, rank_max
+    rank_lo = int(np.floor(np.log2(rank_min)))
+    rank_hi = int(np.ceil(np.log2(rank_max)))
+    rank_axis = np.array([2**k for k in range(rank_lo, rank_hi + 1)], dtype=float)
+    if rank_axis[-1] < rank_max:
+        rank_axis = np.append(rank_axis, rank_max)
+    return rank_min, rank_max, rank_axis
+
+
+def _rank_axis_single(
+    picked: list[dict[str, float | int | str]],
+) -> tuple[float, float, np.ndarray]:
+    """Match plot_uniform_apps.plot_case() exactly."""
+    npe = np.array([int(row["npe"]) for row in picked], dtype=float)
+    rank_min = float(npe.min())
+    rank_max = max(float(npe.max()), 192.0)
+    rank_axis = np.array(
+        [
+            2**k
+            for k in range(int(np.log2(rank_min)), int(np.log2(rank_max)) + 1)
+        ],
+        dtype=float,
+    )
+    if rank_axis[-1] < rank_max:
+        rank_axis = np.append(rank_axis, rank_max)
+    return rank_min, rank_max, rank_axis
 
 
 def style_axes(ax: plt.Axes, ranks: list[int]) -> None:
@@ -150,7 +174,11 @@ def add_legend(ax: plt.Axes, measured: bool = True) -> None:
                 label=spec["label"],
             )
         )
-    handles.append(ideal_legend_handle())
+    handles.append(
+        Line2D(
+            [0], [0], linestyle="--", linewidth=1.0, color="0.25", label="ideal"
+        )
+    )
     ax.legend(
         handles=handles,
         loc="center right",
@@ -198,9 +226,23 @@ def plot_multilevel(
     picked = [row for row in rows if str(row["case"]) == case]
     if not picked:
         raise SystemExit(f"no timing rows for {case}")
-    rank_min, rank_max = _rank_limits(picked)
+    rank_min, rank_max, rank_axis = _rank_axis_multilevel(picked)
     fig, ax = configure_figure()
     present_nx = sorted({int(row["nx"]) for row in picked})
+
+    for nx in present_nx:
+        prefactor = source_plot._ideal_prefactor(
+            picked, nx, NX_IDEAL_WINDOW.get(nx)
+        )
+        if prefactor is not None:
+            ax.plot(
+                rank_axis,
+                prefactor / rank_axis,
+                linestyle="--",
+                linewidth=1.0,
+                color=VIRIDIS(NX_NORM(nx)),
+                zorder=1,
+            )
 
     for nx in present_nx:
         colour = VIRIDIS(NX_NORM(nx))
@@ -231,7 +273,6 @@ def plot_multilevel(
             )
 
     finish_axes(ax, picked, rank_min, rank_max)
-    add_corner_guides(ax)
     add_legend(ax)
     cax = fig.add_axes([
         (AXES_LEFT_MM + AXES_SIDE_MM + 5) / FIGURE_WIDTH_MM,
@@ -250,9 +291,20 @@ def plot_single_level(
     picked.sort(key=lambda row: (str(row["machine"]), int(row["npe"])))
     if not picked:
         raise SystemExit(f"no timing rows for {case}")
-    rank_min, rank_max = _rank_limits(picked)
+    rank_min, rank_max, rank_axis = _rank_axis_single(picked)
     fig, ax = configure_figure()
 
+    y0 = float(picked[0]["per_step"])
+    n0 = float(picked[0]["npe"])
+    if y0 > 0 and n0 > 0:
+        ax.plot(
+            rank_axis,
+            y0 * n0 / rank_axis,
+            linestyle="--",
+            linewidth=1.0,
+            color="0.25",
+            zorder=1,
+        )
     for machine, spec in MACHINE_STYLE.items():
         series = sorted(
             (row for row in picked if str(row["machine"]) == machine),
@@ -275,7 +327,6 @@ def plot_single_level(
         )
 
     finish_axes(ax, picked, rank_min, rank_max)
-    add_corner_guides(ax)
     add_legend(ax)
     save_figure(fig, out)
 

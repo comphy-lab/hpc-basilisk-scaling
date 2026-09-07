@@ -143,7 +143,8 @@ two-phase cases against the Al Saud terminal velocity.
   one legend, with blue shades for L14 and red shades for L9, fixed machine
   symbols, and neutral ideal-scaling guides independent of measured baselines.
   Use `postProcess/scaling_guides.py` for matching lower-left and upper-right
-  corner guides in every report scaling panel; keep the final axis limits.
+  corner guides in Figure 1 only; keep the final axis limits. Other figures
+  retain their original guide placement and styling.
   Update this list when a figure
   is added or retired.
 - Public reports live in `docs/`. Keep each report's source self-contained in
