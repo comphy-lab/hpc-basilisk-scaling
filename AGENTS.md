@@ -138,6 +138,10 @@ two-phase cases against the Al Saud terminal velocity.
   `figures/marangoni-validate-vt-fields.pdf`,
   `figures/bursting-uniform.pdf`, `figures/taylorculick-uniform.pdf`,
   `figures/ve3d-impact-uniform.pdf`, `figures/drop-impact-uniform.pdf`.
+  The report combines the two stock-kernel comparisons in
+  `figures/kernel-scaling-combined-report.pdf`; its four square panels share
+  one legend, with blue shades for L14 and red shades for L9, fixed machine
+  symbols, and a neutral ideal-scaling guide independent of measured baselines.
   Update this list when a figure
   is added or retired.
 - Public reports live in `docs/`. Keep each report's source self-contained in

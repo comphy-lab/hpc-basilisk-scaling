@@ -305,7 +305,9 @@ named snapshot times such as restart dumps; `--max-frames` and
 `--skip-video` are for short checks. Do not point this planar pipeline at
 the axisymmetric `get_fields.c`.
 
-Current figures: kernel scaling in `figures/laplacian-L9.pdf`,
+Current figures: the combined report overview for the four stock-kernel
+panels is `figures/kernel-scaling-combined-report.pdf`; the original kernel
+scaling assets remain available in `figures/laplacian-L9.pdf`,
 `figures/circle-L14.pdf` and `figures/circle-L12.pdf`; uniform-quadtree
 Marangoni wall time per iteration in `figures/marangoni-uniform-per-iter.pdf`;
 the planar drop-count series in `figures/planar-ndrop-per-iter.pdf`; both
@@ -351,11 +353,13 @@ parameters, checksums and attribution are recorded in
 The report figures are authored at their final width of 166 mm, with Computer
 Modern type: 10 pt labels, 9 pt ticks and legends, and 11 pt panel letters.
 The report captions use 10 pt type. Plot axes use a square 1:1 box aspect.
-The combined application figures centre the square scaling plot above a
+The `plot_report_overview.py` script rebuilds the combined kernel overview and
+Marangoni report assets. The combined application figures centre the square
+scaling plot above a
 two-by-two temporal sequence, with legends and colour bars in the side space,
 and have the suffix
-`-uniform-illustrated.pdf`. The original scaling assets and timing tables
-remain available alongside the report-sized `-report.pdf` variants.
+`-uniform-illustrated.pdf`. The original application scaling assets and timing
+tables remain available alongside the report-sized `-report.pdf` variants.
 
 ## Licence
 

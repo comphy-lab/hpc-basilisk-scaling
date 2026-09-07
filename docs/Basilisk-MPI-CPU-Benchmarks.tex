@@ -67,42 +67,33 @@ and figure scripts are available at
 
 The two-dimensional test uses a full quadtree at $L=14$, or $2^{28}$ cells.
 On Snellius, the Poisson time decreases through 8,192 ranks and plateaus at
-16,384 ranks (Figure~\ref{fig:2d-kernel}). The growing MPI contribution
+16,384 ranks (Figure~\ref{fig:kernel-scaling}(a)). The growing MPI contribution
 relative to wall time shows that communication limits this part of the
 curve. The published Curie measurements provide a reference for the same
 calculation.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{circle-L14-report.pdf}
-  \caption{Strong scaling on a full two-dimensional quadtree at $L=14$.
-  (a) Poisson solve. (b) Laplacian operator. Solid curves show wall time per
-  iteration; dashed curves show the measured MPI contribution. The grey
-  dotted line follows ideal scaling from the MareNostrum~5 baseline. Curie
-  data are distributed with the stock Basilisk test.}
-  \label{fig:2d-kernel}
+  \includegraphics[width=\textwidth]{kernel-scaling-combined-report.pdf}
+  \caption{Strong scaling of the stock Poisson (left) and Laplacian (right)
+  kernels. (a,b) Full two-dimensional quadtree at $L=14$.
+  (c,d) Full three-dimensional octree at $L=9$. Blue and red identify
+  $L=14$ and $L=9$, respectively; dark and light shades give wall and MPI
+  time. Circles and diamonds identify MareNostrum~5 and Snellius. Open
+  symbols show the Curie (two-dimensional) and Occigen (three-dimensional)
+  reference data. Solid curves connect measurements. Grey dashed guides
+  show $T\propto N_{\mathrm{MPI}}^{-1}$ with arbitrary vertical normalization.}
+  \label{fig:kernel-scaling}
 \end{figure}
 
 The three-dimensional test uses a full octree at $L=9$, or $2^{27}$ cells.
 The Snellius Poisson time falls from $19.34$~s at two ranks to $0.0390$~s at
 4,096 ranks, with only a further reduction to $0.0333$~s at 16,384 ranks
-(Figure~\ref{fig:3d-kernel}). Occigen supplies the corresponding stock-test
+(Figure~\ref{fig:kernel-scaling}(c)). Occigen supplies the corresponding stock-test
 reference. Together, the wall and MPI timings distinguish the low-rank
 regime, governed primarily by local computation and memory access, from the
 large-rank regime in which communication takes a substantial fraction of
 the iteration.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{laplacian-L9-report.pdf}
-  \caption{Strong scaling of the stock three-dimensional
-  \texttt{mpi-laplacian} test on a full octree at $L=9$.
-  (a) Poisson solve. (b) Laplacian operator. Solid and dashed curves show wall
-  and MPI time per iteration, respectively. Occigen data provide the stock
-  reference; the dotted line gives ideal scaling from the MareNostrum~5
-  baseline.}
-  \label{fig:3d-kernel}
-\end{figure}
 
 \section{Marangoni-driven migration}
 

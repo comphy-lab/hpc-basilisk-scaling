@@ -34,14 +34,15 @@ from matplotlib.ticker import FixedLocator, NullFormatter
 
 REPO = Path(__file__).resolve().parents[1]
 FIGURE_WIDTH_MM = 166.0
-KERNEL_HEIGHT_MM = 90.0
+KERNEL_HEIGHT_MM = 185.0
 APPLICATION_HEIGHT_MM = 80.0
 FIGURE_WIDTH_IN = FIGURE_WIDTH_MM / 25.4
 KERNEL_HEIGHT_IN = KERNEL_HEIGHT_MM / 25.4
 APPLICATION_HEIGHT_IN = APPLICATION_HEIGHT_MM / 25.4
 KERNEL_AXES_SIDE_MM = 60.0
 KERNEL_AXES_LEFT_MM = 16.0
-KERNEL_AXES_BOTTOM_MM = 22.0
+KERNEL_AXES_BOTTOM_MM = 32.0
+KERNEL_ROW_PITCH_MM = 82.0
 KERNEL_AXES_GAP_MM = 14.0
 APPLICATION_AXES_SIDE_MM = 50.0
 APPLICATION_AXES_LEFT_MM = 17.0
@@ -54,27 +55,19 @@ PTS_CSV = REPO / "figures" / "marangoni-uniform-per-iter-timings.csv"
 DROPS_CSV = REPO / "figures" / "planar-ndrop-timings.csv"
 
 MACHINE_STYLE = {
-    "MareNostrum 5": {
-        "wall": "#1A64B3",
-        "mpi": "#C44E52",
-        "wall_marker": "o",
-        "mpi_marker": "s",
-        "zorder": 4,
-    },
-    "Snellius": {
-        "wall": "#4DAF4A",
-        "mpi": "#984EA3",
-        "wall_marker": "P",
-        "mpi_marker": "X",
-        "zorder": 3.5,
-    },
+    "MareNostrum 5": {"marker": "o", "zorder": 4},
+    "Snellius": {"marker": "D", "zorder": 3.5},
 }
-REFERENCE_STYLE = {
-    "wall": "#E76F51",
-    "mpi": "#8C564B",
-    "wall_marker": "D",
-    "mpi_marker": "^",
+LEVEL_COLOURS = {
+    14: {"wall": "#08519c", "mpi": "#4292c6"},
+    9: {"wall": "#a50f15", "mpi": "#e57373"},
 }
+REFERENCE_MARKERS = {"Curie": "^", "Occigen": "s"}
+KERNEL_ROWS = (("mpi-laplacian-2d", 14), ("mpi-laplacian", 9))
+# Arbitrary vertical positions for T proportional to N^-1, independent of
+# every measured baseline. The same guide is used for both mesh dimensions.
+IDEAL_GUIDE_RANKS = np.array([8.0, 1024.0])
+IDEAL_GUIDE_PREFACTOR = {"poisson": 16.0, "laplacian": 1.0}
 REFERENCE_ROOT = {
     "mpi-laplacian-2d": REPO / "reference" / "curie",
     "mpi-laplacian": REPO / "reference" / "occigen-3D",
@@ -227,85 +220,102 @@ def save_report_figure(fig: plt.Figure, axes: list[plt.Axes], out: Path) -> None
     plt.close(fig)
 
 
-def plot_kernel_report(
-    rows: list[dict[str, str]], test: str, level: int, out: Path
+def draw_kernel_series(
+    ax: plt.Axes,
+    npe: np.ndarray,
+    wall: np.ndarray,
+    mpi: np.ndarray,
+    *,
+    level: int,
+    machine: str,
+    marker: str,
+    filled: bool,
+    zorder: float,
 ) -> None:
-    fig = plt.figure(
-        figsize=(FIGURE_WIDTH_IN, KERNEL_HEIGHT_IN), facecolor="white"
-    )
-    axes = [
-        add_square_axes(
-            fig,
-            KERNEL_AXES_LEFT_MM + index * (KERNEL_AXES_SIDE_MM + KERNEL_AXES_GAP_MM),
-            KERNEL_AXES_BOTTOM_MM,
-            KERNEL_AXES_SIDE_MM,
-            KERNEL_HEIGHT_MM,
+    """Keep machine symbols fixed while colour encodes level and timing type."""
+    for metric, time in (("wall", wall), ("mpi", mpi)):
+        colour = LEVEL_COLOURS[level][metric]
+        ax.plot(
+            npe, time, "-", lw=1.1, marker=marker, ms=4.0,
+            mfc=colour if filled else "none",
+            mec="k" if filled else colour, mew=0.45 if filled else 0.85,
+            color=colour, zorder=zorder if metric == "wall" else zorder - 0.25,
+            label=f"{machine} {metric}",
         )
-        for index in range(2)
+
+
+def kernel_legend(fig: plt.Figure) -> None:
+    """One shared legend: level/timing shades above the machine symbols."""
+    colour_handles = [
+        Line2D([0], [0], color=LEVEL_COLOURS[level][metric], lw=1.4,
+               label=rf"$L={level}$, {label}")
+        for level in (14, 9)
+        for metric, label in (("wall", "wall"), ("mpi", "MPI"))
     ]
-    handles: list[Line2D] = []
-    all_ranks: list[int] = []
-    for ax, kernel, panel in zip(axes, ("poisson", "laplacian"), ("a", "b")):
-        first_machine: tuple[np.ndarray, np.ndarray] | None = None
-        for machine, spec in MACHINE_STYLE.items():
-            npe, wall, mpi = select_kernel(rows, machine, test, level, kernel)
-            if not npe.size:
-                continue
-            all_ranks.extend(npe.astype(int))
-            if first_machine is None:
-                first_machine = (npe, wall)
-            wall_line, = ax.plot(
-                npe, wall, "-", lw=1.25, marker=spec["wall_marker"], ms=4.2,
-                mfc=spec["wall"], mec="k", mew=0.45, color=spec["wall"],
-                zorder=spec["zorder"], label=f"{machine} wall",
-            )
-            mpi_line, = ax.plot(
-                npe, mpi, "--", lw=1.05, marker=spec["mpi_marker"], ms=3.7,
-                mfc=spec["mpi"], mec="k", mew=0.4, color=spec["mpi"],
-                zorder=spec["zorder"] - 0.5, label=f"{machine} MPI",
-            )
-            if kernel == "poisson":
-                handles.extend((wall_line, mpi_line))
-
-        ref_npe, ref_wall, ref_mpi = select_reference(test, level, kernel)
-        if not ref_npe.size:
-            raise SystemExit(f"missing {REFERENCE_LABEL[test]} reference for {test} L={level}")
-        all_ranks.extend(ref_npe.astype(int))
-        ref_wall_line, = ax.plot(
-            ref_npe, ref_wall, "-", lw=1.05, marker=REFERENCE_STYLE["wall_marker"],
-            ms=3.8, mfc="none", mec=REFERENCE_STYLE["wall"], mew=0.9,
-            color=REFERENCE_STYLE["wall"], zorder=2,
-            label=f"{REFERENCE_LABEL[test]} wall",
+    machine_handles = [
+        Line2D([0], [0], ls="none", marker=marker, ms=5,
+               mfc="0.6" if filled else "none", mec="k", mew=0.7, label=machine)
+        for machine, marker, filled in (
+            ("MareNostrum 5", "o", True), ("Snellius", "D", True),
+            ("Curie", "^", False), ("Occigen", "s", False),
         )
-        ref_mpi_line, = ax.plot(
-            ref_npe, ref_mpi, "--", lw=0.95, marker=REFERENCE_STYLE["mpi_marker"],
-            ms=3.5, mfc="none", mec=REFERENCE_STYLE["mpi"], mew=0.8,
-            color=REFERENCE_STYLE["mpi"], zorder=2,
-            label=f"{REFERENCE_LABEL[test]} MPI",
-        )
-        if kernel == "poisson":
-            handles.extend((ref_wall_line, ref_mpi_line))
-        if first_machine is None:
-            raise SystemExit(f"missing machine data for {test} L={level} {kernel}")
-        ideal_npe, ideal_wall = first_machine
-        ideal_line, = ax.plot(
-            ideal_npe, ideal_wall[0] * ideal_npe[0] / ideal_npe, ":", lw=1.1,
-            color="0.3", zorder=1, label="ideal (MareNostrum 5)",
-        )
-        if kernel == "poisson":
-            handles.append(ideal_line)
-        ax.set_title(rf"$({panel})$~{kernel.capitalize()}", pad=5)
-        ax.set_xlabel("MPI ranks", labelpad=3)
-        ax.set_ylabel("Time / iteration (s)", labelpad=3)
-
-    xmin, xmax = min(all_ranks), max(all_ranks)
-    for ax in axes:
-        style_log_axes(ax, xmin, xmax)
+    ]
+    # Matplotlib fills legend columns from top to bottom. Interleaving creates
+    # a colour row and a symbol row without repeating a legend in each panel.
+    handles = [handle for pair in zip(colour_handles, machine_handles) for handle in pair]
+    handles.extend((
+        Line2D([], [], ls="none", label=""),
+        Line2D([0], [0], ls="--", lw=1.1, color="0.3", label="ideal"),
+    ))
     fig.legend(
-        handles=handles, loc="lower center", ncol=4, frameon=False,
-        bbox_to_anchor=(0.5, 0.015), handlelength=2.0, columnspacing=1.0,
-        handletextpad=0.45, labelspacing=0.35,
+        handles=handles, loc="lower center", ncol=5, frameon=False,
+        bbox_to_anchor=(0.5, 0.025), handlelength=1.6, columnspacing=1.0,
+        handletextpad=0.5, labelspacing=0.6,
     )
+
+
+def plot_kernel_comparison(rows: list[dict[str, str]], out: Path) -> None:
+    """Compare both dimensions and operators on four square plot boxes."""
+    fig = plt.figure(figsize=(FIGURE_WIDTH_IN, KERNEL_HEIGHT_IN), facecolor="white")
+    axes = []
+    for row_index, (test, level) in enumerate(KERNEL_ROWS):
+        for column, kernel in enumerate(("poisson", "laplacian")):
+            ax = add_square_axes(
+                fig,
+                KERNEL_AXES_LEFT_MM + column * (KERNEL_AXES_SIDE_MM + KERNEL_AXES_GAP_MM),
+                KERNEL_AXES_BOTTOM_MM + (1 - row_index) * KERNEL_ROW_PITCH_MM,
+                KERNEL_AXES_SIDE_MM, KERNEL_HEIGHT_MM,
+            )
+            axes.append(ax)
+            ranks = []
+            for machine, spec in MACHINE_STYLE.items():
+                npe, wall, mpi = select_kernel(rows, machine, test, level, kernel)
+                if not npe.size:
+                    raise ValueError(f"missing {machine} {test} L={level} {kernel}")
+                ranks.extend(npe.astype(int))
+                draw_kernel_series(
+                    ax, npe, wall, mpi, level=level, machine=machine,
+                    marker=spec["marker"], filled=True, zorder=spec["zorder"],
+                )
+            reference = REFERENCE_LABEL[test]
+            npe, wall, mpi = select_reference(test, level, kernel)
+            if not npe.size:
+                raise ValueError(f"missing {reference} {test} L={level} {kernel}")
+            ranks.extend(npe.astype(int))
+            draw_kernel_series(
+                ax, npe, wall, mpi, level=level, machine=reference,
+                marker=REFERENCE_MARKERS[reference], filled=False, zorder=2,
+            )
+            ax.plot(
+                IDEAL_GUIDE_RANKS, IDEAL_GUIDE_PREFACTOR[kernel] / IDEAL_GUIDE_RANKS,
+                "--", color="0.3", lw=1.1, zorder=1, label="ideal",
+            )
+            panel = "abcd"[2 * row_index + column]
+            ax.set_title(rf"$({panel})$ {kernel.capitalize()}, $L={level}$", pad=5)
+            ax.set_xlabel("MPI ranks", labelpad=3)
+            ax.set_ylabel("Time / iteration (s)", labelpad=3)
+            style_log_axes(ax, min(ranks), max(ranks))
+    kernel_legend(fig)
     save_report_figure(fig, axes, out)
 
 
@@ -450,17 +460,12 @@ def main() -> None:
     parser.add_argument("--outdir", type=Path, default=REPO / "figures")
     args = parser.parse_args()
     kernel_rows = load_csv(KERNEL_CSV)
-    plot_kernel_report(
-        kernel_rows, "mpi-laplacian-2d", 14, args.outdir / "circle-L14-report.pdf"
-    )
-    plot_kernel_report(
-        kernel_rows, "mpi-laplacian", 9, args.outdir / "laplacian-L9-report.pdf"
-    )
+    plot_kernel_comparison(kernel_rows, args.outdir / "kernel-scaling-combined-report.pdf")
     plot_application_report(
         load_csv(PTS_CSV), load_csv(DROPS_CSV),
         args.outdir / "marangoni-uniform-ndrop-per-iter-report.pdf",
     )
-    print(f"wrote three report figures at {FIGURE_WIDTH_IN * 25.4:.0f} mm width")
+    print(f"wrote two report figures at {FIGURE_WIDTH_IN * 25.4:.0f} mm width")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ tables stay beside the generated figures, and raw run output remains excluded
 from Git. The present source covers the stock kernels, the Marangoni
 application series, and four uniform-grid application kernels.
 
-Figures 5–8 include four-state temporal sequences from completed simulations.
+Figures 4–7 include four-state temporal sequences from completed simulations.
 All report figures use a final width of 166 mm and Computer Modern type sized
 to match the captions. Figure reproduction commands and dependencies are
 listed in the repository README.
