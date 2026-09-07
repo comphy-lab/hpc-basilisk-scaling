@@ -353,6 +353,8 @@ parameters, checksums and attribution are recorded in
 The report figures are authored at their final width of 166 mm, with Computer
 Modern type: 10 pt labels, 9 pt ticks and legends, and 11 pt panel letters.
 The report captions use 10 pt type. Plot axes use a square 1:1 box aspect.
+Every scaling panel uses paired grey ideal-scaling guides in its lower-left
+and upper-right corners, with common relative lengths and margins.
 The `plot_report_overview.py` script rebuilds the combined kernel overview and
 Marangoni report assets. The combined application figures centre the square
 scaling plot above a

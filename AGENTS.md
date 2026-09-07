@@ -141,7 +141,9 @@ two-phase cases against the Al Saud terminal velocity.
   The report combines the two stock-kernel comparisons in
   `figures/kernel-scaling-combined-report.pdf`; its four square panels share
   one legend, with blue shades for L14 and red shades for L9, fixed machine
-  symbols, and a neutral ideal-scaling guide independent of measured baselines.
+  symbols, and neutral ideal-scaling guides independent of measured baselines.
+  Use `postProcess/scaling_guides.py` for matching lower-left and upper-right
+  corner guides in every report scaling panel; keep the final axis limits.
   Update this list when a figure
   is added or retired.
 - Public reports live in `docs/`. Keep each report's source self-contained in
