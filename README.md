@@ -350,8 +350,10 @@ parameters, checksums and attribution are recorded in
 [`figures/illustration-data/`](figures/illustration-data/README.md).
 The report figures are authored at their final width of 166 mm, with Computer
 Modern type: 10 pt labels, 9 pt ticks and legends, and 11 pt panel letters.
-The report captions use 10 pt type. The combined application figures stack
-the scaling curve above a two-by-two temporal sequence and have the suffix
+The report captions use 10 pt type. Plot axes use a square 1:1 box aspect.
+The combined application figures centre the square scaling plot above a
+two-by-two temporal sequence, with legends and colour bars in the side space,
+and have the suffix
 `-uniform-illustrated.pdf`. The original scaling assets and timing tables
 remain available alongside the report-sized `-report.pdf` variants.
 

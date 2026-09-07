@@ -37,7 +37,10 @@ import plot_uniform_apps as source_plot
 REPO = Path(__file__).resolve().parents[1]
 TIMING_CSV = REPO / "figures" / "uniform-app-timings.csv"
 FIGURE_WIDTH_MM = 166.0
-FIGURE_HEIGHT_MM = 63.0
+FIGURE_HEIGHT_MM = 74.0
+AXES_SIDE_MM = 55.0
+AXES_LEFT_MM = (FIGURE_WIDTH_MM - AXES_SIDE_MM) / 2
+AXES_BOTTOM_MM = 15.0
 FIGURE_SIZE = (FIGURE_WIDTH_MM / 25.4, FIGURE_HEIGHT_MM / 25.4)
 
 # The case names and output names remain the canonical source-script order.
@@ -135,7 +138,7 @@ def style_axes(ax: plt.Axes, ranks: list[int]) -> None:
     for spine in ax.spines.values():
         spine.set_linewidth(0.8)
     ax.minorticks_on()
-    ax.set_xticks(source_plot._xticks_for_ranks(ranks))
+    ax.set_xticks(source_plot._xticks_for_ranks(ranks, min_octaves=2.0))
     ax.xaxis.set_major_formatter(FormatStrFormatter(r"%d"))
     ax.tick_params(axis="x", which="minor", length=0)
 
@@ -178,7 +181,8 @@ def add_legend(ax: plt.Axes, measured: bool = True) -> None:
     )
     ax.legend(
         handles=handles,
-        loc="lower left",
+        loc="center right",
+        bbox_to_anchor=(-0.42, 0.5),
         frameon=False,
         fontsize=9,
         handlelength=1.8,
@@ -188,14 +192,17 @@ def add_legend(ax: plt.Axes, measured: bool = True) -> None:
     )
 
 
-def configure_figure(with_colourbar: bool) -> tuple[plt.Figure, plt.Axes]:
+def configure_figure() -> tuple[plt.Figure, plt.Axes]:
     fig = plt.figure(figsize=FIGURE_SIZE, facecolor="white")
     # Manual axes keep the PDF canvas fixed: savefig deliberately does not use
     # bbox_inches="tight", so these dimensions survive LaTeX inclusion.
-    if with_colourbar:
-        ax = fig.add_axes([0.090, 0.275, 0.805, 0.655])
-    else:
-        ax = fig.add_axes([0.090, 0.275, 0.885, 0.655])
+    ax = fig.add_axes([
+        AXES_LEFT_MM / FIGURE_WIDTH_MM,
+        AXES_BOTTOM_MM / FIGURE_HEIGHT_MM,
+        AXES_SIDE_MM / FIGURE_WIDTH_MM,
+        AXES_SIDE_MM / FIGURE_HEIGHT_MM,
+    ])
+    ax.set_box_aspect(1)
     return fig, ax
 
 
@@ -220,7 +227,7 @@ def plot_multilevel(
     if not picked:
         raise SystemExit(f"no timing rows for {case}")
     rank_min, rank_max, rank_axis = _rank_axis_multilevel(picked)
-    fig, ax = configure_figure(with_colourbar=True)
+    fig, ax = configure_figure()
     present_nx = sorted({int(row["nx"]) for row in picked})
 
     for nx in present_nx:
@@ -267,7 +274,12 @@ def plot_multilevel(
 
     finish_axes(ax, picked, rank_min, rank_max)
     add_legend(ax)
-    cax = fig.add_axes([0.905, 0.275, 0.014, 0.655])
+    cax = fig.add_axes([
+        (AXES_LEFT_MM + AXES_SIDE_MM + 5) / FIGURE_WIDTH_MM,
+        AXES_BOTTOM_MM / FIGURE_HEIGHT_MM,
+        2.5 / FIGURE_WIDTH_MM,
+        AXES_SIDE_MM / FIGURE_HEIGHT_MM,
+    ])
     add_colourbar(fig, cax)
     save_figure(fig, out)
 
@@ -280,7 +292,7 @@ def plot_single_level(
     if not picked:
         raise SystemExit(f"no timing rows for {case}")
     rank_min, rank_max, rank_axis = _rank_axis_single(picked)
-    fig, ax = configure_figure(with_colourbar=False)
+    fig, ax = configure_figure()
 
     y0 = float(picked[0]["per_step"])
     n0 = float(picked[0]["npe"])
@@ -320,6 +332,10 @@ def plot_single_level(
 
 
 def save_figure(fig: plt.Figure, out: Path) -> None:
+    fig.canvas.draw()
+    box = fig.axes[0].get_window_extent()
+    if not np.isclose(box.width / box.height, 1.0, rtol=0, atol=1e-9):
+        raise ValueError("the report plot axes must be square")
     out.parent.mkdir(parents=True, exist_ok=True)
     metadata = {
         "Creator": "postProcess/plot_report_apps.py",

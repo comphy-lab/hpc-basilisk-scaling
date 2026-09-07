@@ -33,9 +33,22 @@ from matplotlib.lines import Line2D
 from matplotlib.ticker import FixedLocator, NullFormatter
 
 REPO = Path(__file__).resolve().parents[1]
-FIGURE_WIDTH_IN = 166.0 / 25.4
-KERNEL_HEIGHT_IN = 112.0 / 25.4
-APPLICATION_HEIGHT_IN = 118.0 / 25.4
+FIGURE_WIDTH_MM = 166.0
+KERNEL_HEIGHT_MM = 90.0
+APPLICATION_HEIGHT_MM = 80.0
+FIGURE_WIDTH_IN = FIGURE_WIDTH_MM / 25.4
+KERNEL_HEIGHT_IN = KERNEL_HEIGHT_MM / 25.4
+APPLICATION_HEIGHT_IN = APPLICATION_HEIGHT_MM / 25.4
+KERNEL_AXES_SIDE_MM = 60.0
+KERNEL_AXES_LEFT_MM = 16.0
+KERNEL_AXES_BOTTOM_MM = 22.0
+KERNEL_AXES_GAP_MM = 14.0
+APPLICATION_AXES_SIDE_MM = 50.0
+APPLICATION_AXES_LEFT_MM = 17.0
+APPLICATION_AXES_BOTTOM_MM = 20.0
+COLOURBAR_WIDTH_MM = 2.5
+COLOURBAR_PAD_MM = 4.0
+APPLICATION_PANEL_GAP_MM = 23.0
 KERNEL_CSV = REPO / "figures" / "kernel-timings.csv"
 PTS_CSV = REPO / "figures" / "marangoni-uniform-per-iter-timings.csv"
 DROPS_CSV = REPO / "figures" / "planar-ndrop-timings.csv"
@@ -148,10 +161,88 @@ def style_log_axes(ax: plt.Axes, xmin: int, xmax: int) -> None:
     ax.grid(which="major", color="0.9", linewidth=0.5, zorder=0)
 
 
+def add_square_axes(
+    fig: plt.Figure,
+    left_mm: float,
+    bottom_mm: float,
+    side_mm: float,
+    figure_height_mm: float,
+) -> plt.Axes:
+    """Place a square plot box at fixed physical coordinates on the canvas."""
+    ax = fig.add_axes(
+        [
+            left_mm / FIGURE_WIDTH_MM,
+            bottom_mm / figure_height_mm,
+            side_mm / FIGURE_WIDTH_MM,
+            side_mm / figure_height_mm,
+        ]
+    )
+    ax.set_box_aspect(1)
+    return ax
+
+
+def add_colourbar_axes(
+    fig: plt.Figure,
+    left_mm: float,
+    bottom_mm: float,
+    height_mm: float,
+    figure_height_mm: float,
+) -> plt.Axes:
+    """Place a colourbar independently so it cannot resize a plot box."""
+    return fig.add_axes(
+        [
+            left_mm / FIGURE_WIDTH_MM,
+            bottom_mm / figure_height_mm,
+            COLOURBAR_WIDTH_MM / FIGURE_WIDTH_MM,
+            height_mm / figure_height_mm,
+        ]
+    )
+
+
+def assert_square_axes(fig: plt.Figure, axes: list[plt.Axes]) -> None:
+    """Check the rendered plot boxes, excluding separately placed colourbars."""
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    for index, ax in enumerate(axes):
+        bbox = ax.get_window_extent(renderer=renderer)
+        ratio = bbox.width / bbox.height
+        if abs(ratio - 1.0) > 1e-6:
+            raise AssertionError(
+                f"plot axis {index} is not square: {bbox.width:.12g} / "
+                f"{bbox.height:.12g} = {ratio:.12g}"
+            )
+
+
+def save_report_figure(fig: plt.Figure, axes: list[plt.Axes], out: Path) -> None:
+    """Validate and save a fixed-size PDF plus an ignored inspection PNG."""
+    assert_square_axes(fig, axes)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    metadata = {
+        "Creator": "postProcess/plot_report_overview.py",
+        "CreationDate": None,
+        "ModDate": None,
+    }
+    fig.savefig(out, dpi=300, facecolor="white", metadata=metadata)
+    fig.savefig(out.with_suffix(".png"), dpi=300, facecolor="white")
+    plt.close(fig)
+
+
 def plot_kernel_report(
     rows: list[dict[str, str]], test: str, level: int, out: Path
 ) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(FIGURE_WIDTH_IN, KERNEL_HEIGHT_IN))
+    fig = plt.figure(
+        figsize=(FIGURE_WIDTH_IN, KERNEL_HEIGHT_IN), facecolor="white"
+    )
+    axes = [
+        add_square_axes(
+            fig,
+            KERNEL_AXES_LEFT_MM + index * (KERNEL_AXES_SIDE_MM + KERNEL_AXES_GAP_MM),
+            KERNEL_AXES_BOTTOM_MM,
+            KERNEL_AXES_SIDE_MM,
+            KERNEL_HEIGHT_MM,
+        )
+        for index in range(2)
+    ]
     handles: list[Line2D] = []
     all_ranks: list[int] = []
     for ax, kernel, panel in zip(axes, ("poisson", "laplacian"), ("a", "b")):
@@ -215,10 +306,7 @@ def plot_kernel_report(
         bbox_to_anchor=(0.5, 0.015), handlelength=2.0, columnspacing=1.0,
         handletextpad=0.45, labelspacing=0.35,
     )
-    fig.subplots_adjust(left=0.105, right=0.955, top=0.93, bottom=0.28, wspace=0.28)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, facecolor="white")
-    plt.close(fig)
+    save_report_figure(fig, axes, out)
 
 
 def ideal_prefactor(
@@ -267,10 +355,11 @@ def draw_application_series(
 
 
 def add_colourbar(
-    fig: plt.Figure, ax: plt.Axes, norm: LogNorm, ticks: tuple[int, ...], label: str
+    fig: plt.Figure, cax: plt.Axes, norm: LogNorm, ticks: tuple[int, ...], label: str
 ) -> None:
     mappable = plt.cm.ScalarMappable(norm=norm, cmap=VIRIDIS)
-    cbar = fig.colorbar(mappable, ax=ax, fraction=0.046, pad=0.025)
+    mappable.set_array([])
+    cbar = fig.colorbar(mappable, cax=cax)
     cbar.set_label(label, fontsize=10, labelpad=3)
     cbar.set_ticks(ticks)
     cbar.set_ticklabels([rf"${tick}$" for tick in ticks])
@@ -282,7 +371,29 @@ def add_colourbar(
 def plot_application_report(
     pts_rows: list[dict[str, str]], drop_rows: list[dict[str, str]], out: Path
 ) -> None:
-    fig, axes = plt.subplots(1, 2, figsize=(FIGURE_WIDTH_IN, APPLICATION_HEIGHT_IN))
+    fig = plt.figure(
+        figsize=(FIGURE_WIDTH_IN, APPLICATION_HEIGHT_IN), facecolor="white"
+    )
+    axes = [
+        add_square_axes(
+            fig,
+            APPLICATION_AXES_LEFT_MM,
+            APPLICATION_AXES_BOTTOM_MM,
+            APPLICATION_AXES_SIDE_MM,
+            APPLICATION_HEIGHT_MM,
+        ),
+        add_square_axes(
+            fig,
+            APPLICATION_AXES_LEFT_MM
+            + APPLICATION_AXES_SIDE_MM
+            + COLOURBAR_PAD_MM
+            + COLOURBAR_WIDTH_MM
+            + APPLICATION_PANEL_GAP_MM,
+            APPLICATION_AXES_BOTTOM_MM,
+            APPLICATION_AXES_SIDE_MM,
+            APPLICATION_HEIGHT_MM,
+        ),
+    ]
     draw_application_series(axes[0], pts_rows, "pts", PTS_LEVELS, PTS_NORM, {64: 256})
     draw_application_series(
         axes[1], drop_rows, "ndrops", DROP_LEVELS, DROP_NORM,
@@ -298,8 +409,28 @@ def plot_application_report(
         ax.set_xlabel("MPI ranks", labelpad=3)
         style_log_axes(ax, 2, 1024)
     axes[0].set_ylabel("Wall time / iteration (s)", labelpad=3)
-    add_colourbar(fig, axes[0], PTS_NORM, PTS_LEVELS, r"$\mathrm{pts}/R$")
-    add_colourbar(fig, axes[1], DROP_NORM, DROP_LEVELS, "drops")
+    colourbar0 = add_colourbar_axes(
+        fig,
+        APPLICATION_AXES_LEFT_MM + APPLICATION_AXES_SIDE_MM + COLOURBAR_PAD_MM,
+        APPLICATION_AXES_BOTTOM_MM,
+        APPLICATION_AXES_SIDE_MM,
+        APPLICATION_HEIGHT_MM,
+    )
+    colourbar1 = add_colourbar_axes(
+        fig,
+        APPLICATION_AXES_LEFT_MM
+        + APPLICATION_AXES_SIDE_MM
+        + COLOURBAR_PAD_MM
+        + COLOURBAR_WIDTH_MM
+        + APPLICATION_PANEL_GAP_MM
+        + APPLICATION_AXES_SIDE_MM
+        + COLOURBAR_PAD_MM,
+        APPLICATION_AXES_BOTTOM_MM,
+        APPLICATION_AXES_SIDE_MM,
+        APPLICATION_HEIGHT_MM,
+    )
+    add_colourbar(fig, colourbar0, PTS_NORM, PTS_LEVELS, r"$\mathrm{pts}/R$")
+    add_colourbar(fig, colourbar1, DROP_NORM, DROP_LEVELS, "drops")
     machine_handles = [
         Line2D([0], [0], ls="none", marker=marker, ms=5, mfc="white", mec="k",
                mew=0.6, label=machine)
@@ -311,10 +442,7 @@ def plot_application_report(
         bbox_to_anchor=(0.5, 0.025), handlelength=1.8, columnspacing=1.4,
         handletextpad=0.5,
     )
-    fig.subplots_adjust(left=0.1, right=0.94, top=0.93, bottom=0.24, wspace=0.34)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, dpi=300, facecolor="white")
-    plt.close(fig)
+    save_report_figure(fig, axes, out)
 
 
 def main() -> None:
