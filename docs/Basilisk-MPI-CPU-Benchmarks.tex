@@ -118,7 +118,8 @@ have saturated. These measurements stop at 1,024 ranks, equivalent to about
   GPP (circles) and Snellius Genoa (diamonds).
   (a) Axisymmetric uniform meshes at 64--512 points per radius.
   (b) Planar workloads with 1--32 drops at 64 points per radius.
-  Dashed lines show ideal scaling.}
+  Dashed lines show ideal scaling. Integral surface-tension formulations for
+  Marangoni flows are described in Ref.~\cite{saini2025-marangoni}.}
   \label{fig:application-scaling}
 \end{figure}
 
@@ -137,7 +138,8 @@ flow in the drop frame.
   (a) Speed relative to the Young--Goldstein--Block prediction at 8--256
   points per radius. (b) Relative error and the coarse-grid $N^{-2}$ trend.
   (c) Drop-frame axial velocity at 64 points per radius, shown at
-  $t/t_0=0.5$, $1$, $2$ and $3$. Magenta marks the interface.}
+  $t/t_0=0.5$, $1$, $2$ and $3$. Magenta marks the interface. See
+  Ref.~\cite{saini2025-marangoni} for the interfacial-stress formulation.}
   \label{fig:validation}
 \end{figure}
 
@@ -217,9 +219,11 @@ coalescence-induced jumping; its timing panel measures viscoelastic impact.
 \begin{figure}[p]
   \centering
   \includegraphics[width=\textwidth]{bursting-uniform-illustrated.pdf}
-  \caption{Bursting bubble. (a) Snellius Genoa strong scaling of the
+  \caption{Bursting bubble~\cite{dixit2025-bursting,sanjay2021-bursting}.
+  (a) Snellius Genoa strong scaling of the
   axisymmetric uniform-grid kernel; colour gives $N_x=2^L$ and dashed
-  lines show ideal scaling. (b) Jet inception at $Oh=0.03$, $Bo=0$.
+  lines show ideal scaling. (b) Jet inception~\cite{gordillo2026-jets}
+  at $Oh=0.03$, $Bo=0$.
   Blue gives $|\boldsymbol{u}|/V_c$, where
   $V_c=\sqrt{\sigma/(\rho_l R)}$ and $t^*=tV_c/R$; grey curves are
   instantaneous streamlines and orange marks the interface. The sequence
@@ -238,7 +242,8 @@ coalescence-induced jumping; its timing panel measures viscoelastic impact.
   Taylor--Culick velocity (upper half) and the azimuthal log-conformation
   $(\log\mathcal{A})_{\theta\theta}$ (lower half); green marks the
   interface. Here $t_\gamma=\sqrt{\rho H_0^3/\sigma}$, with $H_0$ the
-  initial sheet thickness.}
+  initial sheet thickness. For retraction and the influence of the
+  surroundings, see Ref.~\cite{sanjay2022-taylorculick}.}
   \label{fig:taylorculick-uniform}
 \end{figure}
 
@@ -252,7 +257,9 @@ coalescence-induced jumping; its timing panel measures viscoelastic impact.
   where $U_0$ is the impact speed. Purple shows speed, grey curves are instantaneous streamlines,
   orange marks the interface and black marks the substrate.
   Colours saturate above $U_0$. All four frames retain the same view,
-  including the extended lamella at $tU_0/R=4.19$.}
+  including the extended lamella at $tU_0/R=4.19$. Related studies address
+  free-surface wave focusing~\cite{kayal2025-focussing} and drop-impact
+  forces and spreading~\cite{sanjay2025-impact,zhang2022-impact}.}
   \label{fig:drop-impact-uniform}
 \end{figure}
 
@@ -338,7 +345,8 @@ small-scale application comparisons and bracket the 64-node range through
 the stock kernels. Larger three-dimensional workloads and exact node-aligned
 measurements are needed to extend those conclusions above 100 nodes.
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
+\raggedright
 
 \bibitem{basilisk-mpi-circle}
 S.~Popinet,
@@ -362,6 +370,57 @@ M.~O.~Abu-Al-Saud, S.~Popinet and H.~A.~Tchelepi,
 \newblock A conservative and well-balanced surface tension model,
 \newblock \emph{Journal of Computational Physics} \textbf{371} (2018),
 896--913. \href{https://doi.org/10.1016/j.jcp.2018.02.022}{doi:10.1016/j.jcp.2018.02.022}.
+
+\bibitem{saini2025-marangoni}
+M.~Saini, V.~Sanjay, Y.~Saade, D.~Lohse and S.~Popinet,
+\newblock Implementation of integral surface tension formulations in a volume
+of fluid framework and their applications to Marangoni flows,
+\newblock \emph{Journal of Computational Physics} \textbf{542} (2025),
+114348. \href{https://doi.org/10.1016/j.jcp.2025.114348}{doi:10.1016/j.jcp.2025.114348}.
+
+\bibitem{dixit2025-bursting}
+A.~Dixit, A.~Oratis, K.~Zinelis, D.~Lohse and V.~Sanjay,
+\newblock Viscoelastic Worthington jets and droplets produced by bursting
+bubbles,
+\newblock \emph{Journal of Fluid Mechanics} \textbf{1010} (2025),
+A2. \href{https://doi.org/10.1017/jfm.2025.237}{doi:10.1017/jfm.2025.237}.
+
+\bibitem{sanjay2021-bursting}
+V.~Sanjay, D.~Lohse and M.~Jalaal,
+\newblock Bursting bubble in a viscoplastic medium,
+\newblock \emph{Journal of Fluid Mechanics} \textbf{922} (2021),
+A2. \href{https://doi.org/10.1017/jfm.2021.489}{doi:10.1017/jfm.2021.489}.
+
+\bibitem{gordillo2026-jets}
+J.~M.~Gordillo, J.~Rodr\'iguez-Rodr\'iguez and V.~Sanjay,
+\newblock Self-similar Worthington jets,
+\newblock arXiv preprint (2026),
+\href{https://arxiv.org/abs/2607.08972}{arXiv:2607.08972}.
+
+\bibitem{sanjay2022-taylorculick}
+V.~Sanjay, U.~Sen, P.~Kant and D.~Lohse,
+\newblock Taylor--Culick retractions and the influence of the surroundings,
+\newblock \emph{Journal of Fluid Mechanics} \textbf{948} (2022),
+A14. \href{https://doi.org/10.1017/jfm.2022.671}{doi:10.1017/jfm.2022.671}.
+
+\bibitem{kayal2025-focussing}
+L.~Kayal, V.~Sanjay, N.~Yewale, A.~Kumar and R.~Dasgupta,
+\newblock Focussing of concentric free-surface waves,
+\newblock \emph{Journal of Fluid Mechanics} \textbf{1003} (2025),
+A14. \href{https://doi.org/10.1017/jfm.2024.1089}{doi:10.1017/jfm.2024.1089}.
+
+\bibitem{sanjay2025-impact}
+V.~Sanjay and D.~Lohse,
+\newblock Unifying Theory of Scaling in Drop Impact: Forces and Maximum
+Spreading Diameter,
+\newblock \emph{Physical Review Letters} \textbf{134} (2025),
+104003. \href{https://doi.org/10.1103/PhysRevLett.134.104003}{doi:10.1103/PhysRevLett.134.104003}.
+
+\bibitem{zhang2022-impact}
+B.~Zhang, V.~Sanjay, S.~Shi, Y.~Zhao, C.~Lv, X.-Q.~Feng and D.~Lohse,
+\newblock Impact Forces of Water Drops Falling on Superhydrophobic Surfaces,
+\newblock \emph{Physical Review Letters} \textbf{129} (2022),
+104501. \href{https://doi.org/10.1103/PhysRevLett.129.104501}{doi:10.1103/PhysRevLett.129.104501}.
 
 \end{thebibliography}
 
