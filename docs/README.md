@@ -14,9 +14,9 @@ The report references canonical plots from [`../figures/`](../figures/). The
 plotting scripts remain in [`../postProcess/`](../postProcess/), compact timing
 tables stay beside the generated figures, and raw run output remains excluded
 from Git. The present source covers the stock kernels, the Marangoni
-application series, and four uniform-grid application kernels.
+application series, and three axisymmetric uniform-grid application kernels.
 
-Figures 4–7 include four-state temporal sequences from completed simulations.
+Figures 4–6 include four-state temporal sequences from completed simulations.
 All report figures use a final width of 166 mm and Computer Modern type sized
 to match the captions. Figure reproduction commands and dependencies are
 listed in the repository README.

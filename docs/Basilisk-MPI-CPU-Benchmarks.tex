@@ -31,14 +31,13 @@
 Pressure projection couples the velocity field across an incompressible-flow
 calculation at every time step. Its multigrid Poisson solve therefore provides
 a natural test of CPU and MPI performance. We compare two stock Basilisk
-kernels and five multiphase-flow workloads on MareNostrum~5 and Snellius.
+kernels and four multiphase-flow workloads on MareNostrum~5 and Snellius.
 The kernel measurements reach 16,384 MPI ranks; Marangoni-driven migration
 reaches 1,024 ranks and includes a terminal-velocity reference comparison.
 Uniform-grid bursting, sheet retraction and drop-impact calculations show how
 the useful rank count changes with resolution and constitutive model.
-The finest axisymmetric retraction and impact cases extend to 2,304 ranks,
-whereas the present three-dimensional viscoelastic-impact data cover one
-192-core node. These fixed-size sweeps identify where additional ranks cease
+The finest axisymmetric retraction and impact cases extend to 2,304 ranks.
+These fixed-size sweeps identify where additional ranks cease
 to reduce wall time. They also define the workloads and node-aligned
 measurements needed to extend the comparison to larger systems.
 \end{abstract}
@@ -56,9 +55,9 @@ The resulting wall-time curve locates the useful strong-scaling range.
 We begin with the stock Poisson and Laplacian tests, retained without
 modification from Basilisk~\cite{basilisk-mpi-circle,basilisk-mpi-laplacian}.
 We then add interface reconstruction, surface tension and, for the elastic
-cases, constitutive evolution. The Marangoni workload varies both mesh
+case, constitutive evolution. The Marangoni workload varies both mesh
 resolution and drop count, and is compared with a terminal-velocity
-reference. The other four application kernels measure scaling without a
+reference. The other three application kernels measure scaling without a
 separate physical-validation study here. Source cases, compact timing tables
 and figure scripts are available at
 \url{https://github.com/comphy-lab/hpc-basilisk-scaling}.
@@ -146,8 +145,8 @@ flow in the drop frame.
 \section{Uniform-grid multiphase-flow kernels}
 
 The remaining kernels retain the uniform-tree MPI decomposition and change
-the flow: bubble bursting, elastic Taylor--Culick retraction, Newtonian drop
-impact and three-dimensional viscoelastic impact. Each timing covers ten
+the flow: bubble bursting, elastic Taylor--Culick retraction and Newtonian drop
+impact. Each timing covers ten
 incompressible two-phase solver steps. Geometric initialization is excluded,
 as are the serial interface reconstruction and seed dump for bursting.
 The MPI binaries write no checkpoints during these runs.
@@ -156,8 +155,7 @@ The three axisymmetric cases use $L=9$, $10$ and $11$, corresponding to
 $512^2$, $1024^2$ and $2048^2$ cells. The $L=9$ and $L=10$ sweeps cover
 2--768 ranks; the $L=11$ sweeps start at eight ranks. Retraction and impact
 extend to 2,304 ranks at $L=11$, while bursting already turns upward at
-768 ranks. The three-dimensional impact uses a full $L=7$ octree
-($128^3$ cells) over 2--192 ranks.
+768 ranks.
 
 At $L=10$, the three axisymmetric kernels have similar scaling ranges,
 despite their different per-step costs (Table~\ref{tab:axisymmetric-times}).
@@ -201,20 +199,14 @@ boundary. At $L=11$, its time follows the ideal trend to $0.0339$~s at
 sweeps depart from ideal scaling. Retraction continues to become faster,
 whereas impact turns upward within the measured range.
 
-For three-dimensional viscoelastic impact, the $L=7$ time falls from
-$10.8$~s at two ranks to $0.331$~s at 192 ranks, a factor of~32
-(Figure~\ref{fig:ve3d-impact-uniform}). This curve remains monotonic but
-departs from ideal scaling earlier than the axisymmetric cases. The
-application timings do not separate computation from communication and
-other overheads, so they cannot identify the cause of this departure.
+The application timings do not separate computation from communication and
+other overheads, so they do not establish which contribution limits scaling.
 
-The temporal sequences in Figures~\ref{fig:bursting-uniform}--\ref{fig:ve3d-impact-uniform}
+The temporal sequences in Figures~\ref{fig:bursting-uniform}--\ref{fig:drop-impact-uniform}
 come from completed simulations chosen to show the flow geometry and fields.
 They are independent of the ten-step timing trajectories. Each sequence
 reads left to right, then top to bottom, with a common spatial scale.
 Each scalar field uses one colour normalization across all four states.
-The three-dimensional sequence shows
-coalescence-induced jumping; its timing panel measures viscoelastic impact.
 
 \begin{figure}[p]
   \centering
@@ -263,21 +255,6 @@ coalescence-induced jumping; its timing panel measures viscoelastic impact.
   \label{fig:drop-impact-uniform}
 \end{figure}
 
-\begin{figure}[p]
-  \centering
-  \includegraphics[width=\textwidth]{ve3d-impact-uniform-illustrated.pdf}
-  \caption{Three-dimensional calculations. (a) Snellius Genoa strong
-  scaling of viscoelastic drop impact on a full $L=7$ octree.
-  (b) Coalescence-induced jumping of two equal drops at $Oh=0.05$ and
-  $Bo=0$, from a separate calculation. Orange shows the free surface;
-  the substrate plane shows the adaptive mesh. Times are scaled by
-  $\tau_\gamma=\sqrt{\rho R^3/\sigma}$, where $R$ is the initial radius of
-  either drop.
-  The coalescence sequence illustrates three-dimensional interface motion
-  and is not an output of the impact benchmark in (a).}
-  \label{fig:ve3d-impact-uniform}
-\end{figure}
-
 \section{Extending the comparison to larger systems}
 
 The kernel sweeps use powers of two in rank count. Their upper limit of
@@ -304,19 +281,15 @@ existing rank sweeps.}
 \label{tab:matrix}
 \end{table}
 
-The existing $L=14$ quadtree and $L=9$ octree kernels can be retained at
-small scales. For 16--64 nodes, an $L=10$ viscoelastic-impact calculation
-is the next three-dimensional candidate, beginning at 16, 32 and 64 nodes
-subject to a memory check. If that problem leaves too little work per rank,
-an $L=11$ octree can be considered at 128 nodes. A short pilot must establish
-memory use and initialization cost before this increase; extending beyond
-128 nodes remains optional. The problem must retain enough local work for
-its rank sweep to resolve a scaling regime.
+The existing $L=14$ quadtree and $L=9$ octree kernels provide fixed-size
+reference problems. Larger node counts require enough local work per rank
+to resolve a scaling regime. Short memory and scaling pilots should therefore
+set the resolution before fixing a node-aligned comparison.
 
 Application comparisons also require the same domain size, interface area
-and output policy on every machine. The two-phase case should accompany the
-stock kernels at small and medium scales; these workload choices must be
-fixed before extending the application to the large-node range.
+and output policy on every machine. The multiphase workloads should accompany
+the stock kernels at small and medium scales; these workload choices must be
+fixed before extending the applications to the large-node range.
 
 \section{Reproducing and interpreting the measurements}
 
@@ -342,7 +315,7 @@ The uniform-grid cases extend the comparison to jetting, elastic retraction
 and impact: at fixed resolution, additional ranks eventually yield little
 benefit and can increase wall time. The present data therefore support
 small-scale application comparisons and bracket the 64-node range through
-the stock kernels. Larger three-dimensional workloads and exact node-aligned
+the stock kernels. Larger kernel problems and exact node-aligned
 measurements are needed to extend those conclusions above 100 nodes.
 
 \begin{thebibliography}{99}

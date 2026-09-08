@@ -324,10 +324,11 @@ The timing tables behind them are the CSV files beside the PDFs.
 
 ### Simulation image panels
 
-The report accompanies each application scaling curve with four chronological
-states from a completed simulation. The sequences use a common spatial scale
-and colour normalization within each case. The 3D sequence shows coalescence,
-identified separately from the viscoelastic-impact timing curve.
+The report accompanies the bursting, Taylor--Culick and Newtonian-impact
+scaling curves with four chronological states from completed simulations.
+The sequences use a common spatial scale and colour normalization within
+each case. A separate 3D coalescence illustration remains available among
+the repository assets.
 
 Reproduce the image panels and combined PDFs from the bundled compact inputs:
 
