@@ -14,10 +14,16 @@ Developed at the
 Durham University.
 
 The standalone public report
-[Basilisk MPI CPU Benchmarks for Multiphase Flow](docs/Basilisk-MPI-CPU-Benchmarks.pdf)
-summarizes the current evidence and proposes a node-aligned qualification
-matrix for future CPU systems. Its complete source is the single file
-[`docs/Basilisk-MPI-CPU-Benchmarks.tex`](docs/Basilisk-MPI-CPU-Benchmarks.tex).
+[Resolution and MPI scaling for multiphase flows](docs/Basilisk-MPI-CPU-Benchmarks.pdf)
+uses the scaling curves to connect numerical sensitivity, resolution and the
+choice of MPI ranks throughout a research project. The source is
+[`docs/Basilisk-MPI-CPU-Benchmarks.tex`](docs/Basilisk-MPI-CPU-Benchmarks.tex)
+with bibliography
+[`docs/Basilisk-MPI-CPU-Benchmarks.bib`](docs/Basilisk-MPI-CPU-Benchmarks.bib).
+
+Build the report with `make all` from the repository root or `docs/`
+(requires `latexmk`, `pdflatex` and `bibtex`). See
+[the report build instructions](docs/README.md) for rebuilding and cleaning.
 
 ## Why these cases
 

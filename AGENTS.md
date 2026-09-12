@@ -147,9 +147,9 @@ two-phase cases against the Al Saud terminal velocity.
   retain their original guide placement and styling.
   Update this list when a figure
   is added or retired.
-- Public reports live in `docs/`. Keep each report's source self-contained in
-  one `.tex` file, retain its compiled PDF beside it, and reference canonical
-  figure assets from `figures/` rather than duplicating them.
+- Public reports live in `docs/`. Keep each report's `.tex` source and `.bib`
+  bibliography together, retain the compiled PDF beside them, and reference
+  canonical figure assets from `figures/` rather than duplicating them.
 - Reproduce representative image panels with the locked `uv` environment and
   the four image scripts listed in README. `compose_benchmark_panels.py`
   embeds the original scaling PDFs unchanged into the `*-uniform-illustrated.pdf`

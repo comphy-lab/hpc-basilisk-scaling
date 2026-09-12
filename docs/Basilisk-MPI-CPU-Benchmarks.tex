@@ -17,7 +17,7 @@
 \setlength{\parskip}{0.55em}
 \renewcommand{\arraystretch}{1.18}
 
-\title{\textbf{Basilisk MPI scaling for multiphase flows}}
+\title{\textbf{Resolution and MPI scaling for multiphase flows}}
 \author{Vatsal Sanjay\\
 \small Computational Multiphase Physics (CoMPhy) Lab\\
 \small Department of Physics, Durham University\\
@@ -28,141 +28,216 @@
 \maketitle
 
 \begin{abstract}
-Pressure projection couples the velocity field across an incompressible-flow
-calculation at every time step. Its multigrid Poisson solve therefore provides
-a natural test of CPU and MPI performance. We compare two stock Basilisk
-kernels and four multiphase-flow workloads on MareNostrum~5 and Snellius.
-The kernel measurements reach 16,384 MPI ranks; Marangoni-driven migration
-reaches 1,024 ranks and includes a terminal-velocity reference comparison.
-Uniform-grid bursting, sheet retraction and drop-impact calculations show how
-the useful rank count changes with resolution and constitutive model.
-The finest axisymmetric retraction and impact cases extend to 2,304 ranks.
-These fixed-size sweeps identify where additional ranks cease
-to reduce wall time. They also define the workloads and node-aligned
-measurements needed to extend the comparison to larger systems.
+
+We study the CPU scaling of Basilisk for the stock Poisson and Laplacian
+tests, Marangoni-driven migration, bubble bursting, elastic Taylor--Culick
+retraction and drop impact. The measurements on MareNostrum~5 and Snellius
+extend to 16,384 MPI ranks for the stock kernels. For Marangoni migration,
+we also compare the drop velocity with its analytical value and find that
+the error does not decrease monotonically at the finer resolutions.
+At fixed resolution, the wall time initially decreases with increasing
+rank count, then levels off and can increase again. The location of this
+knee changes with the mesh and the flow being calculated. In a research
+project, we first establish the resolution needed for the physical quantity
+of interest, then use a scaling test to choose ranks near the knee.
+Grid independence at one set of parameters cannot be assumed at another,
+nor can the rank count chosen for one mesh be assumed suitable after
+refinement. Both tests need to be repeated as the parameter study develops,
+particularly where smaller length scales or new flow regimes appear.
+The same applies to regularizations and cutoffs introduced when solving
+the continuum equations. A change in the numerical model or computing
+system also requires a new scaling test.
+
 \end{abstract}
 
-\section{From pressure projection to multiphase flow}
+\section{Grid sensitivity and parallel scaling}
 
-An incompressible Basilisk calculation advances advection, viscous stresses
-and interfacial forces, then projects the velocity onto a divergence-free
-field. This last step requires a multigrid Poisson solve. Restriction and
-prolongation transfer information between mesh levels, while MPI exchanges
-couple the subdomains. As the number of ranks increases at fixed problem
-size, each rank has less local work with which to offset these exchanges.
-The resulting wall-time curve locates the useful strong-scaling range.
+A grid-independence study must follow the flow far enough to test the
+quantity of interest. During bubble bursting, the cavity can collapse into
+a jet much thinner than the bubble radius. Similarly, a drop that is well
+resolved before impact can spread into a poorly resolved lamella. A mesh
+chosen from the initial geometry alone may miss these later stages.
+Moreover, convergence of the drop trajectory need not imply convergence of
+the peak impact force or of a jet radius. The required resolution depends
+on which of these quantities we calculate and how accurately we need it.
 
-We begin with the stock Poisson and Laplacian tests, retained without
-modification from Basilisk~\cite{basilisk-mpi-circle,basilisk-mpi-laplacian}.
-We then add interface reconstruction, surface tension and, for the elastic
-case, constitutive evolution. The Marangoni workload varies both mesh
-resolution and drop count, and is compared with a terminal-velocity
-reference. The other three application kernels measure scaling without a
-separate physical-validation study here. Source cases, compact timing tables
-and figure scripts are available at
-\url{https://github.com/comphy-lab/hpc-basilisk-scaling}.
+The grid is only one of the choices made when we solve the continuum
+Cauchy equations numerically. We also choose the time-step restriction,
+solver tolerances and domain size, and may regularize a constitutive law
+or introduce a cutoff. In a regularized viscoplastic model, the effective
+viscosity may be capped at a finite value. The nominally unyielded region then has a large but finite
+viscosity. Refinement at a fixed cap tests convergence for that regularized
+equation; the viscosity cap must be varied separately.
+The criterion used to identify flow arrest needs a similar check. We tested
+both in our study of bursting bubbles in a viscoplastic
+medium~\cite{sanjay2021-bursting}. Even after these numerical tests,
+comparison with theory and experiments is needed to assess the physical
+predictions of the model.
 
-\section{Stock Poisson and Laplacian kernels}
+These checks cannot be settled for an entire project by testing one case
+at the outset. A change in the physical parameters can produce a thinner
+jet, steeper gradients or a different flow regime, for which the same mesh
+is insufficient. Increasing the resolution also changes the amount of work
+assigned to each MPI rank. Once we have established an adequate resolution,
+we therefore measure the wall time at several rank counts. We seek the
+\emph{knee}, where the curve bends from approximately inverse scaling
+towards a plateau. Around this bend, doubling the rank count no longer
+halves the wall time. Its location must be checked again as the calculation
+changes.
 
-The two-dimensional test uses a full quadtree at $L=14$, or $2^{28}$ cells.
-On Snellius, the Poisson time decreases through 8,192 ranks and plateaus at
-16,384 ranks (Figure~\ref{fig:kernel-scaling}(a)). The growing MPI contribution
-relative to wall time shows that communication limits this part of the
-curve. The published Curie measurements provide a reference for the same
-calculation.
+\section{Numerical method and timing}
+
+For each strong-scaling test, we vary the number of MPI ranks
+$N_{\mathrm{MPI}}$ while keeping the grid resolution, geometry, material
+parameters and output settings fixed. We use uniform grids with the
+Basilisk tree backend and disable mesh adaptation during these timings.
+The plots give wall time per iteration; $T\propto N_{\mathrm{MPI}}^{-1}$
+denotes ideal scaling. The separate Marangoni accuracy study uses mesh
+adaptation.
+
+We use the stock Poisson and Laplacian tests without
+modification~\cite{basilisk-mpi-circle,basilisk-mpi-laplacian}, taking the
+mean time per kernel operation over each test's timing loop, together with
+the time spent in MPI routines.
+For retraction and impact, the timer covers ten solver steps after
+geometric initialization. The bursting case starts from an interface
+constructed separately, and the ten-step timer begins after restoring it.
+Neither construction nor restoration enters this time. Checkpoint output is
+disabled for all three cases. When selecting ranks for a full simulation,
+we also need timings from the relevant stages of the flow with the output
+that the simulation will write.
+
+For Marangoni migration, we divide the elapsed solver time by the number
+of steps in the prescribed interval. At 256 points per radius, the interval
+is $t/t_0=0$--$0.05$ for 2--256 ranks and $0$--$0.5$ for 512--1,024 ranks.
+Thus the averages on either side of this change cover different flow
+histories.
+
+Each configuration has been timed once. The curves identify where scaling
+improves or deteriorates, but neighbouring points on a nearly flat curve
+should be repeated before choosing between them. The code, timing tables
+and plotting scripts are available at
+\url{https://github.com/comphy-lab/hpc-basilisk-scaling}. To compare runs
+between systems, we record the source revision, compiler flags and MPI
+implementation, together with the node type, ranks per node and rank
+binding.
+
+\section{Poisson and Laplacian tests}
+
+In an incompressible-flow calculation, the velocity obtained after
+advection, viscous stresses and interfacial forces must be projected onto
+a divergence-free field. Basilisk uses a multigrid Poisson solver for this
+step. Restriction and prolongation connect the different grid levels, and
+MPI communication exchanges data between subdomains. At a fixed grid
+size, each rank has fewer cells as the number of ranks increases, while
+these exchanges are still required. The stock tests measure the resulting
+scaling before interface reconstruction or constitutive evolution is added.
+
+For the two-dimensional test, we use a full quadtree at $L=14$, containing
+$2^{28}$ cells. The Snellius Poisson time decreases up to 8,192 ranks and
+levels off at 16,384 ranks (Figure~\ref{fig:kernel-scaling}(a)). As the
+wall time approaches this plateau, communication takes a larger fraction
+of it. We include the published Curie data for comparison with the same
+test.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{kernel-scaling-combined-report.pdf}
-  \caption{Strong scaling of the stock Poisson (left) and Laplacian (right)
-  kernels. (a,b) Full two-dimensional quadtree at $L=14$.
-  (c,d) Full three-dimensional octree at $L=9$. Blue and red identify
-  $L=14$ and $L=9$, respectively; dark and light shades give wall and MPI
-  time. Circles and diamonds identify MareNostrum~5 and Snellius. Open
-  symbols show the Curie (two-dimensional) and Occigen (three-dimensional)
-  reference data. Solid curves connect measurements. Paired grey dashed
-  guides in the lower-left and upper-right corners show
-  $T\propto N_{\mathrm{MPI}}^{-1}$ with arbitrary vertical normalization.}
+  \caption{Time per iteration for the stock Poisson (left) and Laplacian
+  (right) tests. (a,b) Full two-dimensional quadtree at $L=14$.
+  (c,d) Full three-dimensional octree at $L=9$. The $L=14$ results are
+  shown in blue and the $L=9$ results in red, with darker shades for wall
+  time and lighter shades for MPI time. Circles denote MareNostrum~5 and
+  diamonds Snellius. The open symbols are the published Curie
+  (two-dimensional) and Occigen (three-dimensional) data. Solid lines join
+  the measured points. The grey dashed segments at the lower left and upper
+  right show $T\propto N_{\mathrm{MPI}}^{-1}$; their vertical
+  positions are arbitrary.}
   \label{fig:kernel-scaling}
 \end{figure}
 
-The three-dimensional test uses a full octree at $L=9$, or $2^{27}$ cells.
-The Snellius Poisson time falls from $19.34$~s at two ranks to $0.0390$~s at
-4,096 ranks, with only a further reduction to $0.0333$~s at 16,384 ranks
-(Figure~\ref{fig:kernel-scaling}(c)). Occigen supplies the corresponding stock-test
-reference. Together, the wall and MPI timings distinguish the low-rank
-regime, governed primarily by local computation and memory access, from the
-large-rank regime in which communication takes a substantial fraction of
-the iteration.
+The three-dimensional test uses a full octree at $L=9$, with $2^{27}$
+cells, and is compared with the published Occigen data. On Snellius, the
+Poisson time decreases from $19.34$~s at two ranks to $0.0390$~s at
+4,096 ranks. Increasing to 16,384 ranks reduces it to $0.0333$~s
+(Figure~\ref{fig:kernel-scaling}(c)). Thus four times as many ranks save
+only about 15\% of the wall time over this interval. The Laplacian takes less time per iteration on the
+same grid, and its curve has a different dependence on the rank count.
 
-\section{Marangoni-driven migration}
+\section{Marangoni migration}
 
-A surface-tension gradient drives the active drop. We use the conservative,
-balanced treatment of interfacial stresses described by Abu-Al-Saud,
-Popinet and Tchelepi~\cite{abu-al-saud2018}. The cluster case adds timing,
-restart and controlled output to the public Basilisk test while retaining
-its physical reference problem.
+Here, the drop moves under a prescribed surface-tension gradient. We use
+the conservative, balanced formulation of Abu-Al-Saud, Popinet and
+Tchelepi~\cite{abu-al-saud2018}. The analytical migration velocity gives us
+a reference against which to test the calculated drop speed as the mesh
+is refined.
 
-Increasing the resolution of an axisymmetric uniform mesh and increasing
-the number of drops in a planar domain provide two ways to enlarge the
-workload (Figure~\ref{fig:application-scaling}). In both cases, the larger
-problems continue to benefit from additional ranks after the smaller ones
-have saturated. These measurements stop at 1,024 ranks, equivalent to about
-5.3 fully populated 192-core nodes.
+Figure~\ref{fig:application-scaling} shows the timings for two series of
+calculations. In the axisymmetric case, we increase the resolution from
+64 to 512 points per drop radius. In the planar case, we increase the
+number of drops from one to 32, keeping 64 points per radius. Both series
+extend to 1,024 ranks. The curves for the smaller calculations flatten
+while the larger ones still decrease. Increasing either the resolution or
+the number of drops changes how much computation can be distributed over
+the MPI ranks. A rank count near the plateau of a coarse single-drop case
+can still lie on the decreasing part of a finer-grid or multiple-drop curve.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{marangoni-uniform-ndrop-per-iter-report.pdf}
-  \caption{Active-drop scaling in the abundant-fuel limit on MareNostrum~5
-  GPP (circles) and Snellius Genoa (diamonds).
-  (a) Axisymmetric uniform meshes at 64--512 points per radius.
-  (b) Planar workloads with 1--32 drops at 64 points per radius.
-  Dashed lines show ideal scaling. Integral surface-tension formulations for
-  Marangoni flows are described in Ref.~\cite{saini2025-marangoni}.}
+  \caption{Wall time per solver step for Marangoni-driven migration on
+  MareNostrum~5 GPP (circles) and Snellius Genoa (diamonds).
+  (a) Axisymmetric calculations with 64--512 points per drop radius.
+  (b) Planar calculations with 1--32 drops, each resolved by 64 points per
+  radius. The dashed lines give the ideal scaling. For integral
+  surface-tension formulations applied to Marangoni flow, see
+  Ref.~\cite{saini2025-marangoni}.}
   \label{fig:application-scaling}
 \end{figure}
 
-Figure~\ref{fig:validation} compares the computed migration speed with the
-Young--Goldstein--Block prediction and the Basilisk reference data. The
-relative error decreases at approximately second order through 32 points
-per radius. Finer meshes bring the speed closer to the analytical value,
-but the error plateaus; a single second-order fit across all resolutions
-would conceal this limit. The velocity fields show the development of the
-flow in the drop frame.
+We compare the migration velocity with the Young--Goldstein--Block
+prediction and the Basilisk reference data in Figure~\ref{fig:validation}.
+The relative error decreases rapidly between eight and 32 points per
+radius. Beyond 32 points per radius, it varies non-monotonically with
+refinement. The $N^{-2}$ line is a guide for the coarse-grid points; fitting
+this slope through all the resolutions would obscure the change in
+behaviour at the finer grids. The drop-frame velocity fields show the
+flow developing during migration.
+
+Although the larger grids scale over more ranks, they do not give a
+monotonic reduction in the velocity error. Domain size, integration time
+and solver tolerance are other possible sources of error and need separate
+tests. We cannot infer accuracy from the improvement in parallel scaling.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{marangoni-validate-vt-fields-report.pdf}
-  \caption{Active-drop migration in the abundant-fuel limit.
+  \caption{Marangoni-driven migration under a prescribed surface-tension gradient.
   (a) Speed relative to the Young--Goldstein--Block prediction at 8--256
-  points per radius. (b) Relative error and the coarse-grid $N^{-2}$ trend.
+  points per radius. (b) Relative error and an $N^{-2}$ guide.
   (c) Drop-frame axial velocity at 64 points per radius, shown at
   $t/t_0=0.5$, $1$, $2$ and $3$. Magenta marks the interface. See
   Ref.~\cite{saini2025-marangoni} for the interfacial-stress formulation.}
   \label{fig:validation}
 \end{figure}
 
-\section{Uniform-grid multiphase-flow kernels}
+\section{Bursting, retraction and impact}
 
-The remaining kernels retain the uniform-tree MPI decomposition and change
-the flow: bubble bursting, elastic Taylor--Culick retraction and Newtonian drop
-impact. Each timing covers ten
-incompressible two-phase solver steps. Geometric initialization is excluded,
-as are the serial interface reconstruction and seed dump for bursting.
-The MPI binaries write no checkpoints during these runs.
-
+We next consider bubble bursting, elastic Taylor--Culick retraction and
+Newtonian drop impact, using the same two-phase solver infrastructure.
 The three axisymmetric cases use $L=9$, $10$ and $11$, corresponding to
-$512^2$, $1024^2$ and $2048^2$ cells. The $L=9$ and $L=10$ sweeps cover
-2--768 ranks; the $L=11$ sweeps start at eight ranks. Retraction and impact
-extend to 2,304 ranks at $L=11$, while bursting already turns upward at
-768 ranks.
+$512^2$, $1024^2$ and $2048^2$ cells. The coarser grids are tested over
+2--768 ranks. At $L=11$, the tests start at eight ranks and reach 768
+ranks for bursting and 2,304 ranks for retraction and impact.
 
-At $L=10$, the three axisymmetric kernels have similar scaling ranges,
-despite their different per-step costs (Table~\ref{tab:axisymmetric-times}).
-At $L=9$, wall time approaches a floor near $0.008$~s for bursting beyond
-96 ranks, $0.010$~s for retraction and $0.011$~s for impact. Refinement
-extends the useful rank range; the finest retraction series still decreases
-at its 2,304-rank endpoint.
+At $L=10$, the three cases have similar scaling ranges despite their
+different times per step (Table~\ref{tab:axisymmetric-times}). On the
+coarser $L=9$ grid, the time for bursting levels off at about $0.008$~s
+beyond 96 ranks, while retraction and impact approach $0.010$~s and
+$0.011$~s, respectively. Refinement changes this range. The same rank
+count can consequently fall on a decreasing part of one curve and near
+the plateau of another, depending on both the mesh and the flow being
+calculated.
 
 \begin{table}[htbp]
 \centering
@@ -178,42 +253,46 @@ Elastic Taylor--Culick & 1.85 & 0.0231 & 0.0127 \\
 Newtonian drop impact & 2.04 & 0.0267 & 0.0173 \\
 \bottomrule
 \end{tabular}
-\caption{Selected Snellius Genoa timings from the fixed-size axisymmetric
-sweeps.}
+\caption{Wall time per iteration on Snellius Genoa for the three
+axisymmetric cases.}
 \label{tab:axisymmetric-times}
 \end{table}
 
-Bursting at $L=11$ follows the ideal trend through 384 ranks
-($0.0407$~s), then rises to $0.0781$~s at 768 ranks
-(Figure~\ref{fig:bursting-uniform}). The elastic sheet adds log-conformation
-extra-stress evolution to the projection step. Its $L=11$ time decreases
-from $1.90$~s at eight ranks to $0.0341$~s at 768 ranks and $0.0193$~s at
-1,536 ranks, with a smaller further reduction to $0.0152$~s at 2,304 ranks
-(Figure~\ref{fig:taylorculick-uniform}).
+For the finest bursting case, the time decreases to $0.0407$~s per step at
+384 ranks and then rises to $0.0781$~s at 768 ranks
+(Figure~\ref{fig:bursting-uniform}). Doubling the number of ranks nearly
+doubles the time in this part of the curve. The elastic sheet includes
+log-conformation extra-stress evolution and continues to become faster
+over the larger rank range: the $L=11$ time falls from $0.0341$~s at
+768 ranks to $0.0193$~s at 1,536 ranks and $0.0152$~s at 2,304 ranks
+(Figure~\ref{fig:taylorculick-uniform}). The final increase in ranks still
+reduces the time, although by a smaller amount than the preceding one.
 
-The Newtonian impact places the drop at $(1.05,0)$ in a box of side~8,
-with velocity towards the left wall and the axis of symmetry on the bottom
-boundary. At $L=11$, its time follows the ideal trend to $0.0339$~s at
-768 ranks and $0.0250$~s at 1,536 ranks, then rises to $0.0423$~s at
-2,304 ranks (Figure~\ref{fig:drop-impact-uniform}). Both finest-resolution
-sweeps depart from ideal scaling. Retraction continues to become faster,
-whereas impact turns upward within the measured range.
+For Newtonian impact, the drop is initially at $(1.05,0)$ in a box of
+side~8, moving towards the left wall, with the axis of symmetry along the
+bottom boundary. At $L=11$, we obtain $0.0339$~s per step at 768 ranks,
+$0.0250$~s at 1,536 ranks and $0.0423$~s at 2,304 ranks
+(Figure~\ref{fig:drop-impact-uniform}). Hence, increasing the rank count
+from 1,536 to 2,304 helps the retraction calculation but slows the impact
+calculation. The largest rank count reached by a test is not necessarily
+a useful one for that flow. These application timings do not separate
+computation, communication and other overheads, so they do not determine
+which contribution causes the departure from ideal scaling.
 
-The application timings do not separate computation from communication and
-other overheads, so they do not establish which contribution limits scaling.
-
-The temporal sequences in Figures~\ref{fig:bursting-uniform}--\ref{fig:drop-impact-uniform}
-come from completed simulations chosen to show the flow geometry and fields.
-They are independent of the ten-step timing trajectories. Each sequence
-reads left to right, then top to bottom, with a common spatial scale.
-Each scalar field uses one colour normalization across all four states.
+The sequences in Figures~\ref{fig:bursting-uniform}--\ref{fig:drop-impact-uniform}
+are from separate completed simulations. They show the narrowing cavity
+and emerging jet, the growing rim of the retracting sheet, and the thin
+lamella produced by drop impact. A resolution study must include these
+stages if the jet, rim or lamella determines the result of interest.
+Within each sequence, the spatial scale and colour normalization are fixed.
+The frames are ordered from left to right, then top to bottom.
 
 \begin{figure}[p]
   \centering
   \includegraphics[width=\textwidth]{bursting-uniform-illustrated.pdf}
   \caption{Bursting bubble~\cite{dixit2025-bursting,sanjay2021-bursting}.
   (a) Snellius Genoa strong scaling of the
-  axisymmetric uniform-grid kernel; colour gives $N_x=2^L$ and dashed
+  axisymmetric calculation; colour gives $N_x=2^L$ and dashed
   lines show ideal scaling. (b) Jet inception~\cite{gordillo2026-jets}
   at $Oh=0.03$, $Bo=0$.
   Blue gives $|\boldsymbol{u}|/V_c$, where
@@ -228,7 +307,7 @@ Each scalar field uses one colour normalization across all four states.
   \centering
   \includegraphics[width=\textwidth]{taylorculick-uniform-illustrated.pdf}
   \caption{Elastic Taylor--Culick retraction. (a) Snellius Genoa strong
-  scaling of the axisymmetric uniform-grid kernel.
+  scaling of the axisymmetric calculation.
   (b) Rim evolution at $Ec=0.1$, $Oh=0.05$ in a relaxation-free calculation.
   The view follows the rim. Each frame combines speed relative to the
   Taylor--Culick velocity (upper half) and the azimuthal log-conformation
@@ -243,7 +322,7 @@ Each scalar field uses one colour normalization across all four states.
   \centering
   \includegraphics[width=\textwidth]{drop-impact-uniform-illustrated.pdf}
   \caption{Newtonian drop impact. (a) Snellius Genoa strong scaling of
-  the axisymmetric uniform-grid kernel.
+  the axisymmetric calculation.
   (b) Impact and spreading at diameter-based $We_D=200$ and $Oh_D=0.01$.
   Lengths are scaled by the initial drop radius $R$ and time by $R/U_0$,
   where $U_0$ is the impact speed. Purple shows speed, grey curves are instantaneous streamlines,
@@ -255,146 +334,73 @@ Each scalar field uses one colour normalization across all four states.
   \label{fig:drop-impact-uniform}
 \end{figure}
 
-\section{Extending the comparison to larger systems}
+\section{Choosing resolution and MPI ranks}
 
-The kernel sweeps use powers of two in rank count. Their upper limit of
-16,384 ranks corresponds to 85.3 fully populated 192-core nodes: it brackets
-64 nodes, but does not reach the class above 100 nodes. A 12,288-rank run
-is needed to measure 64 fully populated nodes directly. Table~\ref{tab:matrix}
-sets out the corresponding node-aligned tests.
+We prefer to run near the knee because the time saved by further
+increasing the number of ranks becomes small. The shortest wall time can
+still be useful for an urgent calculation, but for a parameter study those
+additional cores may be better used to run another case. We quantify the
+resource use by the allocated core time. If $C_{\mathrm{alloc}}$ cores
+are reserved for a wall time $t_{\mathrm{wall}}$, then
+\begin{equation}
+  \mathcal{C}=C_{\mathrm{alloc}}\,t_{\mathrm{wall}}.
+\end{equation}
+Here $C_{\mathrm{alloc}}$ counts all reserved cores, including any that
+remain idle. It equals $N_{\mathrm{MPI}}$ when each allocated core runs
+one rank. If the scheduler reserves whole nodes, leaving some of their
+cores idle does not reduce the allocation. We therefore compare both wall
+time and allocated core time when selecting ranks near the knee.
 
-\begin{table}[htbp]
-\centering
-\small
-\begin{tabularx}{\textwidth}{@{}lllX@{}}
-\toprule
-Scale & Nodes & MPI ranks & Coverage in the present data \\
-\midrule
-Small & 1, 2, 4, 8, 10 & 192--1,920 & Kernel curves bracket the range; Marangoni reaches 1,024 ranks; axisymmetric retraction and impact reach 2,304 \\
-Medium & 16, 32, 64 & 3,072--12,288 & Kernel measurements at 4,096 and 8,192 ranks bracket 64 nodes together with the 16,384-rank endpoint \\
-Large & 128, 256 & 24,576--49,152 & Unmeasured; problem size depends on memory use and the useful scaling range \\
-\bottomrule
-\end{tabularx}
-\caption{Node-aligned benchmark points for 192 CPU cores per node.
-The node counts are proposed measurements; the last column describes the
-existing rank sweeps.}
-\label{tab:matrix}
-\end{table}
+We start with a grid study for the physical quantity and accuracy we need.
+This includes mesh and time resolution, together with the relevant solver
+tolerances, regularizations and cutoffs, over the stages of the flow that
+set that quantity. At an adequate resolution, a short MPI test should
+extend far enough to include the decreasing and flattening parts of the
+time curve. We then repeat points near the apparent knee, check the memory
+requirement, and choose a rank range from the measured wall and core
+times. Before using it for a production run, the timing test must cover
+representative flow stages with checkpointing and the other required output.
 
-The existing $L=14$ quadtree and $L=9$ octree kernels provide fixed-size
-reference problems. Larger node counts require enough local work per rank
-to resolve a scaling regime. Short memory and scaling pilots should therefore
-set the resolution before fixing a node-aligned comparison.
+As the parameter study develops, we repeat these checks where the flow
+introduces new length or time scales, where the model changes, or when we
+move to another computing system. The sensitivity results should remain
+associated with the cases for which they were obtained. In particular,
+near a transition we may need to establish whether a jet forms or a drop
+detaches. Agreement in a global error measure is insufficient if the
+calculations disagree on that outcome. Tests near such transitions can be
+more informative than another check of the case used at the start of the
+project. If the resolution required for the result is too expensive, we
+must reconsider the numerical method, the model or the extent of the study.
 
-Application comparisons also require the same domain size, interface area
-and output policy on every machine. The multiphase workloads should accompany
-the stock kernels at small and medium scales; these workload choices must be
-fixed before extending the applications to the large-node range.
-
-\section{Reproducing and interpreting the measurements}
-
-A timing is tied to its source revision, compiler and optimization flags,
-MPI implementation and launcher. Its hardware description must include the
-node type, ranks per node, thread affinity and rank binding. Mesh dimension,
-level, cell count and cells per rank define the numerical workload; wall time,
-MPI time, iteration count and excluded initialization define what was timed.
-These quantities allow the same calculation to be compared across machines.
-
-The committed timing tables contain one observation per configuration.
-They locate scaling regimes but do not quantify run-to-run variability.
-Compact image inputs, source parameters, attribution and scripts accompany
-the figures. The illustrated flow evolution provides physical context;
-performance conclusions follow from the timing data.
+The present kernel tests reach 16,384 ranks, equivalent to about 85 fully
+populated nodes with 192 cores each. The Marangoni cases reach 1,024 ranks,
+while retraction and impact reach 2,304. A comparison at 64 complete nodes,
+or above 100 nodes, requires measurements at the corresponding rank counts
+and a sufficiently large problem. For a machine benchmark, it is reasonable
+to increase the problem size to measure performance at those scales. For a
+research calculation, the additional resolution or larger domain must also
+be required by the physical question.
 
 \section{Conclusion}
 
-The stock kernels resolve the transition from local computation to a
-communication-limited regime. Marangoni migration adds a reference comparison
-and shows how resolution and drop count shift the useful rank range.
-The uniform-grid cases extend the comparison to jetting, elastic retraction
-and impact: at fixed resolution, additional ranks eventually yield little
-benefit and can increase wall time. The present data therefore support
-small-scale application comparisons and bracket the 64-node range through
-the stock kernels. Larger kernel problems and exact node-aligned
-measurements are needed to extend those conclusions above 100 nodes.
+For the three-dimensional Poisson test, increasing from 4,096 to 16,384
+ranks saves only about 15\% of the wall time. Among the finest axisymmetric
+cases, retraction continues to become faster at 2,304 ranks, while impact
+has already slowed down and bursting turns upwards much earlier. The
+larger Marangoni calculations also scale over more ranks, but the velocity
+error does not decrease monotonically with refinement. Thus the resolution
+needed for an accurate result and the ranks needed to compute it efficiently
+have to be tested separately. We choose the numerical parameters from the
+accuracy of the physical quantity, then select ranks near the scaling knee
+for that calculation. As the study reaches new regimes, both tests need
+to be repeated. They belong within the parameter study, rather than being
+treated as checks completed once at the start of the project.
 
-\begin{thebibliography}{99}
-\raggedright
-
-\bibitem{basilisk-mpi-circle}
-S.~Popinet,
-\newblock \emph{Basilisk: MPI circle benchmark},
-\newblock \url{https://basilisk.fr/src/test/mpi-circle.c}.
-
-\bibitem{basilisk-mpi-laplacian}
-S.~Popinet,
-\newblock \emph{Basilisk: MPI Laplacian benchmark},
-\newblock \url{https://basilisk.fr/src/test/mpi-laplacian.c}.
-
-\bibitem{popinet2009}
-S.~Popinet,
-\newblock An accurate adaptive solver for surface-tension-driven interfacial
-flows,
-\newblock \emph{Journal of Computational Physics} \textbf{228} (2009),
-5838--5866. \href{https://doi.org/10.1016/j.jcp.2009.04.042}{doi:10.1016/j.jcp.2009.04.042}.
-
-\bibitem{abu-al-saud2018}
-M.~O.~Abu-Al-Saud, S.~Popinet and H.~A.~Tchelepi,
-\newblock A conservative and well-balanced surface tension model,
-\newblock \emph{Journal of Computational Physics} \textbf{371} (2018),
-896--913. \href{https://doi.org/10.1016/j.jcp.2018.02.022}{doi:10.1016/j.jcp.2018.02.022}.
-
-\bibitem{saini2025-marangoni}
-M.~Saini, V.~Sanjay, Y.~Saade, D.~Lohse and S.~Popinet,
-\newblock Implementation of integral surface tension formulations in a volume
-of fluid framework and their applications to Marangoni flows,
-\newblock \emph{Journal of Computational Physics} \textbf{542} (2025),
-114348. \href{https://doi.org/10.1016/j.jcp.2025.114348}{doi:10.1016/j.jcp.2025.114348}.
-
-\bibitem{dixit2025-bursting}
-A.~Dixit, A.~Oratis, K.~Zinelis, D.~Lohse and V.~Sanjay,
-\newblock Viscoelastic Worthington jets and droplets produced by bursting
-bubbles,
-\newblock \emph{Journal of Fluid Mechanics} \textbf{1010} (2025),
-A2. \href{https://doi.org/10.1017/jfm.2025.237}{doi:10.1017/jfm.2025.237}.
-
-\bibitem{sanjay2021-bursting}
-V.~Sanjay, D.~Lohse and M.~Jalaal,
-\newblock Bursting bubble in a viscoplastic medium,
-\newblock \emph{Journal of Fluid Mechanics} \textbf{922} (2021),
-A2. \href{https://doi.org/10.1017/jfm.2021.489}{doi:10.1017/jfm.2021.489}.
-
-\bibitem{gordillo2026-jets}
-J.~M.~Gordillo, J.~Rodr\'iguez-Rodr\'iguez and V.~Sanjay,
-\newblock Self-similar Worthington jets,
-\newblock arXiv preprint (2026),
-\href{https://arxiv.org/abs/2607.08972}{arXiv:2607.08972}.
-
-\bibitem{sanjay2022-taylorculick}
-V.~Sanjay, U.~Sen, P.~Kant and D.~Lohse,
-\newblock Taylor--Culick retractions and the influence of the surroundings,
-\newblock \emph{Journal of Fluid Mechanics} \textbf{948} (2022),
-A14. \href{https://doi.org/10.1017/jfm.2022.671}{doi:10.1017/jfm.2022.671}.
-
-\bibitem{kayal2025-focussing}
-L.~Kayal, V.~Sanjay, N.~Yewale, A.~Kumar and R.~Dasgupta,
-\newblock Focussing of concentric free-surface waves,
-\newblock \emph{Journal of Fluid Mechanics} \textbf{1003} (2025),
-A14. \href{https://doi.org/10.1017/jfm.2024.1089}{doi:10.1017/jfm.2024.1089}.
-
-\bibitem{sanjay2025-impact}
-V.~Sanjay and D.~Lohse,
-\newblock Unifying Theory of Scaling in Drop Impact: Forces and Maximum
-Spreading Diameter,
-\newblock \emph{Physical Review Letters} \textbf{134} (2025),
-104003. \href{https://doi.org/10.1103/PhysRevLett.134.104003}{doi:10.1103/PhysRevLett.134.104003}.
-
-\bibitem{zhang2022-impact}
-B.~Zhang, V.~Sanjay, S.~Shi, Y.~Zhao, C.~Lv, X.-Q.~Feng and D.~Lohse,
-\newblock Impact Forces of Water Drops Falling on Superhydrophobic Surfaces,
-\newblock \emph{Physical Review Letters} \textbf{129} (2022),
-104501. \href{https://doi.org/10.1103/PhysRevLett.129.104501}{doi:10.1103/PhysRevLett.129.104501}.
-
-\end{thebibliography}
+\clearpage
+{\raggedright
+\nocite{popinet2009}
+\bibliographystyle{unsrt}
+\bibliography{Basilisk-MPI-CPU-Benchmarks}
+}
 
 \end{document}

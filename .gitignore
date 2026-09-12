@@ -55,6 +55,8 @@ figures/*.svg
 
 # LaTeX build intermediates; compiled public reports under docs/ are tracked.
 *.aux
+*.bbl
+*.blg
 *.fdb_latexmk
 *.fls
 *.log
